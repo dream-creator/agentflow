@@ -227,7 +227,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E tests (shard: ${{ matrix.shard }})
+      - name: "Run E2E tests (shard: ${{ matrix.shard }})"
         run: |
           case "${{ matrix.shard }}" in
             auth-pipeline)
