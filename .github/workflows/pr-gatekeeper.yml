@@ -146,11 +146,11 @@ jobs:
 
       - name: Apply preview migrations
         run: |
-          supabase db push --linked || true
+          supabase db push --db-url "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" || true
 
       - name: Validate type sync
         run: |
-          npx supabase gen types typescript --linked > /tmp/generated-types.ts
+          npx supabase gen types typescript --db-url "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" > /tmp/generated-types.ts
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
             echo "❌ types/supabase.ts is out of sync with the current schema."
             echo "Run 'supabase gen types typescript > types/supabase.ts' locally and commit the result."

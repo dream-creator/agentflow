@@ -77,7 +77,7 @@ jobs:
           for i in $(seq 1 $MAX_RETRIES); do
             echo "=== Attempt $i of $MAX_RETRIES ==="
 
-            if supabase db push --linked; then
+            if supabase db push --db-url "${{ secrets.STAGING_SUPABASE_DB_URL }}"; then
               echo "✅ Staging migrations applied successfully"
               exit 0
             fi
@@ -117,7 +117,7 @@ jobs:
 
       - name: Validate type sync
         run: |
-          npx supabase gen types typescript --linked > /tmp/generated-types.ts
+          npx supabase gen types typescript --db-url "${{ secrets.STAGING_SUPABASE_DB_URL }}" > /tmp/generated-types.ts
 
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
             echo "❌ types/supabase.ts is out of sync with staging schema"
