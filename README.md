@@ -461,7 +461,7 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/):
 
 ## License
 
-MIT
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
