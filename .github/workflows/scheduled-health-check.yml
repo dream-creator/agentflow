@@ -18,9 +18,9 @@ jobs:
           URL="${{ secrets.PRODUCTION_APP_URL }}"
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/login" --max-time 10)
           if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Production login page: HTTP ${HTTP_STATUS}"
+            echo "[OK] Production login page: HTTP ${HTTP_STATUS}"
           else
-            echo "❌ Production login page: HTTP ${HTTP_STATUS}"
+            echo "[FAIL] Production login page: HTTP ${HTTP_STATUS}"
             exit 1
           fi
 
@@ -32,9 +32,9 @@ jobs:
 
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/health" --max-time 10)
           if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Production health endpoint: HTTP ${HTTP_STATUS}"
+            echo "[OK] Production health endpoint: HTTP ${HTTP_STATUS}"
           else
-            echo "❌ Production health endpoint: HTTP ${HTTP_STATUS}"
+            echo "[FAIL] Production health endpoint: HTTP ${HTTP_STATUS}"
             exit 1
           fi
 
@@ -43,9 +43,9 @@ jobs:
           URL="${{ secrets.PRODUCTION_APP_URL }}"
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/manifest.json" --max-time 10)
           if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Production PWA manifest: HTTP ${HTTP_STATUS}"
+            echo "[OK] Production PWA manifest: HTTP ${HTTP_STATUS}"
           else
-            echo "❌ Production PWA manifest: HTTP ${HTTP_STATUS}"
+            echo "[FAIL] Production PWA manifest: HTTP ${HTTP_STATUS}"
             exit 1
           fi
 
@@ -54,9 +54,9 @@ jobs:
           URL="${{ secrets.PRODUCTION_APP_URL }}"
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/leads" --max-time 10)
           if [ "$HTTP_STATUS" = "401" ] || [ "$HTTP_STATUS" = "307" ]; then
-            echo "✅ Production auth guards: HTTP ${HTTP_STATUS}"
+            echo "[OK] Production auth guards: HTTP ${HTTP_STATUS}"
           else
-            echo "❌ Production auth guards: HTTP ${HTTP_STATUS} (expected 401 or 307)"
+            echo "[FAIL] Production auth guards: HTTP ${HTTP_STATUS} (expected 401 or 307)"
             exit 1
           fi
 
@@ -69,9 +69,9 @@ jobs:
           URL="${{ secrets.STAGING_APP_URL }}"
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/login" --max-time 10)
           if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Staging login page: HTTP ${HTTP_STATUS}"
+            echo "[OK] Staging login page: HTTP ${HTTP_STATUS}"
           else
-            echo "❌ Staging login page: HTTP ${HTTP_STATUS}"
+            echo "[FAIL] Staging login page: HTTP ${HTTP_STATUS}"
             exit 1
           fi
 
@@ -80,9 +80,9 @@ jobs:
           URL="${{ secrets.STAGING_APP_URL }}"
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/health" --max-time 10)
           if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Staging health endpoint: HTTP ${HTTP_STATUS}"
+            echo "[OK] Staging health endpoint: HTTP ${HTTP_STATUS}"
           else
-            echo "❌ Staging health endpoint: HTTP ${HTTP_STATUS}"
+            echo "[FAIL] Staging health endpoint: HTTP ${HTTP_STATUS}"
             exit 1
           fi
 
@@ -98,9 +98,9 @@ jobs:
 
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/health/cron" --max-time 10)
           if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Cron liveness check passed"
+            echo "[OK] Cron liveness check passed"
           else
-            echo "⚠️ Cron liveness check returned HTTP ${HTTP_STATUS}"
+            echo "[WARN] Cron liveness check returned HTTP ${HTTP_STATUS}"
             # Non-blocking — cron might not have run yet
           fi
 
@@ -114,7 +114,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const title = `🚨 Health Check Failure — ${new Date().toISOString().split('T')[0]}`;
+            const title = `[INCIDENT] Health Check Failure — ${new Date().toISOString().split('T')[0]}`;
             const body = `## Health Check Failure Detected
 
             **Time:** ${new Date().toISOString()}

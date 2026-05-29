@@ -102,7 +102,7 @@ jobs:
       - name: Enforce coverage thresholds
         run: |
           if [ ! -f coverage/coverage-summary.json ]; then
-            echo "❌ No coverage report found"
+            echo "[FAIL] No coverage report found"
             exit 1
           fi
 
@@ -110,10 +110,10 @@ jobs:
           echo "Global line coverage: ${GLOBAL_LINES}%"
 
           if [ $(echo "$GLOBAL_LINES < 75" | bc) -eq 1 ]; then
-            echo "❌ Global coverage ${GLOBAL_LINES}% is below 75% threshold"
+            echo "[FAIL] Global coverage ${GLOBAL_LINES}% is below 75% threshold"
             exit 1
           fi
-          echo "✅ Global coverage ${GLOBAL_LINES}% meets 75% threshold"
+          echo "[OK] Global coverage ${GLOBAL_LINES}% meets 75% threshold"
 
   preview-deploy:
     name: preview-deploy
@@ -152,11 +152,11 @@ jobs:
         run: |
           npx supabase gen types typescript --db-url "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" > /tmp/generated-types.ts
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
-            echo "❌ types/supabase.ts is out of sync with the current schema."
+            echo "[FAIL] types/supabase.ts is out of sync with the current schema."
             echo "Run 'supabase gen types typescript > types/supabase.ts' locally and commit the result."
             exit 1
           fi
-          echo "✅ Types are in sync"
+          echo "[OK] Types are in sync"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
@@ -171,7 +171,7 @@ jobs:
         run: |
           URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=${URL}" >> $GITHUB_OUTPUT
-          echo "✅ Preview deployed: ${URL}"
+          echo "[OK] Preview deployed: ${URL}"
 
       - name: Health check
         run: |
@@ -188,16 +188,16 @@ jobs:
             HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/" 2>/dev/null || echo "000")
 
             if [ "$HTTP_STATUS" = "200" ]; then
-              echo "✅ Health check passed (HTTP ${HTTP_STATUS})"
+              echo "[OK] Health check passed (HTTP ${HTTP_STATUS})"
               exit 0
             fi
 
-            echo "⚠️ Got HTTP ${HTTP_STATUS}, retrying in ${RETRY_DELAY}s..."
+            echo "[WARN] Got HTTP ${HTTP_STATUS}, retrying in ${RETRY_DELAY}s..."
             sleep $RETRY_DELAY
             RETRY_DELAY=$((RETRY_DELAY + 6))
           done
 
-          echo "❌ Health check failed after $MAX_RETRIES attempts"
+          echo "[FAIL] Health check failed after $MAX_RETRIES attempts"
           exit 1
 
   lighthouse-ci:
@@ -246,12 +246,12 @@ jobs:
           |-------|--------|
           EOF
 
-          echo "| Lint & TypeCheck | ${{ needs.lint-and-typecheck.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
-          echo "| Security Audit | ${{ needs.security-audit.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
-          echo "| Unit Tests | ${{ needs.unit-tests.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
-          echo "| Coverage Gate | ${{ needs.coverage-gate.result == 'success' && '✅' || '❌' }} ($COVERAGE) |" >> /tmp/pr-comment.md
-          echo "| Preview Deploy | ${{ needs.preview-deploy.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
-          echo "| Lighthouse CI | ${{ needs.lighthouse-ci.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
+          echo "| Lint & TypeCheck | ${{ needs.lint-and-typecheck.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
+          echo "| Security Audit | ${{ needs.security-audit.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
+          echo "| Unit Tests | ${{ needs.unit-tests.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
+          echo "| Coverage Gate | ${{ needs.coverage-gate.result == 'success' && '[PASSED]' || '[FAILED]' }} ($COVERAGE) |" >> /tmp/pr-comment.md
+          echo "| Preview Deploy | ${{ needs.preview-deploy.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
+          echo "| Lighthouse CI | ${{ needs.lighthouse-ci.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
           echo "" >> /tmp/pr-comment.md
           echo "**Preview URL:** ${{ needs.preview-deploy.outputs.preview-url }}" >> /tmp/pr-comment.md
 
