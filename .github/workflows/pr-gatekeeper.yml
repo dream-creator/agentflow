@@ -239,20 +239,21 @@ jobs:
             COVERAGE=$(node -e "const c=require('./coverage/coverage-summary.json');console.log(c.total.lines.pct+'%')")
           fi
 
-          cat << EOF > /tmp/pr-comment.md
+          cat << 'EOF' > /tmp/pr-comment.md
           ## CI/CD Pipeline Results
 
           | Check | Status |
           |-------|--------|
-          | Lint & TypeCheck | ${{ needs.lint-and-typecheck.result == 'success' && '✅' || '❌' }} |
-          | Security Audit | ${{ needs.security-audit.result == 'success' && '✅' || '❌' }} |
-          | Unit Tests | ${{ needs.unit-tests.result == 'success' && '✅' || '❌' }} |
-          | Coverage Gate | ${{ needs.coverage-gate.result == 'success' && '✅' || '❌' }} (${{ COVERAGE }}) |
-          | Preview Deploy | ${{ needs.preview-deploy.result == 'success' && '✅' || '❌' }} |
-          | Lighthouse CI | ${{ needs.lighthouse-ci.result == 'success' && '✅' || '❌' }} |
-
-          **Preview URL:** ${{ needs.preview-deploy.outputs.url }}
           EOF
+
+          echo "| Lint & TypeCheck | ${{ needs.lint-and-typecheck.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
+          echo "| Security Audit | ${{ needs.security-audit.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
+          echo "| Unit Tests | ${{ needs.unit-tests.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
+          echo "| Coverage Gate | ${{ needs.coverage-gate.result == 'success' && '✅' || '❌' }} ($COVERAGE) |" >> /tmp/pr-comment.md
+          echo "| Preview Deploy | ${{ needs.preview-deploy.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
+          echo "| Lighthouse CI | ${{ needs.lighthouse-ci.result == 'success' && '✅' || '❌' }} |" >> /tmp/pr-comment.md
+          echo "" >> /tmp/pr-comment.md
+          echo "**Preview URL:** ${{ needs.preview-deploy.outputs.preview-url }}" >> /tmp/pr-comment.md
 
       - name: Post PR comment
         uses: marocchino/sticky-pull-request-comment@v2
