@@ -28,16 +28,20 @@ jobs:
         with:
           version: latest
 
+      - name: Link to staging project
+        run: supabase link --project-ref ${{ env.SUPABASE_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
       - name: Check migration status
         id: check
         run: |
           echo "=== Migration History ==="
-          supabase migration list --db-url ${{ secrets.STAGING_SUPABASE_DB_URL }} || true
+          supabase migration list --linked || true
 
           echo ""
           echo "=== Pending Migrations ==="
           MIGRATIONS_DIR="supabase/migrations"
-          APPLIED=$(supabase migration list --db-url ${{ secrets.STAGING_SUPABASE_DB_URL }} 2>/dev/null | grep -c ".applied" || echo "0")
           PENDING=$(ls -1 $MIGRATIONS_DIR/*.sql 2>/dev/null | wc -l || echo "0")
 
           echo "migrations_pending=${PENDING}" >> $GITHUB_OUTPUT
@@ -60,6 +64,11 @@ jobs:
         with:
           version: latest
 
+      - name: Link to staging project
+        run: supabase link --project-ref ${{ env.SUPABASE_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
       - name: Apply migrations with retry
         run: |
           MAX_RETRIES=3
@@ -68,7 +77,7 @@ jobs:
           for i in $(seq 1 $MAX_RETRIES); do
             echo "=== Attempt $i of $MAX_RETRIES ==="
 
-            if supabase db push --db-url ${{ secrets.STAGING_SUPABASE_DB_URL }}; then
+            if supabase db push --linked; then
               echo "✅ Staging migrations applied successfully"
               exit 0
             fi
@@ -101,9 +110,14 @@ jobs:
         with:
           version: latest
 
+      - name: Link to staging project
+        run: supabase link --project-ref ${{ env.SUPABASE_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
       - name: Validate type sync
         run: |
-          npx supabase gen types typescript --db-url ${{ secrets.STAGING_SUPABASE_DB_URL }} > /tmp/generated-types.ts
+          npx supabase gen types typescript --linked > /tmp/generated-types.ts
 
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
             echo "❌ types/supabase.ts is out of sync with staging schema"
