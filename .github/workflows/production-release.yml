@@ -112,15 +112,11 @@ jobs:
         with:
           version: latest
 
-      - name: Link to production project
-        run: supabase link --project-ref ${{ env.SUPABASE_PROJECT_ID }}
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
       - name: Apply migrations (no retry — production safety)
         run: |
           echo "=== Applying Production Migrations ==="
-          if supabase db push --linked; then
+          echo "Using IPv4 pooler connection: ${PRODUCTION_SUPABASE_DB_URL%%:*}@***"
+          if supabase db push --db-url "${{ secrets.PRODUCTION_SUPABASE_DB_URL }}"; then
             echo "✅ Production migrations applied successfully"
           else
             echo "❌ Production migration failed — halting deployment"
@@ -129,6 +125,7 @@ jobs:
           fi
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PRODUCTION_SUPABASE_DB_URL: ${{ secrets.PRODUCTION_SUPABASE_DB_URL }}
 
   vercel-production-deploy:
     name: vercel-production-deploy
