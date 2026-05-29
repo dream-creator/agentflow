@@ -1,0 +1,253 @@
+name: Staging Promotion
+
+on:
+  push:
+    branches: [develop]
+
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "20"
+  SUPABASE_PROJECT_ID: fsxdduvwshirrheenmag
+
+jobs:
+  migration-preflight:
+    name: migration-preflight
+    runs-on: ubuntu-latest
+    outputs:
+      migrations_pending: ${{ steps.check.outputs.migrations_pending }}
+      migration_list: ${{ steps.check.outputs.migration_list }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Check migration status
+        id: check
+        run: |
+          echo "=== Migration History ==="
+          supabase migration list --db-url ${{ secrets.STAGING_SUPABASE_DB_URL }} || true
+
+          echo ""
+          echo "=== Pending Migrations ==="
+          MIGRATIONS_DIR="supabase/migrations"
+          APPLIED=$(supabase migration list --db-url ${{ secrets.STAGING_SUPABASE_DB_URL }} 2>/dev/null | grep -c ".applied" || echo "0")
+          PENDING=$(ls -1 $MIGRATIONS_DIR/*.sql 2>/dev/null | wc -l || echo "0")
+
+          echo "migrations_pending=${PENDING}" >> $GITHUB_OUTPUT
+          echo "Pending migrations: ${PENDING}"
+
+          ls -1 $MIGRATIONS_DIR/*.sql 2>/dev/null | head -10 || echo "No migration files found"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  apply-staging-migrations:
+    name: apply-staging-migrations
+    runs-on: ubuntu-latest
+    needs: [migration-preflight]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Apply migrations with retry
+        run: |
+          MAX_RETRIES=3
+          RETRY_DELAY=30
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "=== Attempt $i of $MAX_RETRIES ==="
+
+            if supabase db push --db-url ${{ secrets.STAGING_SUPABASE_DB_URL }}; then
+              echo "✅ Staging migrations applied successfully"
+              exit 0
+            fi
+
+            EXIT_CODE=$?
+            echo "❌ Attempt $i failed (exit code: $EXIT_CODE)"
+
+            if [ $i -lt $MAX_RETRIES ]; then
+              echo "Waiting ${RETRY_DELAY}s before retry (Supabase cold start)..."
+              sleep $RETRY_DELAY
+              RETRY_DELAY=$((RETRY_DELAY * 2))
+            fi
+          done
+
+          echo "❌ All $MAX_RETRIES attempts failed"
+          exit 1
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  validate-types-sync:
+    name: validate-types-sync
+    runs-on: ubuntu-latest
+    needs: [apply-staging-migrations]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Validate type sync
+        run: |
+          npx supabase gen types typescript --db-url ${{ secrets.STAGING_SUPABASE_DB_URL }} > /tmp/generated-types.ts
+
+          if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
+            echo "❌ types/supabase.ts is out of sync with staging schema"
+            echo "Run 'supabase gen types typescript > types/supabase.ts' locally and commit"
+            diff types/supabase.ts /tmp/generated-types.ts || true
+            exit 1
+          fi
+          echo "✅ Types are in sync with staging"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  vercel-staging-deploy:
+    name: vercel-staging-deploy
+    runs-on: ubuntu-latest
+    needs: [validate-types-sync]
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+    outputs:
+      deploy-url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to staging
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "✅ Staging deployed: ${URL}"
+
+      - name: Health check
+        run: |
+          MAX_RETRIES=10
+          RETRY_DELAY=9
+          URL="${{ steps.deploy.outputs.url }}"
+
+          echo "Waiting for staging deployment to stabilize..."
+          sleep 30
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Health check attempt $i of $MAX_RETRIES..."
+
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/leads" 2>/dev/null || echo "000")
+
+            if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "307" ] || [ "$HTTP_STATUS" = "401" ]; then
+              echo "✅ Health check passed (HTTP ${HTTP_STATUS})"
+              exit 0
+            fi
+
+            echo "⚠️ Got HTTP ${HTTP_STATUS}, retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+            RETRY_DELAY=$((RETRY_DELAY + 9))
+          done
+
+          echo "❌ Health check failed after $MAX_RETRIES attempts"
+          exit 1
+
+  e2e-test-matrix:
+    name: e2e-${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    needs: [vercel-staging-deploy]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard:
+          - auth-pipeline
+          - csv-cron
+          - stripe
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests (shard: ${{ matrix.shard }})
+        run: |
+          case "${{ matrix.shard }}" in
+            auth-pipeline)
+              npx playwright test e2e-auth.spec.ts e2e-pipeline.spec.ts --reporter=html
+              ;;
+            csv-cron)
+              npx playwright test e2e-csv-upload.spec.ts e2e-cron.spec.ts --reporter=html
+              ;;
+            stripe)
+              npx playwright test e2e-stripe.spec.ts --reporter=html
+              ;;
+          esac
+        env:
+          BASE_URL: ${{ needs.vercel-staging-deploy.outputs.deploy-url }}
+          CI: true
+
+      - name: Upload E2E report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-report-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 7
+
+  e2e-report-merge:
+    name: e2e-report-merge
+    runs-on: ubuntu-latest
+    needs: [e2e-test-matrix]
+    if: always()
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: e2e-report-*
+          path: reports/
+          merge-multiple: true
+
+      - name: Create summary
+        run: |
+          echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Shard | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| auth-pipeline | ${{ needs.e2e-test-matrix.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| csv-cron | ${{ needs.e2e-test-matrix.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| stripe | ${{ needs.e2e-test-matrix.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
