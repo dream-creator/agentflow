@@ -1,0 +1,254 @@
+name: Production Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "20"
+  SUPABASE_PROJECT_ID: fsxdduvwshirrheenmag
+
+jobs:
+  pre-flight-production:
+    name: pre-flight-production
+    runs-on: ubuntu-latest
+    outputs:
+      migration_diff: ${{ steps.diff.outputs.migration_diff }}
+      commit_sha: ${{ github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Compute migration diff
+        id: diff
+        run: |
+          echo "=== Production Migration Diff ==="
+          MIGRATIONS_DIR="supabase/migrations"
+
+          echo "Migration files in directory:"
+          ls -1 $MIGRATIONS_DIR/*.sql 2>/dev/null | head -20 || echo "None"
+
+          PENDING=$(ls -1 $MIGRATIONS_DIR/*.sql 2>/dev/null | wc -l || echo "0")
+          echo "migrations_pending=${PENDING}" >> $GITHUB_OUTPUT
+
+          echo ""
+          echo "=== Will be applied to production ==="
+          ls -1 $MIGRATIONS_DIR/*.sql 2>/dev/null | tail -5 || echo "No pending migrations"
+
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          ## Pre-Flight Production Report
+
+          **Commit:** ${{ github.sha }}
+          **Author:** ${{ github.actor }}
+          **Pending Migrations:** ${PENDING}
+
+          ### Migration Files
+          $(ls -1 $MIGRATIONS_DIR/*.sql 2>/dev/null || echo "None found")
+          EOF
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  manual-approval-gate:
+    name: manual-approval
+    runs-on: ubuntu-latest
+    needs: [pre-flight-production]
+    environment:
+      name: production
+    steps:
+      - name: Approval received
+        run: |
+          echo "✅ Production deployment approved by ${{ github.actor }}"
+          echo "## Production Approval" >> $GITHUB_STEP_SUMMARY
+          echo "- **Approved by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ needs.pre-flight-production.outputs.commit_sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+  pre-migration-snapshot:
+    name: pre-migration-snapshot
+    runs-on: ubuntu-latest
+    needs: [manual-approval-gate]
+    steps:
+      - name: Take PITR snapshot
+        run: |
+          echo "=== Creating PITR Snapshot ==="
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            "https://api.supabase.com/v1/projects/${{ env.SUPABASE_PROJECT_ID }}/database/backups" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"name": "pre-deploy-'$(date +%Y%m%d-%H%M%S)'", "type": "on_demand"}')
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          echo "HTTP Status: ${HTTP_CODE}"
+          echo "Response: ${BODY}"
+
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then
+            echo "✅ Snapshot created successfully"
+          else
+            echo "⚠️ Snapshot returned HTTP ${HTTP_CODE} — continuing anyway"
+          fi
+
+  apply-production-migrations:
+    name: apply-production-migrations
+    runs-on: ubuntu-latest
+    needs: [pre-migration-snapshot]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Apply migrations (no retry — production safety)
+        run: |
+          echo "=== Applying Production Migrations ==="
+          if supabase db push --db-url ${{ secrets.PRODUCTION_SUPABASE_DB_URL }}; then
+            echo "✅ Production migrations applied successfully"
+          else
+            echo "❌ Production migration failed — halting deployment"
+            echo "Manual intervention required"
+            exit 1
+          fi
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+  vercel-production-deploy:
+    name: vercel-production-deploy
+    runs-on: ubuntu-latest
+    needs: [apply-production-migrations]
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    outputs:
+      deploy-url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to production
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "✅ Production deployed: ${URL}"
+
+  post-deploy-smoke-tests:
+    name: smoke-tests
+    runs-on: ubuntu-latest
+    needs: [vercel-production-deploy]
+    steps:
+      - name: Login page renders
+        run: |
+          URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/login")
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Login page accessible (HTTP 200)"
+          else
+            echo "❌ Login page returned HTTP ${HTTP_STATUS}"
+            exit 1
+          fi
+
+      - name: PWA manifest reachable
+        run: |
+          URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/manifest.json")
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ PWA manifest accessible (HTTP 200)"
+          else
+            echo "❌ PWA manifest returned HTTP ${HTTP_STATUS}"
+            exit 1
+          fi
+
+      - name: Auth endpoint guards
+        run: |
+          URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/leads")
+          if [ "$HTTP_STATUS" = "401" ] || [ "$HTTP_STATUS" = "307" ]; then
+            echo "✅ Auth middleware active (HTTP ${HTTP_STATUS})"
+          else
+            echo "❌ Auth endpoint returned HTTP ${HTTP_STATUS} (expected 401 or 307)"
+            exit 1
+          fi
+
+      - name: Landing page
+        run: |
+          URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/")
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Landing page accessible (HTTP 200)"
+          else
+            echo "❌ Landing page returned HTTP ${HTTP_STATUS}"
+            exit 1
+          fi
+
+  deployment-notification:
+    name: deployment-notification
+    runs-on: ubuntu-latest
+    needs: [vercel-production-deploy, post-deploy-smoke-tests]
+    if: always()
+    steps:
+      - name: Create deployment summary
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          RELEASE_TAG="v$(date +%Y.%m.%d)-${SHORT_SHA}"
+
+          echo "## 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **URL** | ${{ needs.vercel-production-deploy.outputs.deploy-url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Release** | ${RELEASE_TAG} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Author** | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Time** | $(date -u +'%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Smoke Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- Login: ${{ needs.post-deploy-smoke-tests.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- PWA Manifest: ${{ needs.post-deploy-smoke-tests.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Auth Guards: ${{ needs.post-deploy-smoke-tests.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create GitHub Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const shortSha = context.sha.substring(0, 7);
+            const date = new Date().toISOString().split('T')[0].replace(/-/g, '.');
+            const tagName = `v${date}-${shortSha}`;
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tagName,
+              name: `Production Release ${tagName}`,
+              body: `Deployed by @${context.actor}\n\nCommit: ${context.sha}\n\nURL: ${{ needs.vercel-production-deploy.outputs.deploy-url }}`,
+              draft: false,
+              prerelease: false,
+            });
