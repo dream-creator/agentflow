@@ -11,6 +11,7 @@ concurrency:
 
 env:
   NODE_VERSION: "20"
+  SUPABASE_PROJECT_ID: fsxdduvwshirrheenmag
 
 jobs:
   lint-and-typecheck:
@@ -138,15 +139,18 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Apply preview migrations
-        run: |
-          supabase db push --db-url ${{ secrets.PREVIEW_SUPABASE_DB_URL }} || true
+      - name: Link to preview project
+        run: supabase link --project-ref ${{ env.SUPABASE_PROJECT_ID }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
+      - name: Apply preview migrations
+        run: |
+          supabase db push --linked || true
+
       - name: Validate type sync
         run: |
-          npx supabase gen types typescript --db-url ${{ secrets.PREVIEW_SUPABASE_DB_URL }} > /tmp/generated-types.ts
+          npx supabase gen types typescript --linked > /tmp/generated-types.ts
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
             echo "❌ types/supabase.ts is out of sync with the current schema."
             echo "Run 'supabase gen types typescript > types/supabase.ts' locally and commit the result."
