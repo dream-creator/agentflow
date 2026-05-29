@@ -1,113 +1,269 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+export const dynamic = "force-dynamic";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Phone,
+  Users,
+  Clock,
+  Smartphone,
+  Star,
+  ArrowRight,
+  CheckCircle2,
+} from "lucide-react";
 
-export default function Home() {
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+});
+
+export const metadata: Metadata = {
+  title: "AgentFlow — The CRM for agents who hate CRMs",
+  description:
+    "Dead-simple contact management and follow-up for solo real estate agents. No automations. No dashboards. Just who to call today.",
+};
+
+export default function LandingPage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="min-h-dvh bg-white">
+      {/* Nav */}
+      <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-surface-100">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-white font-bold text-sm">AF</span>
+            </div>
+            <span className="font-heading text-lg font-bold text-surface-900">AgentFlow</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="text-sm font-medium text-surface-600 hover:text-surface-900">
+              Sign in
+            </Link>
+            <Link href="/signup">
+              <Button size="sm">Get started free</Button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </nav>
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
+      {/* Hero */}
+      <section className="pt-32 pb-20 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-surface-900 leading-tight mb-6">
+            The CRM for agents
+            <br />
+            <span className="text-primary">who hate CRMs</span>
+          </h1>
+          <p className="text-lg sm:text-xl text-surface-500 mb-8 max-w-xl mx-auto">
+            Dead-simple contact management and follow-up for solo real estate
+            agents. No automations. No dashboards. Just who to call today.
           </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/signup">
+              <Button size="lg" className="w-full sm:w-auto">
+                Start for free
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
+          <p className="text-sm text-surface-400 mt-4">
+            Free plan includes 1 lead. No credit card required.
           </p>
-        </a>
+        </div>
+      </section>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
+      {/* Social Proof */}
+      <section className="py-12 px-4 bg-surface-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-1 mb-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
+            ))}
+          </div>
+          <p className="text-surface-500 text-sm">
+            Trusted by solo agents closing 5–20 deals per year
           </p>
-        </a>
+        </div>
+      </section>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
+      {/* Problem */}
+      <section className="py-20 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-heading text-3xl font-bold text-surface-900 mb-4">
+            Every CRM you&apos;ve tried is overkill
           </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
+          <p className="text-surface-500 text-lg mb-8 max-w-xl mx-auto">
+            Follow Up Boss at $69/mo. kvCORE at $100/mo. Features for teams of 50 when
+            you&apos;re a solo agent doing 12 deals a year.
           </p>
-        </a>
-      </div>
-    </main>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+            {[
+              {
+                icon: <Clock className="h-5 w-5" />,
+                title: "20-minute setup tax",
+                desc: "Every time you open the app after a busy week, you face a mountain of missed tasks.",
+              },
+              {
+                icon: <Users className="h-5 w-5" />,
+                title: "Built for teams",
+                desc: "Complex automations, lead routing, ISA management — none of which you need.",
+              },
+              {
+                icon: <Smartphone className="h-5 w-5" />,
+                title: "Bad mobile experience",
+                desc: "You work from your phone between showings. Your CRM should too.",
+              },
+            ].map((item, i) => (
+              <div key={i} className="p-4">
+                <div className="w-10 h-10 rounded-lg bg-destructive-50 text-destructive flex items-center justify-center mb-3">
+                  {item.icon}
+                </div>
+                <h3 className="font-heading font-semibold text-surface-900 mb-1">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-surface-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Solution */}
+      <section className="py-20 px-4 bg-primary-50">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-heading text-3xl font-bold text-surface-900 mb-4">
+            Three things. That&apos;s it.
+          </h2>
+          <p className="text-surface-500 text-lg mb-12 max-w-xl mx-auto">
+            AgentFlow does exactly what you need and nothing else.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <Phone className="h-5 w-5" />,
+                title: "Contacts",
+                desc: "Name, phone, email, source. No custom fields. No tags taxonomy.",
+              },
+              {
+                icon: <Users className="h-5 w-5" />,
+                title: "Pipeline",
+                desc: "See where every lead stands. New → Contacted → Showing → Offer → Closed.",
+              },
+              {
+                icon: <Clock className="h-5 w-5" />,
+                title: "Daily Follow-up",
+                desc: "Open the app. See who to call today. That's the whole app.",
+              },
+            ].map((item, i) => (
+              <div key={i} className="card text-left">
+                <div className="w-10 h-10 rounded-lg bg-primary-100 text-primary flex items-center justify-center mb-3">
+                  {item.icon}
+                </div>
+                <h3 className="font-heading font-semibold text-surface-900 mb-1">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-surface-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-20 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-heading text-3xl font-bold text-surface-900 mb-4">
+            Simple pricing
+          </h2>
+          <p className="text-surface-500 text-lg mb-12">
+            Less than one lunch per month. Zero guilt.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <div className="card text-left">
+              <h3 className="font-heading text-lg font-semibold text-surface-900 mb-1">Free</h3>
+              <div className="text-3xl font-bold text-surface-900 mb-4">$0</div>
+              <ul className="space-y-2 mb-6">
+                {["1 active lead", "1 pipeline", "Daily email digest"].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-surface-600">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup">
+                <Button variant="secondary" className="w-full">
+                  Get started
+                </Button>
+              </Link>
+            </div>
+            <div className="card text-left border-2 border-primary relative">
+              <div className="absolute -top-3 left-4 bg-primary text-white text-xs font-medium px-2 py-0.5 rounded-pill">
+                Most popular
+              </div>
+              <h3 className="font-heading text-lg font-semibold text-surface-900 mb-1">Pro</h3>
+              <div className="text-3xl font-bold text-surface-900 mb-4">
+                $19<span className="text-sm font-normal text-surface-500">/mo</span>
+              </div>
+              <ul className="space-y-2 mb-6">
+                {[
+                  "Unlimited leads",
+                  "Unlimited pipelines",
+                  "Custom branding",
+                  "SMS reminders",
+                  "Priority support",
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-surface-600">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup">
+                <Button className="w-full">Start Pro trial</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-4 bg-surface-900">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-heading text-3xl font-bold text-white mb-4">
+            Stop losing leads to bad tools
+          </h2>
+          <p className="text-surface-400 text-lg mb-8 max-w-xl mx-auto">
+            Join solo agents who actually use their CRM daily.
+          </p>
+          <Link href="/signup">
+            <Button size="lg" className="bg-white text-surface-900 hover:bg-surface-100">
+              Start for free
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 px-4 border-t border-surface-100">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
+              <span className="text-white font-bold text-[10px]">AF</span>
+            </div>
+            <span className="text-sm text-surface-500">AgentFlow</span>
+          </div>
+          <p className="text-xs text-surface-400">
+            &copy; {new Date().getFullYear()} AgentFlow. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </div>
   );
 }
