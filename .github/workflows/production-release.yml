@@ -94,8 +94,8 @@ jobs:
         run: |
           BUMP="${{ github.event.inputs.version_bump || 'patch' }}"
 
-          # Get the latest v* tag
-          PREV_TAG=$(git tag --sort=-version:refname | grep '^v' | head -1 2>/dev/null || echo "")
+          # Get the latest valid semver tag (vX.Y.Z format only)
+          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 2>/dev/null || echo "")
 
           if [ -z "$PREV_TAG" ]; then
             # First release
@@ -357,7 +357,7 @@ jobs:
           VERSION="${{ needs.compute-version.outputs.version }}"
 
           # Determine range from last release tag
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep '^v' | head -1 2>/dev/null || echo "")
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 2>/dev/null || echo "")
           if [ -z "$PREVIOUS_TAG" ]; then
             GIT_RANGE="HEAD~20..HEAD"
             RANGE_LABEL="last 20 commits (initial release)"
