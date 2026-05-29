@@ -540,7 +540,7 @@ jobs:
             const fs = require('fs');
 
             const body    = fs.readFileSync('/tmp/release-notes.md', 'utf8');
-            const tagName = '${{ steps.meta.outputs.tag }}';
+            const tagName = '${{ steps.meta.outputs.release_tag }}';
             const version = '${{ steps.meta.outputs.version }}';
 
             const { data: release } = await github.rest.repos.createRelease({
