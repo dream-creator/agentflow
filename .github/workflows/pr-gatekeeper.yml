@@ -1,0 +1,256 @@
+name: PR Gatekeeper
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [develop, main]
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  lint-and-typecheck:
+    name: lint-typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint -- --max-warnings 0
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+  security-audit:
+    name: security-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+  unit-tests:
+    name: unit-tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, security-audit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npx vitest run --coverage --reporter=verbose
+        env:
+          CI: true
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  coverage-gate:
+    name: coverage-gate
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: Enforce coverage thresholds
+        run: |
+          if [ ! -f coverage/coverage-summary.json ]; then
+            echo "❌ No coverage report found"
+            exit 1
+          fi
+
+          GLOBAL_LINES=$(node -e "const c=require('./coverage/coverage-summary.json');console.log(c.total.lines.pct)")
+          echo "Global line coverage: ${GLOBAL_LINES}%"
+
+          if [ $(echo "$GLOBAL_LINES < 75" | bc) -eq 1 ]; then
+            echo "❌ Global coverage ${GLOBAL_LINES}% is below 75% threshold"
+            exit 1
+          fi
+          echo "✅ Global coverage ${GLOBAL_LINES}% meets 75% threshold"
+
+  preview-deploy:
+    name: preview-deploy
+    runs-on: ubuntu-latest
+    needs: [coverage-gate]
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Apply preview migrations
+        run: |
+          supabase db push --db-url ${{ secrets.PREVIEW_SUPABASE_DB_URL }} || true
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Validate type sync
+        run: |
+          npx supabase gen types typescript --db-url ${{ secrets.PREVIEW_SUPABASE_DB_URL }} > /tmp/generated-types.ts
+          if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
+            echo "❌ types/supabase.ts is out of sync with the current schema."
+            echo "Run 'supabase gen types typescript > types/supabase.ts' locally and commit the result."
+            exit 1
+          fi
+          echo "✅ Types are in sync"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to preview
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=${URL}" >> $GITHUB_OUTPUT
+          echo "✅ Preview deployed: ${URL}"
+
+      - name: Health check
+        run: |
+          MAX_RETRIES=10
+          RETRY_DELAY=6
+          URL="${{ steps.deploy.outputs.url }}"
+
+          echo "Waiting for deployment to stabilize..."
+          sleep 30
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Health check attempt $i of $MAX_RETRIES..."
+
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/" 2>/dev/null || echo "000")
+
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "✅ Health check passed (HTTP ${HTTP_STATUS})"
+              exit 0
+            fi
+
+            echo "⚠️ Got HTTP ${HTTP_STATUS}, retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+            RETRY_DELAY=$((RETRY_DELAY + 6))
+          done
+
+          echo "❌ Health check failed after $MAX_RETRIES attempts"
+          exit 1
+
+  lighthouse-ci:
+    name: lighthouse-ci
+    runs-on: ubuntu-latest
+    needs: [preview-deploy]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            ${{ needs.preview-deploy.outputs.url }}/
+            ${{ needs.preview-deploy.outputs.url }}/login
+          budgetPath: ./lighthouse-budget.json
+          uploadArtifacts: true
+
+  pr-comment-summary:
+    name: pr-comment
+    runs-on: ubuntu-latest
+    needs: [preview-deploy, lighthouse-ci, coverage-gate, unit-tests]
+    if: always()
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Download coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+      - name: Generate summary
+        id: summary
+        run: |
+          COVERAGE="N/A"
+          if [ -f coverage/coverage-summary.json ]; then
+            COVERAGE=$(node -e "const c=require('./coverage/coverage-summary.json');console.log(c.total.lines.pct+'%')")
+          fi
+
+          cat << EOF > /tmp/pr-comment.md
+          ## CI/CD Pipeline Results
+
+          | Check | Status |
+          |-------|--------|
+          | Lint & TypeCheck | ${{ needs.lint-and-typecheck.result == 'success' && '✅' || '❌' }} |
+          | Security Audit | ${{ needs.security-audit.result == 'success' && '✅' || '❌' }} |
+          | Unit Tests | ${{ needs.unit-tests.result == 'success' && '✅' || '❌' }} |
+          | Coverage Gate | ${{ needs.coverage-gate.result == 'success' && '✅' || '❌' }} (${{ COVERAGE }}) |
+          | Preview Deploy | ${{ needs.preview-deploy.result == 'success' && '✅' || '❌' }} |
+          | Lighthouse CI | ${{ needs.lighthouse-ci.result == 'success' && '✅' || '❌' }} |
+
+          **Preview URL:** ${{ needs.preview-deploy.outputs.url }}
+          EOF
+
+      - name: Post PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: /tmp/pr-comment.md
