@@ -222,7 +222,8 @@ jobs:
       - name: Create deployment summary
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          RELEASE_TAG="v$(date +%Y.%m.%d)-${SHORT_SHA}"
+          TIMESTAMP=$(date +%s)
+          RELEASE_TAG="release-${TIMESTAMP}-${SHORT_SHA}"
 
           echo "## 🚀 Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -241,11 +242,12 @@ jobs:
 
       - name: Create GitHub Release
         uses: actions/github-script@v7
+        continue-on-error: true
         with:
           script: |
             const shortSha = context.sha.substring(0, 7);
-            const date = new Date().toISOString().split('T')[0].replace(/-/g, '.');
-            const tagName = `v${date}-${shortSha}`;
+            const timestamp = Date.now();
+            const tagName = `release-${timestamp}-${shortSha}`;
 
             await github.rest.repos.createRelease({
               owner: context.repo.owner,
