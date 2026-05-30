@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Phone, Mail, MessageSquare, CheckCircle2 } from "lucide-react";
+import { formatStage, getStageVariant } from "@/lib/utils";
 import type { Database } from "@/types";
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -246,25 +247,4 @@ function FollowUpCard({
       </div>
     </Card>
   );
-}
-
-function formatStage(stage: string): string {
-  return stage
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
-
-function getStageVariant(
-  stage: string
-): "default" | "primary" | "accent" | "destructive" | "success" | "warning" {
-  const variants: Record<string, "default" | "primary" | "accent" | "destructive" | "success" | "warning"> = {
-    new_lead: "primary",
-    contacted: "accent",
-    showing: "warning",
-    offer: "default",
-    closed_won: "success",
-    closed_lost: "destructive",
-  };
-  return variants[stage] || "default";
 }

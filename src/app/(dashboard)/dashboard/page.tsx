@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Phone, Mail, MessageSquare, UserPlus } from "lucide-react";
 import Link from "next/link";
+import { formatStage, getStageVariant } from "@/lib/utils";
 import type { Database } from "@/types";
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -128,27 +129,6 @@ export default function DashboardPage() {
       )}
     </div>
   );
-}
-
-function formatStage(stage: string): string {
-  return stage
-    .split("_")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
-
-function getStageVariant(
-  stage: string
-): "default" | "primary" | "accent" | "destructive" | "success" | "warning" {
-  const variants: Record<string, "default" | "primary" | "accent" | "destructive" | "success" | "warning"> = {
-    new_lead: "primary",
-    contacted: "accent",
-    showing: "warning",
-    offer: "default",
-    closed_won: "success",
-    closed_lost: "destructive",
-  };
-  return variants[stage] || "default";
 }
 
 function formatDate(date: string | null): string {
