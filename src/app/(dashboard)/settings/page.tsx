@@ -7,7 +7,8 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LogOut, CreditCard, User } from "lucide-react";
+import { LogOut, CreditCard, User, Edit } from "lucide-react";
+import Link from "next/link";
 import type { Database } from "@/types";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -68,9 +69,16 @@ export default function SettingsPage() {
         {/* Profile */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Profile
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Profile
+              </div>
+              <Link href="/settings/profile/edit">
+                <Button variant="ghost" size="sm">
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </Link>
             </CardTitle>
           </CardHeader>
           <div className="space-y-3">

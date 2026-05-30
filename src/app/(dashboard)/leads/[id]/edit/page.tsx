@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { showToast } from "@/components/ui/toast";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import Link from "next/link";
 import type { Database } from "@/types";
@@ -104,6 +105,7 @@ export default function EditLeadPage() {
       return;
     }
 
+    showToast("Lead updated successfully!", "success");
     router.push(`/leads/${params.id}`);
     router.refresh();
   }

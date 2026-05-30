@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { getOAuthRedirectTo } from "@/lib/auth";
 import { Mail, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
@@ -37,7 +38,7 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: getOAuthRedirectTo(),
       },
     });
     if (error) {
