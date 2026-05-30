@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { leadSchema } from "@/lib/validations";
+import { apiRateLimit } from "@/lib/rate-limiter";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -10,6 +11,21 @@ export async function GET(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rateLimitResult = await apiRateLimit(`leads:get:${user.id}`, 100, 60);
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": String(rateLimitResult.limit),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
+        },
+      }
+    );
   }
 
   const { data, error } = await supabase
@@ -23,7 +39,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json(data, {
+    headers: {
+      "X-RateLimit-Limit": String(rateLimitResult.limit),
+      "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+      "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -34,6 +56,21 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rateLimitResult = await apiRateLimit(`leads:create:${user.id}`, 30, 60);
+  if (!rateLimitResult.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Limit": String(rateLimitResult.limit),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
+        },
+      }
+    );
   }
 
   const body = await request.json();
@@ -66,5 +103,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data, { status: 201 });
+  return NextResponse.json(data, {
+    status: 201,
+    headers: {
+      "X-RateLimit-Limit": String(rateLimitResult.limit),
+      "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+      "X-RateLimit-Reset": rateLimitResult.reset.toISOString(),
+    },
+  });
 }
