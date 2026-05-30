@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cn } from "@/lib/utils";
+import { cn, formatStage, getStageVariant } from "@/lib/utils";
 
 describe("cn()", () => {
   it("returns a single class name unchanged", () => {
@@ -60,5 +60,62 @@ describe("cn()", () => {
     expect(result).toContain("flex-col");
     expect(result).toContain("items-center");
     expect(result).toContain("justify-center");
+  });
+});
+
+describe("formatStage()", () => {
+  it("formats new_lead to New Lead", () => {
+    expect(formatStage("new_lead")).toBe("New Lead");
+  });
+
+  it("formats contacted to Contacted", () => {
+    expect(formatStage("contacted")).toBe("Contacted");
+  });
+
+  it("formats closed_won to Closed Won", () => {
+    expect(formatStage("closed_won")).toBe("Closed Won");
+  });
+
+  it("formats closed_lost to Closed Lost", () => {
+    expect(formatStage("closed_lost")).toBe("Closed Lost");
+  });
+
+  it("formats single word stages", () => {
+    expect(formatStage("showing")).toBe("Showing");
+    expect(formatStage("offer")).toBe("Offer");
+  });
+
+  it("capitalizes first letter of each word", () => {
+    expect(formatStage("hello_world")).toBe("Hello World");
+  });
+});
+
+describe("getStageVariant()", () => {
+  it("returns primary for new_lead", () => {
+    expect(getStageVariant("new_lead")).toBe("primary");
+  });
+
+  it("returns accent for contacted", () => {
+    expect(getStageVariant("contacted")).toBe("accent");
+  });
+
+  it("returns warning for showing", () => {
+    expect(getStageVariant("showing")).toBe("warning");
+  });
+
+  it("returns default for offer", () => {
+    expect(getStageVariant("offer")).toBe("default");
+  });
+
+  it("returns success for closed_won", () => {
+    expect(getStageVariant("closed_won")).toBe("success");
+  });
+
+  it("returns destructive for closed_lost", () => {
+    expect(getStageVariant("closed_lost")).toBe("destructive");
+  });
+
+  it("returns default for unknown stage", () => {
+    expect(getStageVariant("unknown_stage")).toBe("default");
   });
 });
