@@ -25,6 +25,10 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "AgentFlow",
   },
+  icons: {
+    icon: "/icons/icon.svg",
+    apple: "/icons/apple-touch-icon.png",
+  },
   openGraph: {
     title: "AgentFlow",
     description: "Dead-simple CRM for solo real estate agents. Track leads, manage pipelines, and never miss a follow-up.",
@@ -33,9 +37,9 @@ export const metadata: Metadata = {
     url: appUrl,
     images: [
       {
-        url: `${appUrl}/og-image.png`,
-        width: 1200,
-        height: 630,
+        url: `${appUrl}/icons/icon-512.png`,
+        width: 512,
+        height: 512,
         alt: "AgentFlow — CRM for real estate agents",
       },
     ],
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AgentFlow",
     description: "Dead-simple CRM for solo real estate agents. Track leads, manage pipelines, and never miss a follow-up.",
-    images: [`${appUrl}/og-image.png`],
+    images: [`${appUrl}/icons/icon-512.png`],
   },
   robots: {
     index: true,
