@@ -1,6 +1,13 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
+  }
+  return _resend;
+}
 
 export const EMAIL_CONFIG = {
   from: "AgentFlow <daily@agentflow.app>",
@@ -19,6 +26,12 @@ export async function sendDailyDigest(
   userName: string,
   leads: LeadForDigest[]
 ): Promise<{ success: boolean; error?: string }> {
+  if (!process.env.RESEND_API_KEY) {
+    return { success: false, error: "RESEND_API_KEY not configured" };
+  }
+
+  const resend = getResendClient();
+
   const leadList = leads
     .map(
       (l) =>
@@ -57,6 +70,12 @@ export async function sendWelcomeEmail(
   to: string,
   userName: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (!process.env.RESEND_API_KEY) {
+    return { success: false, error: "RESEND_API_KEY not configured" };
+  }
+
+  const resend = getResendClient();
+
   const html = `
     <h2>Welcome to ${EMAIL_CONFIG.appName}, ${userName}!</h2>
     <p>You're all set to start managing your leads like a pro.</p>
@@ -89,4 +108,4 @@ export async function sendWelcomeEmail(
   }
 }
 
-export { resend };
+export { getResendClient as resend };
