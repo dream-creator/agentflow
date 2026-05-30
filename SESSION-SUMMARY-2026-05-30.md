@@ -24,6 +24,26 @@
 - Created edit profile page at `/settings/profile/edit`
 - Added action history to lead detail view
 
+### Drag-and-Drop Pipeline (NEW)
+- Implemented drag-and-drop using `@hello-pangea/dnd`
+- Horizontal kanban layout with drag handles (GripVertical icon)
+- Visual feedback: cards show shadow when dragged, columns highlight when targeted
+- Optimistic updates with error rollback
+- Loading state while updates are in progress
+
+### Extract Duplicated Utils (NEW)
+- Created shared `formatStage()` and `getStageVariant()` in `src/lib/utils.ts`
+- Removed 4 duplicate implementations from:
+  - `src/app/(dashboard)/leads/[id]/page.tsx`
+  - `src/app/(dashboard)/leads/page.tsx`
+  - `src/app/(dashboard)/follow-ups/page.tsx`
+  - `src/app/(dashboard)/dashboard/page.tsx`
+
+### ECC (Everything Claude Code) Installation
+- Installed 249 skills, 63 agents, 92 commands from ECC repository
+- Configured global opencode.json with ECC instructions
+- Available agents: planner, architect, code-reviewer, security-reviewer, tdd-guide, etc.
+
 ### Quality Verification
 - ESLint: 0 errors, 0 warnings
 - TypeScript: 0 errors
@@ -48,7 +68,7 @@
 | Item | Status |
 |------|--------|
 | Lead CRUD (API + UI) | DONE |
-| Pipeline view | DONE |
+| Pipeline view (drag-and-drop) | DONE |
 | Follow-ups view | DONE |
 | CSV import | DONE |
 | Dashboard page | DONE |
@@ -59,7 +79,7 @@
 | PWA (manifest, service worker, icons) | DONE |
 | Design system (components) | DONE |
 
-### Phase 3: Testing & QA — 85% COMPLETE
+### Phase 3: Testing & QA — 90% COMPLETE
 | Item | Status |
 |------|--------|
 | Unit tests (84 tests, 97%+ coverage) | DONE |
@@ -71,7 +91,8 @@
 | Sidebar (real user data) | DONE |
 | Edit profile page | DONE |
 | Action history | DONE |
-| Extract duplicated utils | TODO |
+| Extract duplicated utils | DONE |
+| Drag-and-drop pipeline | DONE |
 | Create stripe.ts module | TODO |
 | Create resend.ts module | TODO |
 
@@ -93,27 +114,32 @@
 ## Remaining Tasks
 
 ### HIGH Priority
-1. **Drag-and-drop pipeline** — `@hello-pangea/dnd` installed, not wired up
-2. **E2E tests for authenticated flows** — current tests only hit unauthenticated routes
-3. **Extract duplicated `formatStage`/`getStageVariant`** — code duplication in 2 files
+1. **E2E tests for authenticated flows** — current tests only hit unauthenticated routes
 
 ### MEDIUM Priority
-4. **Create `src/lib/stripe.ts`** — extract Stripe logic into shared module
-5. **Create `src/lib/resend.ts`** — extract email logic into shared module
-6. **API route input validation** — add Zod schemas
-7. **Stripe live mode** — switch from test to production keys
-8. **Resend domain verification** — verify agentflow.app domain
+2. **Create `src/lib/stripe.ts`** — extract Stripe logic into shared module
+3. **Create `src/lib/resend.ts`** — extract email logic into shared module
+4. **API route input validation** — add Zod schemas
+5. **Stripe live mode** — switch from test to production keys
+6. **Resend domain verification** — verify agentflow.app domain
 
 ### LOW Priority
-9. **Open Graph / Twitter card meta tags**
-10. **Replace placeholder PWA icons**
-11. **Data-fetching hooks** (useLeads, useProfile, useActions)
-12. **Lighthouse CI budget**
-13. **Sentry error tracking**
-14. **Vercel Analytics**
+7. **Open Graph / Twitter card meta tags**
+8. **Replace placeholder PWA icons**
+9. **Data-fetching hooks** (useLeads, useProfile, useActions)
+10. **Lighthouse CI budget**
+11. **Sentry error tracking**
+12. **Vercel Analytics**
 
 ### Infrastructure
-15. **Custom domain** — agentflow.app DNS → Vercel
-16. **Staging Supabase project** — separate from production
-17. **Stripe live keys** in Vercel environment
-18. **Resend API key** (production) in Vercel environment
+13. **Custom domain** — agentflow.app DNS → Vercel
+14. **Staging Supabase project** — separate from production
+15. **Stripe live keys** in Vercel environment
+16. **Resend API key** (production) in Vercel environment
+
+---
+
+## Git History
+- `0e49c54` — feat: drag-and-drop pipeline + extract duplicated utils
+- `16d78da` — fix: use production URL for OAuth redirects
+- `3c6acaa` — feat: OAuth fix, E2E tests, Toast, billing/sidebar/profile polish
