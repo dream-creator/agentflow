@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { leadSchema } from "@/lib/validations";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -37,18 +38,26 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
+  const result = leadSchema.safeParse(body);
+  if (!result.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: result.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("leads")
     .insert({
       user_id: user.id,
-      full_name: body.full_name,
-      email: body.email || null,
-      phone: body.phone || null,
-      source: body.source || "manual",
-      pipeline_stage: body.pipeline_stage || "new_lead",
-      next_action: body.next_action || null,
-      next_action_date: body.next_action_date || null,
-      notes: body.notes || null,
+      full_name: result.data.full_name,
+      email: result.data.email || null,
+      phone: result.data.phone || null,
+      source: result.data.source,
+      pipeline_stage: result.data.pipeline_stage,
+      next_action: result.data.next_action || null,
+      next_action_date: result.data.next_action_date || null,
+      notes: result.data.notes || null,
     })
     .select()
     .single();
