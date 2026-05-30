@@ -60,7 +60,7 @@ test.describe("Authentication", () => {
 
   test("should show error message for invalid credentials", async ({ page }) => {
     await page.goto("/login?error=auth_callback_failed");
-    await expect(page.locator("text=auth_callback_failed")).toBeVisible();
+    await expect(page.locator("text=auth callback failed")).toBeVisible();
   });
 
   test("should have working navigation links", async ({ page }) => {
