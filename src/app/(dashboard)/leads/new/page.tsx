@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { showToast } from "@/components/ui/toast";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -64,6 +65,7 @@ export default function NewLeadPage() {
       return;
     }
 
+    showToast("Lead created successfully!", "success");
     router.push("/leads");
     router.refresh();
   }
