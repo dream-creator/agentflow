@@ -4,7 +4,7 @@
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/dream-creator/agentflow/pr-gatekeeper.yml?label=build)](https://github.com/dream-creator/agentflow/actions)
 [![Test Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen)](https://github.com/dream-creator/agentflow)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
@@ -339,13 +339,16 @@ AgentFlow is designed with a security-first approach:
 
 ## Contributing
 
-Contributions are welcome. Please follow the workflow below to keep the codebase consistent and the review process efficient.
+AgentFlow is a proprietary, closed-source product. Contributions are limited to authorized team members and approved collaborators only.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes following the [Conventional Commits](https://www.conventionalcommits.org/) specification
-4. Push to your branch: `git push origin feature/your-feature-name`
-5. Open a Pull Request against the `develop` branch
+If you have been granted repository access, please follow the workflow below to keep the codebase consistent and the review process efficient.
+
+1. Create a feature branch from `develop`: `git checkout -b feature/your-feature-name`
+2. Commit your changes following the [Conventional Commits](https://www.conventionalcommits.org/) specification
+3. Push to your branch: `git push origin feature/your-feature-name`
+4. Open a Pull Request against the `develop` branch for review
+
+> **Note:** By submitting a Pull Request, you confirm that your contribution is your original work and that you have the right to grant AgentFlow a perpetual, irrevocable license to use it within this codebase.
 
 ### Commit Convention
 
@@ -365,7 +368,13 @@ This project enforces Conventional Commits for automated changelog generation an
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+Copyright © 2025 AgentFlow. All rights reserved.
+
+This software and its source code are proprietary and confidential. No part of this codebase may be copied, modified, distributed, sublicensed, or used — in whole or in part — for any commercial or non-commercial purpose without the prior written permission of AgentFlow.
+
+Authorized contributors granted access to this repository agree to keep all source code, architecture, and business logic strictly confidential. Access does not constitute a license to use, reproduce, or distribute this software outside the terms explicitly agreed upon in writing.
+
+> For licensing inquiries, partnership opportunities, or enterprise access, contact [support@agentflow.app](mailto:support@agentflow.app).
 
 ---
 
