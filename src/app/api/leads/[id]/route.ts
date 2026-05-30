@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { leadUpdateSchema } from "@/lib/validations";
 
 export async function GET(
   request: NextRequest,
@@ -45,10 +46,18 @@ export async function PUT(
 
   const body = await request.json();
 
+  const result = leadUpdateSchema.safeParse(body);
+  if (!result.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: result.error.flatten().fieldErrors },
+      { status: 400 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("leads")
     .update({
-      ...body,
+      ...result.data,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
