@@ -13,6 +13,8 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
 });
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://startupvo1.vercel.app";
+
 export const metadata: Metadata = {
   title: "AgentFlow — The CRM for agents who hate CRMs",
   description:
@@ -22,6 +24,31 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "AgentFlow",
+  },
+  openGraph: {
+    title: "AgentFlow",
+    description: "Dead-simple CRM for solo real estate agents. Track leads, manage pipelines, and never miss a follow-up.",
+    type: "website",
+    siteName: "AgentFlow",
+    url: appUrl,
+    images: [
+      {
+        url: `${appUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "AgentFlow — CRM for real estate agents",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AgentFlow",
+    description: "Dead-simple CRM for solo real estate agents. Track leads, manage pipelines, and never miss a follow-up.",
+    images: [`${appUrl}/og-image.png`],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
