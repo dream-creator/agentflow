@@ -1,9 +1,16 @@
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-05-27.dahlia",
-});
+let _stripe: Stripe | null = null;
+
+function getStripeClient(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_placeholder", {
+      apiVersion: "2026-05-27.dahlia",
+    });
+  }
+  return _stripe;
+}
 
 export const STRIPE_CONFIG = {
   price: 1900, // $19.00
@@ -19,7 +26,12 @@ export async function getOrCreateStripeCustomer(
   email: string,
   fullName?: string
 ): Promise<string> {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY not configured");
+  }
+
   const supabase = await createClient();
+  const stripe = getStripeClient();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -49,6 +61,12 @@ export async function createCheckoutSession(
   customerId: string,
   userId: string
 ): Promise<string> {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY not configured");
+  }
+
+  const stripe = getStripeClient();
+
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
@@ -144,11 +162,19 @@ export function constructWebhookEvent(
   body: string,
   signature: string
 ): Stripe.Event {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY not configured");
+  }
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    throw new Error("STRIPE_WEBHOOK_SECRET not configured");
+  }
+
+  const stripe = getStripeClient();
   return stripe.webhooks.constructEvent(
     body,
     signature,
-    process.env.STRIPE_WEBHOOK_SECRET!
+    process.env.STRIPE_WEBHOOK_SECRET
   );
 }
 
-export { stripe };
+export { getStripeClient as stripe };
