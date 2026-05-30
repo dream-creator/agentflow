@@ -17,6 +17,13 @@
 - **45 E2E tests passing** across all browsers
 - Added npm scripts: `test:e2e`, `test:e2e:ui`, `test:e2e:report`
 
+### Authenticated E2E Tests (NEW)
+- Created `tests/e2e/fixtures/auth.ts` — Supabase test user fixture
+- Added 32 authenticated E2E tests across 3 spec files:
+  - `lead-crud-auth.spec.ts` — 12 tests for CRUD operations
+  - `pipeline-auth.spec.ts` — 10 tests for pipeline view
+  - `follow-ups-auth.spec.ts` — 10 tests for follow-ups
+
 ### UI Polish
 - Created Toast component (`src/components/ui/toast.tsx`) for CRUD feedback
 - Fixed billing page to fetch real plan from profiles table
@@ -28,6 +35,30 @@
 - Implemented drag-and-drop using `@hello-pangea/dnd`
 - Horizontal kanban layout with drag handles (GripVertical icon)
 - Visual feedback: cards show shadow when dragged, columns highlight when targeted
+- Optimistic updates with error rollback
+
+### Extract Duplicated Utils (NEW)
+- Created shared `formatStage()` and `getStageVariant()` in `src/lib/utils.ts`
+- Removed 4 duplicate implementations from dashboard pages
+
+### Shared Modules (NEW)
+- Created `src/lib/stripe.ts` — shared Stripe operations (checkout, webhooks, subscriptions)
+- Created `src/lib/resend.ts` — shared email sending (daily digest, welcome emails)
+- Created `src/lib/validations.ts` — Zod schemas for API input validation
+- Updated API routes to use shared modules and validation
+
+### ECC (Everything Claude Code) Installation
+- Installed 249 skills, 63 agents, 92 commands from ECC repository
+- Configured global opencode.json with ECC instructions
+- Available agents: planner, architect, code-reviewer, security-reviewer, tdd-guide, etc.
+
+### Quality Verification
+- ESLint: 0 errors, 0 warnings
+- TypeScript: 0 errors
+- Unit tests: 84/84 passing
+- Coverage: 97.31% statements, 92.3% branches, 85.71% functions
+- E2E tests: 77/77 passing (45 unauthenticated + 32 authenticated)
+- Build: Successful
 - Optimistic updates with error rollback
 - Loading state while updates are in progress
 
@@ -79,11 +110,11 @@
 | PWA (manifest, service worker, icons) | DONE |
 | Design system (components) | DONE |
 
-### Phase 3: Testing & QA — 90% COMPLETE
+### Phase 3: Testing & QA — 100% COMPLETE
 | Item | Status |
 |------|--------|
 | Unit tests (84 tests, 97%+ coverage) | DONE |
-| E2E tests (45 tests, 3 browsers) | DONE |
+| E2E tests (77 tests, 3 browsers) | DONE |
 | CI/CD pipeline (4 workflows) | DONE |
 | OAuth configuration | DONE |
 | Toast feedback | DONE |
@@ -93,8 +124,10 @@
 | Action history | DONE |
 | Extract duplicated utils | DONE |
 | Drag-and-drop pipeline | DONE |
-| Create stripe.ts module | TODO |
-| Create resend.ts module | TODO |
+| Authenticated E2E tests | DONE |
+| Shared Stripe module | DONE |
+| Shared Resend module | DONE |
+| API input validation (Zod) | DONE |
 
 ### Phase 4: Production — 40% COMPLETE
 | Item | Status |
@@ -113,29 +146,23 @@
 
 ## Remaining Tasks
 
-### HIGH Priority
-1. **E2E tests for authenticated flows** — current tests only hit unauthenticated routes
-
 ### MEDIUM Priority
-2. **Create `src/lib/stripe.ts`** — extract Stripe logic into shared module
-3. **Create `src/lib/resend.ts`** — extract email logic into shared module
-4. **API route input validation** — add Zod schemas
-5. **Stripe live mode** — switch from test to production keys
-6. **Resend domain verification** — verify agentflow.app domain
+1. **Stripe live mode** — switch from test to production keys
+2. **Resend domain verification** — verify agentflow.app domain
 
 ### LOW Priority
-7. **Open Graph / Twitter card meta tags**
-8. **Replace placeholder PWA icons**
-9. **Data-fetching hooks** (useLeads, useProfile, useActions)
-10. **Lighthouse CI budget**
-11. **Sentry error tracking**
-12. **Vercel Analytics**
+3. **Open Graph / Twitter card meta tags**
+4. **Replace placeholder PWA icons**
+5. **Data-fetching hooks** (useLeads, useProfile, useActions)
+6. **Lighthouse CI budget**
+7. **Sentry error tracking**
+8. **Vercel Analytics**
 
 ### Infrastructure
-13. **Custom domain** — agentflow.app DNS → Vercel
-14. **Staging Supabase project** — separate from production
-15. **Stripe live keys** in Vercel environment
-16. **Resend API key** (production) in Vercel environment
+9. **Custom domain** — agentflow.app DNS → Vercel
+10. **Staging Supabase project** — separate from production
+11. **Stripe live keys** in Vercel environment
+12. **Resend API key** (production) in Vercel environment
 
 ---
 
