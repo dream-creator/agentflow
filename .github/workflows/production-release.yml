@@ -114,6 +114,10 @@ jobs:
       - name: Check health endpoint
         run: |
           URL="${{ secrets.PRODUCTION_APP_URL }}"
+          if [ -z "$URL" ]; then
+            echo "[SKIP] PRODUCTION_APP_URL not configured"
+            exit 0
+          fi
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/health" --max-time 15)
           if [ "$HTTP_STATUS" = "200" ]; then
             echo "[OK] Health endpoint: HTTP ${HTTP_STATUS}"
@@ -124,6 +128,10 @@ jobs:
       - name: Check login page
         run: |
           URL="${{ secrets.PRODUCTION_APP_URL }}"
+          if [ -z "$URL" ]; then
+            echo "[SKIP] PRODUCTION_APP_URL not configured"
+            exit 0
+          fi
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/login" --max-time 15)
           if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "302" ] || [ "$HTTP_STATUS" = "307" ]; then
             echo "[OK] Login page: HTTP ${HTTP_STATUS}"
