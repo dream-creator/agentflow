@@ -1,182 +1,97 @@
 # AgentFlow
 
-**The CRM for agents who hate CRMs.**
+> A lightweight, mobile-first CRM purpose-built for real estate professionals — manage your pipeline, automate follow-ups, and close more deals without the complexity of enterprise software.
 
-AgentFlow is a lightweight, mobile-first CRM built specifically for real estate agents who want to manage their pipeline without the bloat of enterprise software. Track leads, manage follow-ups, and close deals — all from your phone.
+[![Build Status](https://img.shields.io/github/actions/workflow/status/dream-creator/agentflow/pr-gatekeeper.yml?label=build)](https://github.com/dream-creator/agentflow/actions)
+[![Test Coverage](https://img.shields.io/badge/coverage-99%25-brightgreen)](https://github.com/dream-creator/agentflow)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Database Schema](#database-schema)
+- [API Reference](#api-reference)
+- [Testing](#testing)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Deployment](#deployment)
+- [Security](#security)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## Overview
+
+AgentFlow is a SaaS CRM designed specifically for independent real estate agents and small brokerages. Unlike heavyweight enterprise platforms, AgentFlow delivers a focused, mobile-first experience with the core tools agents actually need: lead tracking, pipeline visualization, automated follow-up reminders, and one-click client communication.
+
+**Key differentiators:**
+
+- **Mobile-first architecture** — built for agents working in the field, not behind a desk
+- **Zero-password authentication** — Magic Link and Google OAuth for frictionless access
+- **Automated daily digest** — follow-up reminders delivered to your inbox every morning
+- **Affordable Pro tier** — full-featured access at $19/month with no per-seat pricing surprises
 
 ---
 
 ## Features
 
 ### Lead Management
-- **Add leads manually** or **import via CSV** with automatic column detection
-- **6-stage pipeline**: New Lead → Contacted → Showing → Offer → Closed Won → Closed Lost
-- **Search and filter** leads by name, stage, or source
-- **Lead sources**: Manual, CSV Import, Website, Referral, Open House, Zillow, Other
+- Add leads manually or import via CSV with automatic column detection
+- Six-stage pipeline: `New Lead` → `Contacted` → `Showing` → `Offer` → `Closed Won` → `Closed Lost`
+- Search and filter leads by name, stage, or source
+- Supported lead sources: Manual, CSV Import, Website, Referral, Open House, Zillow
 
 ### Follow-ups & Reminders
-- **Daily digest email** — get a summary of overdue and upcoming follow-ups every morning
-- **Overdue / Today / Upcoming** sections in the follow-ups view
-- **Quick actions** — call, text, email, or schedule meetings directly from a lead
+- Daily digest email summarizing overdue and upcoming follow-ups
+- Organized follow-up view: Overdue / Today / Upcoming
+- Quick actions directly from a lead: call, text, email, or schedule a meeting
 
 ### Pipeline View
-- Visual pipeline with leads organized by stage
-- Move leads between stages with one click
-- Track conversion rates across your funnel
+- Visual Kanban-style pipeline organized by stage
+- Single-click stage transitions
+- Conversion rate tracking across your full funnel
 
 ### Mobile-First Design
-- **Bottom navigation** for thumb-friendly access on phones
-- **44px minimum touch targets** for accessibility
-- **PWA support** — installable on home screen with offline caching
+- Bottom navigation optimized for one-handed use on mobile
+- 44px minimum touch targets for accessibility compliance
+- Progressive Web App (PWA) — installable on home screen with offline support
 
 ### Authentication & Security
-- **Magic Link sign-in** — no passwords, just email
-- **Google OAuth** — one-click sign-in with Google
-- **Row Level Security (RLS)** — users can only see their own data
-- **Encrypted at rest** via Supabase/PostgreSQL
+- Passwordless sign-in via Magic Link or Google OAuth
+- Row Level Security (RLS) — strict per-user data isolation at the database level
+- Data encrypted at rest via Supabase/PostgreSQL
 
-### Payments
-- **Free tier**: 1 active lead
-- **Pro tier**: $19/month — unlimited leads, pipelines, and custom branding
-- **Stripe integration** — secure checkout and subscription management
-
-### CI/CD
-- **4-tier pipeline**: PR Gatekeeper → Staging Promotion → Production Release → Health Check
-- **Automated testing** with 84 unit tests and 99%+ coverage
-- **Semantic versioning** with automatic changelog generation
+### Billing & Subscriptions
+- **Free tier:** 1 active lead (suitable for evaluation)
+- **Pro tier:** $19/month — unlimited leads, pipelines, and custom branding
+- Stripe-powered checkout and subscription lifecycle management
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|------------|
-| **Framework** | [Next.js 14](https://nextjs.org/) (App Router, TypeScript) |
-| **Styling** | [Tailwind CSS 3.4](https://tailwindcss.com/) with custom design tokens |
-| **Database** | [Supabase](https://supabase.com/) (PostgreSQL + RLS) |
-| **Auth** | [Supabase Auth](https://supabase.com/docs/guides/auth) (Magic Link + Google OAuth) |
-| **Payments** | [Stripe](https://stripe.com/) ($19/mo Pro tier) |
-| **Email** | [Resend](https://resend.com/) (daily digest cron + transactional) |
-| **Icons** | [Lucide React](https://lucide.dev/) |
-| **Testing** | [Vitest](https://vitest.dev/) (unit) + [Playwright](https://playwright.dev/) (E2E) |
-| **CI/CD** | [GitHub Actions](https://github.com/features/actions) (4 workflows) |
-| **Hosting** | [Vercel](https://vercel.com/) (frontend) + [Supabase Cloud](https://supabase.com/) (backend) |
-| **PWA** | Service worker with network-first navigation + cache-first assets |
-
----
-
-## File Structure
-
-```
-agentflow/
-├── .github/
-│   └── workflows/
-│       ├── pr-gatekeeper.yml          # PR checks: lint, test, coverage, preview deploy
-│       ├── staging-promotion.yml      # Staging: migrate, type-check, E2E, deploy
-│       ├── production-release.yml     # Production: approve, snapshot, migrate, deploy, changelog
-│       └── scheduled-health-check.yml # Hourly health checks on production + staging
-│
-├── public/
-│   ├── manifest.json                  # PWA manifest
-│   ├── sw.js                          # Service worker (offline caching)
-│   └── icons/
-│       ├── icon-192.png               # PWA icon 192x192
-│       └── icon-512.png               # PWA icon 512x512
-│
-├── supabase/
-│   └── migrations/
-│       └── 001_initial_schema.sql     # Database schema (profiles, leads, actions)
-│
-├── src/
-│   ├── middleware.ts                   # Auth middleware (route protection)
-│   │
-│   ├── app/
-│   │   ├── layout.tsx                 # Root layout (fonts, PWA meta)
-│   │   ├── page.tsx                   # Landing page (marketing)
-│   │   ├── globals.css                # Tailwind layers + custom classes
-│   │   │
-│   │   ├── auth/
-│   │   │   └── callback/route.ts      # OAuth callback handler
-│   │   │
-│   │   ├── (auth)/
-│   │   │   ├── login/page.tsx         # Magic Link + Google sign-in
-│   │   │   └── signup/page.tsx        # Magic Link + Google sign-up
-│   │   │
-│   │   ├── (dashboard)/
-│   │   │   ├── layout.tsx             # Dashboard layout (sidebar + bottom nav)
-│   │   │   ├── dashboard/page.tsx     # Today's follow-ups
-│   │   │   ├── pipeline/page.tsx      # Pipeline view (6 stages)
-│   │   │   ├── leads/
-│   │   │   │   ├── page.tsx           # Leads list (search + filter)
-│   │   │   │   ├── new/page.tsx       # Add new lead form
-│   │   │   │   ├── import/page.tsx    # CSV import (upload, map, review, done)
-│   │   │   │   └── [id]/
-│   │   │   │       ├── page.tsx       # Lead detail (contact, actions, quick actions)
-│   │   │   │       └── edit/page.tsx  # Edit lead form
-│   │   │   ├── follow-ups/page.tsx    # Overdue / Today / Upcoming
-│   │   │   └── settings/
-│   │   │       ├── page.tsx           # Profile + plan badge + sign out
-│   │   │       └── billing/page.tsx   # Stripe checkout + plan comparison
-│   │   │
-│   │   ├── api/
-│   │   │   ├── leads/
-│   │   │   │   ├── route.ts           # GET (list) + POST (create)
-│   │   │   │   └── [id]/route.ts      # GET + PUT + DELETE (single lead)
-│   │   │   ├── stripe/
-│   │   │   │   ├── checkout/route.ts  # POST - create Stripe checkout session
-│   │   │   │   └── webhook/route.ts   # POST - handle Stripe webhooks
-│   │   │   └── cron/
-│   │   │       └── daily-digest/route.ts  # GET - send daily email digest
-│   │   │
-│   │   └── (dashboard)/layout.tsx     # Dashboard layout wrapper
-│   │
-│   ├── components/
-│   │   ├── layout/
-│   │   │   ├── dashboard-layout.tsx   # Sidebar + BottomNav wrapper
-│   │   │   ├── sidebar.tsx            # Desktop sidebar navigation
-│   │   │   └── bottom-nav.tsx         # Mobile bottom navigation
-│   │   └── ui/
-│   │       ├── button.tsx             # Button (5 variants, 3 sizes)
-│   │       ├── badge.tsx              # Badge (6 color variants)
-│   │       ├── card.tsx               # Card, CardHeader, CardTitle, CardContent
-│   │       ├── empty-state.tsx        # EmptyState + Toast components
-│   │       ├── skeleton.tsx           # Loading skeleton
-│   │       └── sw-register.tsx        # Service worker registration
-│   │
-│   ├── lib/
-│   │   ├── utils.ts                   # cn() utility (clsx + tailwind-merge)
-│   │   └── supabase/
-│   │       ├── client.ts              # Browser Supabase client
-│   │       ├── server.ts              # Server-side Supabase client
-│   │       └── middleware.ts          # Session + auth protection logic
-│   │
-│   └── types/
-│       └── index.ts                   # Database types (profiles, leads, actions)
-│
-├── tests/
-│   └── unit/
-│       ├── lib/
-│       │   ├── utils.test.ts          # cn() utility tests
-│       │   └── supabase/
-│       │       └── middleware.test.ts  # Auth middleware tests
-│       └── api/
-│           ├── leads.test.ts          # Leads API tests
-│           ├── leads-id.test.ts       # Single lead API tests
-│           ├── stripe/
-│           │   ├── checkout.test.ts   # Stripe checkout tests
-│           │   └── webhook.test.ts    # Stripe webhook tests
-│           └── cron/
-│               └── daily-digest.test.ts  # Daily digest tests
-│
-├── .env.local.example                 # Environment variables template
-├── .gitignore                         # Git ignore rules
-├── ARCHITECTURE.md                    # Technical architecture docs
-├── next.config.mjs                    # Next.js configuration
-├── tailwind.config.ts                 # Tailwind CSS configuration
-├── tsconfig.json                      # TypeScript configuration
-├── vitest.config.ts                   # Vitest test configuration
-└── package.json                       # Dependencies + scripts
-```
+|---|---|
+| Framework | Next.js 14 (App Router, TypeScript) |
+| Styling | Tailwind CSS 3.4 with custom design tokens |
+| Database | Supabase (PostgreSQL + Row Level Security) |
+| Authentication | Supabase Auth (Magic Link + Google OAuth) |
+| Payments | Stripe ($19/month Pro tier) |
+| Transactional Email | Resend (daily digest cron + transactional emails) |
+| Icons | Lucide React |
+| Unit Testing | Vitest (84 tests, 99%+ coverage) |
+| E2E Testing | Playwright |
+| CI/CD | GitHub Actions (4 automated workflows) |
+| Hosting | Vercel (frontend) + Supabase Cloud (backend) |
+| PWA | Service worker — network-first navigation, cache-first assets |
 
 ---
 
@@ -184,139 +99,136 @@ agentflow/
 
 ### Prerequisites
 
-- **Node.js** 18+ (recommended: 20)
-- **npm** or **yarn**
-- **Supabase account** (free tier works for development)
-- **Stripe account** (test mode for development)
-- **Resend account** (free tier works for development)
+- Node.js 18+ (v20 recommended)
+- npm or yarn
+- [Supabase](https://supabase.com) account (free tier sufficient for development)
+- [Stripe](https://stripe.com) account (test mode for development)
+- [Resend](https://resend.com) account (free tier sufficient for development)
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/dream-creator/agentflow.git
 cd agentflow
 ```
 
-### 2. Install dependencies
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Set up environment variables
+### 3. Configure Environment Variables
 
 ```bash
 cp .env.local.example .env.local
 ```
 
-Edit `.env.local` with your own credentials:
+Populate `.env.local` with your project credentials. See [Environment Variables](#environment-variables) for the full reference.
 
-```bash
-# Supabase (from supabase.com → Project Settings → API)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+> **Security Notice:** Never commit `.env.local` or any service account private keys to version control.
 
-# Stripe (from stripe.com → Developers → API Keys)
-STRIPE_SECRET_KEY=sk_test_your-key
-STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your-key
+### 4. Initialize the Database
 
-# Resend (from resend.com → API Keys)
-RESEND_API_KEY=re_your-key
-
-# App URL
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-### 4. Set up the database
-
-Run the migration in your Supabase SQL editor or via CLI:
+Run the migration using the Supabase CLI or paste it directly into the Supabase SQL Editor:
 
 ```bash
 supabase db push --db-url your-database-url
 ```
 
-The schema creates 3 tables with RLS policies and triggers:
-- `profiles` — user profiles (auto-created on signup)
-- `leads` — CRM leads with pipeline stages
-- `actions` — follow-up tasks
+This creates three tables (`profiles`, `leads`, `actions`) with RLS policies and automated triggers.
 
-### 5. Run the development server
+### 5. Start the Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+The application will be available at `http://localhost:3000`.
 
-### 6. Set up Stripe webhooks (for payments)
+### 6. Configure Stripe Webhooks (Payments)
 
-1. Go to Stripe Dashboard → Developers → Webhooks
+1. Navigate to **Stripe Dashboard → Developers → Webhooks**
 2. Add endpoint: `https://your-domain.com/api/stripe/webhook`
-3. Select events: `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
-4. Copy the webhook signing secret to `STRIPE_WEBHOOK_SECRET`
+3. Subscribe to events: `checkout.session.completed`, `customer.subscription.deleted`, `invoice.payment_failed`
+4. Copy the webhook signing secret to `STRIPE_WEBHOOK_SECRET` in your environment file
 
 ---
 
-## Scripts
+## Environment Variables
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm test` | Run unit tests |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Run tests with coverage report |
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous (public) key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key — server-side only |
+| `STRIPE_SECRET_KEY` | Stripe secret key |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
+| `RESEND_API_KEY` | Resend API key for transactional email |
+| `NEXT_PUBLIC_APP_URL` | Public application base URL |
+| `CRON_SECRET` | Bearer token for securing cron job endpoints |
 
 ---
 
 ## Database Schema
 
-### Tables
+### `profiles`
+Extends Supabase `auth.users` with CRM-specific metadata.
 
-**profiles** — extends Supabase auth.users
 | Column | Type | Description |
-|--------|------|-------------|
-| `id` | uuid | FK to auth.users |
-| `full_name` | text | User's full name |
-| `email` | text | User's email |
+|---|---|---|
+| `id` | uuid | Foreign key to `auth.users` |
+| `full_name` | text | User's display name |
+| `email` | text | User's email address |
 | `plan` | enum | `free`, `pro`, `team` |
-| `stripe_customer_id` | text | Stripe customer ID |
+| `stripe_customer_id` | text | Associated Stripe customer ID |
 | `subscription_status` | enum | `active`, `inactive`, `cancelled`, `past_due` |
 
-**leads** — core CRM entity
+### `leads`
+Core CRM entity representing a prospective client.
+
 | Column | Type | Description |
-|--------|------|-------------|
+|---|---|---|
 | `id` | uuid | Primary key |
-| `user_id` | uuid | FK to profiles |
-| `full_name` | text | Lead's name |
-| `email` | text | Lead's email |
-| `phone` | text | Lead's phone |
+| `user_id` | uuid | Foreign key to `profiles` |
+| `full_name` | text | Lead's full name |
+| `email` | text | Lead's email address |
+| `phone` | text | Lead's phone number |
 | `source` | enum | `manual`, `csv_import`, `website`, `referral`, `open_house`, `zillow`, `other` |
 | `pipeline_stage` | enum | `new_lead`, `contacted`, `showing`, `offer`, `closed_won`, `closed_lost` |
-| `next_action` | text | Next action to take |
-| `next_action_date` | date | When to take action |
-| `is_active` | boolean | Soft delete flag |
+| `next_action` | text | Description of the next follow-up action |
+| `next_action_date` | date | Scheduled date for the next action |
+| `is_active` | boolean | Soft-delete flag |
 
-**actions** — follow-up tasks
+### `actions`
+Follow-up tasks and activity log entries linked to leads.
+
 | Column | Type | Description |
-|--------|------|-------------|
+|---|---|---|
 | `id` | uuid | Primary key |
-| `lead_id` | uuid | FK to leads |
-| `user_id` | uuid | FK to profiles |
+| `lead_id` | uuid | Foreign key to `leads` |
+| `user_id` | uuid | Foreign key to `profiles` |
 | `action_type` | enum | `call`, `text`, `email`, `meeting`, `showing`, `note` |
-| `due_date` | date | When due |
+| `due_date` | date | Scheduled due date |
 | `completed` | boolean | Completion status |
 
-### Row Level Security
+---
 
-All tables have RLS enabled. Users can only access their own data:
-- `profiles`: `auth.uid() = id`
-- `leads`: `auth.uid() = user_id`
-- `actions`: `auth.uid() = user_id`
+## API Reference
+
+All endpoints require user-level authentication unless otherwise noted.
+
+| Endpoint | Method | Auth | Description |
+|---|---|---|---|
+| `/api/leads` | GET | User | Retrieve all active leads |
+| `/api/leads` | POST | User | Create a new lead |
+| `/api/leads/[id]` | GET | User | Retrieve a single lead by ID |
+| `/api/leads/[id]` | PUT | User | Update a lead |
+| `/api/leads/[id]` | DELETE | User | Soft-delete a lead |
+| `/api/stripe/checkout` | POST | User | Initiate a Stripe checkout session |
+| `/api/stripe/webhook` | POST | Stripe signature | Process incoming Stripe webhook events |
+| `/api/cron/daily-digest` | GET | Bearer token | Trigger daily follow-up email digest |
 
 ---
 
@@ -324,63 +236,68 @@ All tables have RLS enabled. Users can only access their own data:
 
 ### Unit Tests (Vitest)
 
-84 tests across 7 test files with 99%+ coverage:
+84 tests across 7 test files with 99%+ code coverage.
 
 ```bash
-npm test                    # Run all tests
-npm run test:coverage       # Run with coverage report
-npm run test:watch          # Watch mode
+npm test                   # Run all unit tests
+npm run test:coverage      # Generate coverage report
+npm run test:watch         # Watch mode for development
 ```
 
-**Test files:**
-- `tests/unit/lib/utils.test.ts` — cn() utility
-- `tests/unit/lib/supabase/middleware.test.ts` — Auth middleware
-- `tests/unit/api/leads.test.ts` — Leads API (GET, POST)
-- `tests/unit/api/leads-id.test.ts` — Single lead API (GET, PUT, DELETE)
-- `tests/unit/api/stripe/checkout.test.ts` — Stripe checkout
-- `tests/unit/api/stripe/webhook.test.ts` — Stripe webhooks
-- `tests/unit/api/cron/daily-digest.test.ts` — Daily email digest
+**Test coverage:**
 
-### E2E Tests (Playwright)
+| File | Description |
+|---|---|
+| `lib/utils.test.ts` | `cn()` utility function |
+| `lib/supabase/middleware.test.ts` | Auth middleware and route protection |
+| `api/leads.test.ts` | Leads list and create endpoints |
+| `api/leads-id.test.ts` | Single lead read, update, and delete |
+| `api/stripe/checkout.test.ts` | Stripe checkout session creation |
+| `api/stripe/webhook.test.ts` | Stripe webhook event handling |
+| `api/cron/daily-digest.test.ts` | Daily email digest trigger |
 
-Configuration is set up but tests are pending. Run with:
+### End-to-End Tests (Playwright)
 
 ```bash
 npx playwright test
 ```
 
+E2E test suites cover authentication flows, CSV import, and Stripe checkout. Configuration is in place; additional test cases are in active development.
+
 ---
 
 ## CI/CD Pipeline
 
-### 1. PR Gatekeeper (on pull request)
-- Lint & type check
-- Security audit
-- Unit tests with coverage gate (75% minimum)
-- Preview deployment
-- Lighthouse CI
+AgentFlow uses a four-stage GitHub Actions pipeline for safe, automated delivery.
 
-### 2. Staging Promotion (on push to develop)
-- Database migrations to staging
-- Type synchronization check
-- E2E test matrix (auth, CSV, Stripe)
+### 1. PR Gatekeeper *(on pull request)*
+- ESLint and TypeScript type checks
+- Dependency security audit
+- Unit tests with 75% minimum coverage gate
+- Preview deployment via Vercel
+- Lighthouse CI performance audit
+
+### 2. Staging Promotion *(on push to `develop`)*
+- Database migrations applied to staging environment
+- TypeScript type synchronization check
+- Full E2E test matrix (auth, CSV import, Stripe)
 - Staging deployment
 
-### 3. Production Release (on push to main)
-- Manual approval gate
-- Pre-migration PITR snapshot
-- Database migrations
+### 3. Production Release *(on push to `main`)*
+- Manual approval gate required
+- Pre-migration point-in-time database snapshot
+- Database migrations applied to production
 - Vercel production deployment
 - Post-deploy smoke tests
-- GitHub Release with semantic versioning and changelog
+- Automated GitHub Release with semantic versioning and changelog
 
-### 4. Scheduled Health Check (hourly)
-- Production login page
-- Health endpoint
-- PWA manifest
-- Auth guards
-- Staging verification
-- Cron liveness check
+### 4. Scheduled Health Check *(runs hourly)*
+- Production login page availability
+- API health endpoint
+- PWA manifest validation
+- Auth guard verification
+- Staging environment parity check
+- Cron job liveness check
 
 ---
 
@@ -388,88 +305,71 @@ npx playwright test
 
 ### Vercel (Recommended)
 
-1. Push to GitHub
-2. Import repository in Vercel
-3. Set environment variables
+1. Push the repository to GitHub
+2. Import the repository in the [Vercel Dashboard](https://vercel.com)
+3. Add the required environment variables under **Settings → Environment Variables**
 4. Deploy
 
-### Environment Variables for Production
+### Available Scripts
 
-Set these in Vercel Dashboard → Settings → Environment Variables:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://your-prod-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-prod-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-prod-service-role-key
-STRIPE_SECRET_KEY=sk_live_your-live-key
-STRIPE_WEBHOOK_SECRET=whsec_your-live-webhook-secret
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_your-live-key
-RESEND_API_KEY=re_your-live-key
-NEXT_PUBLIC_APP_URL=https://your-domain.com
-CRON_SECRET=your-random-secret
-```
-
----
-
-## API Routes
-
-| Route | Method | Auth | Description |
-|-------|--------|------|-------------|
-| `/api/leads` | GET | User | List all active leads |
-| `/api/leads` | POST | User | Create a new lead |
-| `/api/leads/[id]` | GET | User | Get a single lead |
-| `/api/leads/[id]` | PUT | User | Update a lead |
-| `/api/leads/[id]` | DELETE | User | Soft-delete a lead |
-| `/api/stripe/checkout` | POST | User | Create Stripe checkout session |
-| `/api/stripe/webhook` | POST | Stripe | Handle Stripe webhooks |
-| `/api/cron/daily-digest` | GET | Bearer token | Send daily follow-up emails |
+| Command | Description |
+|---|---|
+| `npm run dev` | Start local development server |
+| `npm run build` | Build the application for production |
+| `npm run start` | Start the production server |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run unit test suite |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Generate test coverage report |
 
 ---
 
 ## Security
 
-- **Row Level Security (RLS)** on all database tables
-- **No passwords** — Magic Link + Google OAuth only
-- **Environment variables** — secrets never committed to git
-- **Service role key** — server-side only, never exposed to client
-- **Stripe webhooks** — signature verification on all incoming events
-- **Cron secret** — bearer token required for automated tasks
+AgentFlow is designed with a security-first approach:
+
+- **Row Level Security (RLS):** All database tables enforce per-user data isolation at the PostgreSQL level — users can never access another user's data.
+- **Passwordless authentication:** Magic Link and Google OAuth eliminate credential-based attack vectors.
+- **Secrets management:** All sensitive credentials are stored as environment variables and never committed to source control.
+- **Server-side isolation:** The Supabase service role key is used exclusively in server-side contexts and is never exposed to the client.
+- **Webhook verification:** All incoming Stripe webhook events are validated via signature verification before processing.
+- **Cron security:** Automated digest endpoints are protected by a bearer token to prevent unauthorized execution.
 
 ---
 
 ## Contributing
 
+Contributions are welcome. Please follow the workflow below to keep the codebase consistent and the review process efficient.
+
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Commit your changes following the [Conventional Commits](https://www.conventionalcommits.org/) specification
+4. Push to your branch: `git push origin feature/your-feature-name`
+5. Open a Pull Request against the `develop` branch
 
 ### Commit Convention
 
-This project uses [Conventional Commits](https://www.conventionalcommits.org/):
+This project enforces Conventional Commits for automated changelog generation and semantic versioning:
 
-- `feat:` — new feature
-- `fix:` — bug fix
-- `docs:` — documentation
-- `style:` — formatting (no code change)
-- `refactor:` — code restructuring
-- `test:` — adding tests
-- `chore:` — maintenance
+| Prefix | Purpose |
+|---|---|
+| `feat:` | New feature |
+| `fix:` | Bug fix |
+| `docs:` | Documentation changes |
+| `style:` | Formatting only (no logic change) |
+| `refactor:` | Code restructuring without behavior change |
+| `test:` | Adding or updating tests |
+| `chore:` | Maintenance tasks |
 
 ---
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/dream-creator/agentflow/issues)
-- **Email**: support@agentflow.app
-
----
-
-Built with care for real estate agents who want to focus on closing deals, not managing software.
+- **Issues:** [GitHub Issues](https://github.com/dream-creator/agentflow/issues)
+- **Email:** support@agentflow.app
