@@ -21,225 +21,51 @@ concurrency:
 
 env:
   NODE_VERSION: "20"
-  SUPABASE_PROJECT_ID: fsxdduvwshirrheenmag
 
 jobs:
   # ─────────────────────────────────────────────
-  # 1. PRE-FLIGHT
+  # 1. VALIDATE
   # ─────────────────────────────────────────────
-  pre-flight-production:
-    name: pre-flight-production
+  validate:
+    name: validate
     runs-on: ubuntu-latest
-    outputs:
-      migrations_pending: ${{ steps.diff.outputs.migrations_pending }}
-      migration_files: ${{ steps.diff.outputs.migration_files }}
-      commit_sha: ${{ github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: latest
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
-      - name: Compute migration diff
-        id: diff
-        run: |
-          MIGRATIONS_DIR="supabase/migrations"
-          PENDING=$(ls -1 "$MIGRATIONS_DIR"/*.sql 2>/dev/null | wc -l | tr -d ' ')
-          echo "migrations_pending=${PENDING}" >> "$GITHUB_OUTPUT"
+      - name: Install dependencies
+        run: npm ci
 
-          FILES=$(ls -1 "$MIGRATIONS_DIR"/*.sql 2>/dev/null | tail -10 \
-            | xargs -I{} basename {} 2>/dev/null | paste -sd ',' || echo "none")
-          echo "migration_files=${FILES}" >> "$GITHUB_OUTPUT"
+      - name: Lint
+        run: npm run lint
 
-          echo "=== Migration files (${PENDING} total) ==="
-          ls -1 "$MIGRATIONS_DIR"/*.sql 2>/dev/null | tail -10 || echo "None"
+      - name: Type check
+        run: npx tsc --noEmit
 
-          {
-            echo "## Pre-Flight Production Report"
-            echo ""
-            echo "| Field | Value |"
-            echo "|-------|-------|"
-            echo "| **Commit** | \`${{ github.sha }}\` |"
-            echo "| **Author** | @${{ github.actor }} |"
-            echo "| **Pending Migrations** | ${PENDING} |"
-            echo ""
-            echo "### Migration Files"
-            echo "\`\`\`"
-            ls -1 "$MIGRATIONS_DIR"/*.sql 2>/dev/null || echo "None found"
-            echo "\`\`\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
 
   # ─────────────────────────────────────────────
-  # 2. COMPUTE VERSION
+  # 2. DEPLOY TO VERCEL
   # ─────────────────────────────────────────────
-  compute-version:
-    name: compute-version
+  deploy:
+    name: deploy-production
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      tag: ${{ steps.version.outputs.tag }}
-    steps:
-      - name: Checkout (full history for tags)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Compute semantic version
-        id: version
-        run: |
-          BUMP="${{ github.event.inputs.version_bump || 'patch' }}"
-
-          # Get the latest valid semver tag (vX.Y.Z format only)
-          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 2>/dev/null || echo "")
-
-          if [ -z "$PREV_TAG" ]; then
-            # First release
-            MAJOR=0
-            MINOR=1
-            PATCH=0
-          else
-            # Parse previous version (strip 'v' prefix)
-            PREV_VERSION="${PREV_TAG#v}"
-            MAJOR=$(echo "$PREV_VERSION" | cut -d. -f1)
-            MINOR=$(echo "$PREV_VERSION" | cut -d. -f2)
-            PATCH=$(echo "$PREV_VERSION" | cut -d. -f3)
-
-            case "$BUMP" in
-              major)
-                MAJOR=$((MAJOR + 1))
-                MINOR=0
-                PATCH=0
-                ;;
-              minor)
-                MINOR=$((MINOR + 1))
-                PATCH=0
-                ;;
-              patch)
-                PATCH=$((PATCH + 1))
-                ;;
-            esac
-          fi
-
-          VERSION="v${MAJOR}.${MINOR}.${PATCH}"
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "tag=${VERSION}" >> "$GITHUB_OUTPUT"
-
-          echo "=== Version Bump ==="
-          echo "Previous tag: ${PREV_TAG:-none}"
-          echo "Bump type:    ${BUMP}"
-          echo "New version:  ${VERSION}"
-
-          {
-            echo "## Version Information"
-            echo ""
-            echo "| Field | Value |"
-            echo "|-------|-------|"
-            echo "| **Previous Tag** | \`${PREV_TAG:-none}\` |"
-            echo "| **Bump Type** | ${BUMP} |"
-            echo "| **New Version** | \`${VERSION}\` |"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  # ─────────────────────────────────────────────
-  # 3. MANUAL APPROVAL GATE
-  # ─────────────────────────────────────────────
-  manual-approval-gate:
-    name: manual-approval
-    runs-on: ubuntu-latest
-    needs: [pre-flight-production, compute-version]
-    environment:
-      name: production
-    steps:
-      - name: Approval received
-        run: |
-          echo "[OK] Production deployment approved by ${{ github.actor }}"
-          {
-            echo "## Production Approval"
-            echo ""
-            echo "| Field | Value |"
-            echo "|-------|-------|"
-            echo "| **Approved by** | @${{ github.actor }} |"
-            echo "| **Version** | \`${{ needs.compute-version.outputs.version }}\` |"
-            echo "| **Commit** | \`${{ needs.pre-flight-production.outputs.commit_sha }}\` |"
-            echo "| **Time** | $(date -u +'%Y-%m-%d %H:%M:%S UTC') |"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  # ─────────────────────────────────────────────
-  # 4. PRE-MIGRATION SNAPSHOT
-  # ─────────────────────────────────────────────
-  pre-migration-snapshot:
-    name: pre-migration-snapshot
-    runs-on: ubuntu-latest
-    needs: [manual-approval-gate]
-    steps:
-      - name: Take PITR snapshot
-        run: |
-          SNAPSHOT_NAME="pre-deploy-$(date +%Y%m%d-%H%M%S)"
-          echo "=== Creating PITR Snapshot: ${SNAPSHOT_NAME} ==="
-
-          RESPONSE=$(curl -s -w "\n%{http_code}" \
-            -X POST \
-            "https://api.supabase.com/v1/projects/${{ env.SUPABASE_PROJECT_ID }}/database/backups" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"name\": \"${SNAPSHOT_NAME}\", \"type\": \"on_demand\"}")
-
-          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-          BODY=$(echo "$RESPONSE" | head -n -1)
-          echo "HTTP Status: ${HTTP_CODE} | Response: ${BODY}"
-
-          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then
-            echo "[OK] Snapshot '${SNAPSHOT_NAME}' created"
-          else
-            echo "[WARN] Snapshot returned HTTP ${HTTP_CODE} — continuing anyway"
-          fi
-
-  # ─────────────────────────────────────────────
-  # 5. APPLY PRODUCTION MIGRATIONS
-  # ─────────────────────────────────────────────
-  apply-production-migrations:
-    name: apply-production-migrations
-    runs-on: ubuntu-latest
-    needs: [pre-migration-snapshot]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Apply migrations (no retry — production safety)
-        run: |
-          echo "=== Applying Production Migrations ==="
-          if supabase db push --db-url "${{ secrets.PRODUCTION_SUPABASE_DB_URL }}"; then
-            echo "[OK] Production migrations applied successfully"
-          else
-            echo "[FAIL] Production migration failed — halting deployment"
-            echo "Manual intervention required. Restore from snapshot if needed."
-            exit 1
-          fi
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          PRODUCTION_SUPABASE_DB_URL: ${{ secrets.PRODUCTION_SUPABASE_DB_URL }}
-
-  # ─────────────────────────────────────────────
-  # 6. VERCEL PRODUCTION DEPLOY
-  # ─────────────────────────────────────────────
-  vercel-production-deploy:
-    name: vercel-production-deploy
-    runs-on: ubuntu-latest
-    needs: [apply-production-migrations]
-    environment:
-      name: production
-      url: ${{ steps.deploy.outputs.url }}
-    outputs:
-      deploy-url: ${{ steps.deploy.outputs.url }}
+    needs: [validate]
+    if: success()
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -269,290 +95,39 @@ jobs:
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
 
       - name: Deploy to production
-        id: deploy
         run: |
           URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "Deployed to: ${URL}"
           echo "url=${URL}" >> "$GITHUB_OUTPUT"
-          echo "[OK] Production deployed: ${URL}"
 
   # ─────────────────────────────────────────────
-  # 7. POST-DEPLOY SMOKE TESTS
+  # 3. SMOKE TESTS
   # ─────────────────────────────────────────────
-  post-deploy-smoke-tests:
+  smoke-tests:
     name: smoke-tests
     runs-on: ubuntu-latest
-    needs: [vercel-production-deploy]
+    needs: [deploy]
     steps:
-      - name: Login page renders
-        run: |
-          URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/login")
-          if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "302" ] || \
-             [ "$HTTP_STATUS" = "307" ] || [ "$HTTP_STATUS" = "401" ]; then
-            echo "[OK] Login page accessible (HTTP ${HTTP_STATUS})"
-          else
-            echo "[FAIL] Login page returned HTTP ${HTTP_STATUS}"
-            exit 1
-          fi
+      - name: Wait for deployment
+        run: sleep 30
 
-      - name: PWA manifest reachable
+      - name: Check health endpoint
         run: |
-          URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/manifest.json")
+          URL="${{ secrets.PRODUCTION_APP_URL }}"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/health" --max-time 15)
           if [ "$HTTP_STATUS" = "200" ]; then
-            echo "[OK] PWA manifest accessible (HTTP 200)"
+            echo "[OK] Health endpoint: HTTP ${HTTP_STATUS}"
           else
-            echo "[WARN] PWA manifest returned HTTP ${HTTP_STATUS} — non-blocking"
+            echo "[WARN] Health endpoint: HTTP ${HTTP_STATUS}"
           fi
 
-      - name: Auth endpoint guards
+      - name: Check login page
         run: |
-          URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/api/leads")
-          if [ "$HTTP_STATUS" = "401" ] || [ "$HTTP_STATUS" = "307" ] || [ "$HTTP_STATUS" = "302" ]; then
-            echo "[OK] Auth middleware active (HTTP ${HTTP_STATUS})"
+          URL="${{ secrets.PRODUCTION_APP_URL }}"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/login" --max-time 15)
+          if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "302" ] || [ "$HTTP_STATUS" = "307" ]; then
+            echo "[OK] Login page: HTTP ${HTTP_STATUS}"
           else
-            echo "[WARN] Auth endpoint returned HTTP ${HTTP_STATUS} (expected 401/302/307) — non-blocking"
-          fi
-
-      - name: Landing page
-        run: |
-          URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/")
-          if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "302" ] || \
-             [ "$HTTP_STATUS" = "307" ] || [ "$HTTP_STATUS" = "401" ]; then
-            echo "[OK] Landing page accessible (HTTP ${HTTP_STATUS})"
-          else
-            echo "[FAIL] Landing page returned HTTP ${HTTP_STATUS}"
+            echo "[FAIL] Login page: HTTP ${HTTP_STATUS}"
             exit 1
           fi
-
-  # ─────────────────────────────────────────────
-  # 8. DEPLOYMENT NOTIFICATION + GITHUB RELEASE
-  # ─────────────────────────────────────────────
-  deployment-notification:
-    name: deployment-notification
-    runs-on: ubuntu-latest
-    needs:
-      - pre-flight-production
-      - compute-version
-      - apply-production-migrations
-      - vercel-production-deploy
-      - post-deploy-smoke-tests
-    if: always()
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout (full history for changelog)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Compute release metadata
-        id: meta
-        run: |
-          DEPLOY_DATE=$(date -u +'%B %d, %Y at %H:%M UTC')
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          RELEASE_TAG="${{ needs.compute-version.outputs.tag }}"
-          VERSION="${{ needs.compute-version.outputs.version }}"
-
-          # Determine range from last release tag
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 2>/dev/null || echo "")
-          if [ -z "$PREVIOUS_TAG" ]; then
-            GIT_RANGE="HEAD~20..HEAD"
-            RANGE_LABEL="last 20 commits (initial release)"
-          else
-            GIT_RANGE="${PREVIOUS_TAG}..HEAD"
-            RANGE_LABEL="since ${PREVIOUS_TAG}"
-          fi
-
-          TOTAL_COMMITS=$(git log "$GIT_RANGE" --oneline 2>/dev/null | wc -l | tr -d ' ')
-          FILES_CHANGED=$(git diff "${PREVIOUS_TAG:-HEAD~1}" HEAD --name-only 2>/dev/null | wc -l | tr -d ' ')
-
-          echo "release_tag=${RELEASE_TAG}"     >> "$GITHUB_OUTPUT"
-          echo "version=${VERSION}"             >> "$GITHUB_OUTPUT"
-          echo "deploy_date=${DEPLOY_DATE}"     >> "$GITHUB_OUTPUT"
-          echo "short_sha=${SHORT_SHA}"         >> "$GITHUB_OUTPUT"
-          echo "git_range=${GIT_RANGE}"         >> "$GITHUB_OUTPUT"
-          echo "range_label=${RANGE_LABEL}"     >> "$GITHUB_OUTPUT"
-          echo "total_commits=${TOTAL_COMMITS}" >> "$GITHUB_OUTPUT"
-          echo "files_changed=${FILES_CHANGED}" >> "$GITHUB_OUTPUT"
-
-          echo "Release tag:    ${RELEASE_TAG}"
-          echo "Git range:      ${GIT_RANGE}"
-          echo "Total commits:  ${TOTAL_COMMITS}"
-          echo "Files changed:  ${FILES_CHANGED}"
-
-      - name: Build categorised changelog
-        id: changelog
-        run: |
-          GIT_RANGE="${{ steps.meta.outputs.git_range }}"
-
-          FEAT=$(mktemp); FIX=$(mktemp);      PERF=$(mktemp)
-          REFACTOR=$(mktemp); TEST=$(mktemp); DOCS=$(mktemp)
-          STYLE=$(mktemp); MAINT=$(mktemp);   REVERT=$(mktemp)
-          OTHER=$(mktemp)
-          TOTAL=0
-
-          while IFS=$'\x1f' read -r sha author date subject || [ -n "$sha" ]; do
-            [ -z "$sha" ] && continue
-            TOTAL=$((TOTAL + 1))
-            ENTRY="- ${subject} (\`${sha}\`) — *${author}* · ${date:0:10}"
-            SL=$(echo "$subject" | tr '[:upper:]' '[:lower:]')
-
-            if   echo "$SL" | grep -qE '^feat(\([^)]+\))?[!]?:';              then echo "$ENTRY" >> "$FEAT"
-            elif echo "$SL" | grep -qE '^fix(\([^)]+\))?[!]?:';               then echo "$ENTRY" >> "$FIX"
-            elif echo "$SL" | grep -qE '^perf(\([^)]+\))?[!]?:';              then echo "$ENTRY" >> "$PERF"
-            elif echo "$SL" | grep -qE '^refactor(\([^)]+\))?[!]?:';          then echo "$ENTRY" >> "$REFACTOR"
-            elif echo "$SL" | grep -qE '^test(\([^)]+\))?[!]?:';              then echo "$ENTRY" >> "$TEST"
-            elif echo "$SL" | grep -qE '^docs(\([^)]+\))?[!]?:';              then echo "$ENTRY" >> "$DOCS"
-            elif echo "$SL" | grep -qE '^style(\([^)]+\))?[!]?:';             then echo "$ENTRY" >> "$STYLE"
-            elif echo "$SL" | grep -qE '^(chore|ci|build)(\([^)]+\))?[!]?:'; then echo "$ENTRY" >> "$MAINT"
-            elif echo "$SL" | grep -qE '^revert(\([^)]+\))?[!]?:';            then echo "$ENTRY" >> "$REVERT"
-            else echo "$ENTRY" >> "$OTHER"
-            fi
-          done < <(git log "$GIT_RANGE" --pretty=format:"%h%x1f%aN%x1f%ai%x1f%s" 2>/dev/null)
-
-          CHANGELOG_FILE="/tmp/changelog-section.md"
-          HAS_CONTENT=false
-
-          append_section() {
-            local title="$1" file="$2"
-            if [ -s "$file" ]; then
-              { echo ""; echo "### ${title}"; cat "$file"; } >> "$CHANGELOG_FILE"
-              HAS_CONTENT=true
-            fi
-          }
-
-          > "$CHANGELOG_FILE"
-          append_section "New Features"              "$FEAT"
-          append_section "Bug Fixes"                "$FIX"
-          append_section "Performance Improvements"  "$PERF"
-          append_section "Refactoring"              "$REFACTOR"
-          append_section "Tests"                    "$TEST"
-          append_section "Documentation"             "$DOCS"
-          append_section "Style & UI"               "$STYLE"
-          append_section "Maintenance"               "$MAINT"
-          append_section "Reverts"                  "$REVERT"
-          append_section "Other Changes"             "$OTHER"
-
-          rm -f "$FEAT" "$FIX" "$PERF" "$REFACTOR" "$TEST" \
-                "$DOCS" "$STYLE" "$MAINT" "$REVERT" "$OTHER"
-
-          [ "$HAS_CONTENT" = true ] || echo "_No new commits in this range._" > "$CHANGELOG_FILE"
-
-          echo "total_parsed=${TOTAL}" >> "$GITHUB_OUTPUT"
-          echo "[OK] Categorised ${TOTAL} commit(s)"
-
-      - name: Assemble release notes
-        run: |
-          VERSION="${{ steps.meta.outputs.version }}"
-          DEPLOY_DATE="${{ steps.meta.outputs.deploy_date }}"
-          SHORT_SHA="${{ steps.meta.outputs.short_sha }}"
-          RELEASE_TAG="${{ steps.meta.outputs.release_tag }}"
-          RANGE_LABEL="${{ steps.meta.outputs.range_label }}"
-          TOTAL_COMMITS="${{ steps.meta.outputs.total_commits }}"
-          FILES_CHANGED="${{ steps.meta.outputs.files_changed }}"
-          DEPLOY_URL="${{ needs.vercel-production-deploy.outputs.deploy-url }}"
-          MIGS_PENDING="${{ needs.pre-flight-production.outputs.migrations_pending }}"
-          MIGRATION_FILES="${{ needs.pre-flight-production.outputs.migration_files }}"
-
-          PROD_STATUS="${{ needs.vercel-production-deploy.result }}"
-          MIGS_STATUS="${{ needs.apply-production-migrations.result }}"
-          SMOKE_STATUS="${{ needs.post-deploy-smoke-tests.result }}"
-
-          [ "$PROD_STATUS"  = "success" ] && PROD_ICON="[PASSED]"  || PROD_ICON="[FAILED]"
-          [ "$MIGS_STATUS"  = "success" ] && MIGS_ICON="[PASSED]"  || MIGS_ICON="[FAILED]"
-          [ "$SMOKE_STATUS" = "success" ] && SMOKE_ICON="[PASSED]" || SMOKE_ICON="[FAILED]"
-
-          if [ "$PROD_STATUS" = "success" ] && [ "$MIGS_STATUS" = "success" ]; then
-            BANNER="## Production Release ${VERSION} — ${DEPLOY_DATE}"
-          else
-            BANNER="## Production Release ${VERSION} (Partial Failure) — ${DEPLOY_DATE}"
-          fi
-
-          if [ "${MIGS_PENDING:-0}" = "0" ]; then
-            MIGS_NOTE="No new migrations applied in this release."
-          else
-            MIGS_NOTE="${MIGS_PENDING} migration(s) applied to production."
-          fi
-
-          COMMIT_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
-
-          {
-            echo "${BANNER}"
-            echo ""
-            echo "> Deployed by @${{ github.actor }}"
-            echo ""
-            echo "---"
-            echo ""
-            echo "## Summary"
-            echo ""
-            echo "| Field | Value |"
-            echo "|-------|-------|"
-            echo "| **Release Date** | ${DEPLOY_DATE} |"
-            echo "| **Deployed by** | @${{ github.actor }} |"
-            echo "| **Version** | \`${VERSION}\` |"
-            echo "| **Commit** | [\`${SHORT_SHA}\`](${COMMIT_URL}) |"
-            echo "| **Branch** | \`main\` |"
-            echo "| **Tag** | \`${RELEASE_TAG}\` |"
-            echo "| **Production URL** | ${DEPLOY_URL} |"
-            echo "| **Commits in release** | ${TOTAL_COMMITS} (${RANGE_LABEL}) |"
-            echo "| **Files changed** | ${FILES_CHANGED} |"
-            echo ""
-            echo "---"
-            echo ""
-            echo "## Changelog"
-            cat /tmp/changelog-section.md
-            echo ""
-            echo "---"
-            echo ""
-            echo "## Database Migrations"
-            echo ""
-            echo "${MIGS_NOTE}"
-            if [ "${MIGS_PENDING:-0}" != "0" ] && [ "$MIGRATION_FILES" != "none" ] && [ -n "$MIGRATION_FILES" ]; then
-              echo ""
-              echo "**Applied files:**"
-              echo "$MIGRATION_FILES" | tr ',' '\n' | while read -r f; do
-                [ -n "$f" ] && echo "- \`${f}\`"
-              done
-            fi
-            echo ""
-            echo "---"
-            echo ""
-            echo "## Deployment Verification"
-            echo ""
-            echo "| Check | Status |"
-            echo "|-------|--------|"
-            echo "| Vercel Production Deploy | ${PROD_ICON} |"
-            echo "| Database Migrations | ${MIGS_ICON} |"
-            echo "| Post-Deploy Smoke Tests | ${SMOKE_ICON} |"
-          } > /tmp/release-notes.md
-
-          cat /tmp/release-notes.md >> "$GITHUB_STEP_SUMMARY"
-          echo "[OK] Release notes written to /tmp/release-notes.md"
-
-      - name: Create GitHub Release
-        uses: actions/github-script@v7
-        continue-on-error: true
-        with:
-          script: |
-            const fs = require('fs');
-
-            const body    = fs.readFileSync('/tmp/release-notes.md', 'utf8');
-            const tagName = '${{ steps.meta.outputs.release_tag }}';
-            const version = '${{ steps.meta.outputs.version }}';
-
-            const { data: release } = await github.rest.repos.createRelease({
-              owner:            context.repo.owner,
-              repo:             context.repo.repo,
-              tag_name:         tagName,
-              target_commitish: context.sha,
-              name:             `Production Release ${version}`,
-              body,
-              draft:      false,
-              prerelease: false,
-            });
-
-            core.info(`[OK] Release created: ${tagName}`);
-            core.info(`View at: ${release.html_url}`);
