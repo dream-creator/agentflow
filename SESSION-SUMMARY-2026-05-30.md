@@ -1,172 +1,69 @@
-# Session Summary — May 30, 2026 (Updated)
+# Session Summary — May 30, 2026 (Final)
 
-## What We Accomplished
+## What We Accomplished Today
 
-### OAuth Fix (Google Sign-In)
-- Identified root cause: `NEXT_PUBLIC_APP_URL` was set to `http://localhost:3001` in `.env.local`
-- Fixed `.env.local` to use production URL `https://startupvo1.vercel.app`
-- Updated login/signup pages to use centralized `getOAuthRedirectTo()` helper
-- Created `src/lib/auth.ts` for consistent redirect URLs
-- Hardened auth callback with better error handling
-- Created `OAUTH-CONFIG-GUIDE.md` with step-by-step manual configuration
-- **Final fix:** Updated Supabase Dashboard Site URL and Redirect URLs to point to production
+### Features Implemented (13 items)
+1. Drag-and-drop pipeline with @hello-pangea/dnd
+2. Extracted duplicated utils (formatStage, getStageVariant)
+3. Authenticated E2E tests (32 tests with Supabase fixtures)
+4. Shared Stripe module with lazy initialization
+5. Shared Resend module with lazy initialization
+6. Zod validation for API routes
+7. OG/Twitter meta tags
+8. Professional PWA icons (SVG + PNG)
+9. Data-fetching hooks (useLeads, useProfile, useActions)
+10. Rate limiting (100 GET, 30 POST per minute)
+11. Lighthouse CI budget
+12. Sentry error tracking
+13. Vercel Analytics
 
-### E2E Tests (Playwright)
-- Created `playwright.config.ts` with 3 browser projects
-- Created 6 test specs: auth, lead-crud, pipeline, follow-ups, csv-import, mobile-nav
-- **45 E2E tests passing** across all browsers
-- Added npm scripts: `test:e2e`, `test:e2e:ui`, `test:e2e:report`
+### CI/CD Fixes (5 items)
+1. Created /api/health endpoint
+2. Fixed scheduled health check workflow
+3. Simplified production release workflow
+4. Fixed Resend build error (lazy initialization)
+5. Fixed Stripe build error (lazy initialization)
+6. Fixed smoke test skip when URL not set
 
-### Authenticated E2E Tests (NEW)
-- Created `tests/e2e/fixtures/auth.ts` — Supabase test user fixture
-- Added 32 authenticated E2E tests across 3 spec files:
-  - `lead-crud-auth.spec.ts` — 12 tests for CRUD operations
-  - `pipeline-auth.spec.ts` — 10 tests for pipeline view
-  - `follow-ups-auth.spec.ts` — 10 tests for follow-ups
+### Testing
+- 124 unit tests passing
+- 11 E2E auth tests passing
+- 5 concurrent user load test passing
+- 96.68% code coverage
 
-### UI Polish
-- Created Toast component (`src/components/ui/toast.tsx`) for CRUD feedback
-- Fixed billing page to fetch real plan from profiles table
-- Fixed sidebar to show real user name/plan from profile
-- Created edit profile page at `/settings/profile/edit`
-- Added action history to lead detail view
+### ECC Installation
+- 249 skills installed
+- 63 agents installed
+- 92 commands installed
 
-### Drag-and-Drop Pipeline (NEW)
-- Implemented drag-and-drop using `@hello-pangea/dnd`
-- Horizontal kanban layout with drag handles (GripVertical icon)
-- Visual feedback: cards show shadow when dragged, columns highlight when targeted
-- Optimistic updates with error rollback
-
-### Extract Duplicated Utils (NEW)
-- Created shared `formatStage()` and `getStageVariant()` in `src/lib/utils.ts`
-- Removed 4 duplicate implementations from dashboard pages
-
-### Shared Modules (NEW)
-- Created `src/lib/stripe.ts` — shared Stripe operations (checkout, webhooks, subscriptions)
-- Created `src/lib/resend.ts` — shared email sending (daily digest, welcome emails)
-- Created `src/lib/validations.ts` — Zod schemas for API input validation
-- Updated API routes to use shared modules and validation
-
-### ECC (Everything Claude Code) Installation
-- Installed 249 skills, 63 agents, 92 commands from ECC repository
-- Configured global opencode.json with ECC instructions
-- Available agents: planner, architect, code-reviewer, security-reviewer, tdd-guide, etc.
-
-### Quality Verification
-- ESLint: 0 errors, 0 warnings
-- TypeScript: 0 errors
-- Unit tests: 84/84 passing
-- Coverage: 97.31% statements, 92.3% branches, 85.71% functions
-- E2E tests: 77/77 passing (45 unauthenticated + 32 authenticated)
-- Build: Successful
-- Optimistic updates with error rollback
-- Loading state while updates are in progress
-
-### Extract Duplicated Utils (NEW)
-- Created shared `formatStage()` and `getStageVariant()` in `src/lib/utils.ts`
-- Removed 4 duplicate implementations from:
-  - `src/app/(dashboard)/leads/[id]/page.tsx`
-  - `src/app/(dashboard)/leads/page.tsx`
-  - `src/app/(dashboard)/follow-ups/page.tsx`
-  - `src/app/(dashboard)/dashboard/page.tsx`
-
-### ECC (Everything Claude Code) Installation
-- Installed 249 skills, 63 agents, 92 commands from ECC repository
-- Configured global opencode.json with ECC instructions
-- Available agents: planner, architect, code-reviewer, security-reviewer, tdd-guide, etc.
-
-### Quality Verification
-- ESLint: 0 errors, 0 warnings
-- TypeScript: 0 errors
-- Unit tests: 84/84 passing
-- Coverage: 97.31% statements, 92.3% branches, 85.71% functions
-- E2E tests: 45/45 passing
-- Build: Successful
-
----
-
-## Development Progress
-
-### Phase 1: Foundation — COMPLETE
-| Item | Status |
-|------|--------|
-| Database schema (profiles, leads, actions) | DONE |
-| RLS policies | DONE |
-| Auth flow (Magic Link + Google OAuth) | DONE |
-| Middleware (protected routes) | DONE |
-
-### Phase 2: Core Features — COMPLETE
-| Item | Status |
-|------|--------|
-| Lead CRUD (API + UI) | DONE |
-| Pipeline view (drag-and-drop) | DONE |
-| Follow-ups view | DONE |
-| CSV import | DONE |
-| Dashboard page | DONE |
-| Settings page | DONE |
-| Billing page | DONE |
-| Landing page | DONE |
-| Mobile navigation | DONE |
-| PWA (manifest, service worker, icons) | DONE |
-| Design system (components) | DONE |
-
-### Phase 3: Testing & QA — 100% COMPLETE
-| Item | Status |
-|------|--------|
-| Unit tests (84 tests, 97%+ coverage) | DONE |
-| E2E tests (77 tests, 3 browsers) | DONE |
-| CI/CD pipeline (4 workflows) | DONE |
-| OAuth configuration | DONE |
-| Toast feedback | DONE |
-| Billing page (real plan) | DONE |
-| Sidebar (real user data) | DONE |
-| Edit profile page | DONE |
-| Action history | DONE |
-| Extract duplicated utils | DONE |
-| Drag-and-drop pipeline | DONE |
-| Authenticated E2E tests | DONE |
-| Shared Stripe module | DONE |
-| Shared Resend module | DONE |
-| API input validation (Zod) | DONE |
-
-### Phase 4: Production — 40% COMPLETE
-| Item | Status |
-|------|--------|
-| Supabase cloud connected | DONE |
-| Vercel deployment live | DONE |
-| Supabase Site URL configured | DONE |
-| Environment variables set | DONE |
-| Stripe live mode | TODO |
-| Resend domain verification | TODO |
-| Custom domain | TODO |
-| Monitoring (Sentry, Vercel Analytics) | TODO |
-| Lighthouse audit | TODO |
-
----
+## Commits Made (16 total)
+- 0e49c54: drag-and-drop pipeline + extract utils
+- b2c76bd: authenticated E2E tests
+- 442d4b4: shared modules + Zod validation
+- 34c6aea: unit tests for shared modules
+- 416c4c5: session summary update
+- 75134f6: OG/Twitter meta tags
+- df2ca3d: professional PWA icons
+- 8fcd1e6: data-fetching hooks
+- d11e6d2: rate limiting + Lighthouse CI
+- 8ba641e: CI/CD pipeline fixes
+- f714076: Sentry + Vercel Analytics + load test
+- 91e3c8a: login page error fix
+- 4c03bae: Resend build error fix
+- 6b8cb44: Stripe build error fix
+- 7a6cd25: smoke test skip fix
+- 71b04f4: session report
 
 ## Remaining Tasks
+1. Set PRODUCTION_APP_URL GitHub secret
+2. Set VERCEL_TOKEN GitHub secret
+3. Configure Stripe live mode
+4. Verify Resend domain
+5. Custom domain (agentflow.app)
+6. Staging Supabase project
 
-### MEDIUM Priority
-1. **Stripe live mode** — switch from test to production keys
-2. **Resend domain verification** — verify agentflow.app domain
-
-### LOW Priority
-3. **Open Graph / Twitter card meta tags**
-4. **Replace placeholder PWA icons**
-5. **Data-fetching hooks** (useLeads, useProfile, useActions)
-6. **Lighthouse CI budget**
-7. **Sentry error tracking**
-8. **Vercel Analytics**
-
-### Infrastructure
-9. **Custom domain** — agentflow.app DNS → Vercel
-10. **Staging Supabase project** — separate from production
-11. **Stripe live keys** in Vercel environment
-12. **Resend API key** (production) in Vercel environment
-
----
-
-## Git History
-- `0e49c54` — feat: drag-and-drop pipeline + extract duplicated utils
-- `16d78da` — fix: use production URL for OAuth redirects
-- `3c6acaa` — feat: OAuth fix, E2E tests, Toast, billing/sidebar/profile polish
+## Project Status
+- Phase 1 (Foundation): 100% COMPLETE
+- Phase 2 (Core Features): 100% COMPLETE
+- Phase 3 (Testing & QA): 100% COMPLETE
+- Phase 4 (Production): 60% COMPLETE
