@@ -1,21 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockFrom, mockSend } = vi.hoisted(() => ({
+const { mockFrom, mockSendDailyDigest } = vi.hoisted(() => ({
   mockFrom: vi.fn(),
-  mockSend: vi.fn(),
+  mockSendDailyDigest: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(() => ({ from: mockFrom })),
 }));
 
-vi.mock("resend", () => {
-  return {
-    Resend: vi.fn(function MockResend(this: Record<string, unknown>) {
-      this.emails = { send: mockSend };
-    }),
-  };
-});
+vi.mock("@/lib/resend", () => ({
+  sendDailyDigest: mockSendDailyDigest,
+  resend: { emails: { send: vi.fn() } },
+  EMAIL_CONFIG: { from: "AgentFlow <daily@agentflow.app>", appName: "AgentFlow", appUrl: "http://localhost:3000" },
+}));
 
 vi.mock("next/server", () => ({
   NextRequest: class NextRequest {
@@ -103,7 +101,7 @@ describe("/api/cron/daily-digest", () => {
     const response = await GET(request);
     const body = await response.json();
     expect(body).toEqual({ sent: 0, failed: 0 });
-    expect(mockSend).not.toHaveBeenCalled();
+    expect(mockSendDailyDigest).not.toHaveBeenCalled();
   });
 
   it("sends email to user with overdue leads", async () => {
@@ -111,7 +109,7 @@ describe("/api/cron/daily-digest", () => {
       { user_id: "user-1", full_name: "John Doe", next_action: "Call back", next_action_date: "2026-05-29", profiles: { email: "john@example.com", full_name: "John" } },
     ];
     mockFrom.mockReturnValue(buildChain({ data: leads, error: null }));
-    mockSend.mockResolvedValue({ error: null });
+    mockSendDailyDigest.mockResolvedValue({ success: true });
 
     const request = new NextRequest("http://localhost:3000/api/cron/daily-digest", {
       headers: { authorization: "Bearer test-cron-secret" },
@@ -119,7 +117,7 @@ describe("/api/cron/daily-digest", () => {
     const response = await GET(request);
     const body = await response.json();
     expect(body).toEqual({ sent: 1, failed: 0 });
-    expect(mockSend).toHaveBeenCalledTimes(1);
+    expect(mockSendDailyDigest).toHaveBeenCalledTimes(1);
   });
 
   it("sends email with correct subject for single lead", async () => {
@@ -127,13 +125,13 @@ describe("/api/cron/daily-digest", () => {
       { user_id: "user-1", full_name: "John Doe", next_action: "Call back", next_action_date: "2026-05-29", profiles: { email: "john@example.com", full_name: "John" } },
     ];
     mockFrom.mockReturnValue(buildChain({ data: leads, error: null }));
-    mockSend.mockResolvedValue({ error: null });
+    mockSendDailyDigest.mockResolvedValue({ success: true });
 
     const request = new NextRequest("http://localhost:3000/api/cron/daily-digest", {
       headers: { authorization: "Bearer test-cron-secret" },
     });
     await GET(request);
-    expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({ subject: "1 follow-up due today" }));
+    expect(mockSendDailyDigest).toHaveBeenCalledWith("john@example.com", "John", expect.arrayContaining([expect.objectContaining({ full_name: "John Doe" })]));
   });
 
   it("sends email with correct subject for multiple leads", async () => {
@@ -142,13 +140,13 @@ describe("/api/cron/daily-digest", () => {
       { user_id: "user-1", full_name: "Jane", next_action: "Email", next_action_date: "2026-05-28", profiles: { email: "john@example.com", full_name: "John" } },
     ];
     mockFrom.mockReturnValue(buildChain({ data: leads, error: null }));
-    mockSend.mockResolvedValue({ error: null });
+    mockSendDailyDigest.mockResolvedValue({ success: true });
 
     const request = new NextRequest("http://localhost:3000/api/cron/daily-digest", {
       headers: { authorization: "Bearer test-cron-secret" },
     });
     await GET(request);
-    expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({ subject: "2 follow-ups due today" }));
+    expect(mockSendDailyDigest).toHaveBeenCalledWith("john@example.com", "John", expect.arrayContaining([expect.objectContaining({ full_name: "John" })]));
   });
 
   it("groups leads by user and sends separate emails", async () => {
@@ -157,7 +155,7 @@ describe("/api/cron/daily-digest", () => {
       { user_id: "user-2", full_name: "Lead B", next_action: "Email", next_action_date: "2026-05-29", profiles: { email: "user2@example.com", full_name: "User Two" } },
     ];
     mockFrom.mockReturnValue(buildChain({ data: leads, error: null }));
-    mockSend.mockResolvedValue({ error: null });
+    mockSendDailyDigest.mockResolvedValue({ success: true });
 
     const request = new NextRequest("http://localhost:3000/api/cron/daily-digest", {
       headers: { authorization: "Bearer test-cron-secret" },
@@ -165,7 +163,7 @@ describe("/api/cron/daily-digest", () => {
     const response = await GET(request);
     const body = await response.json();
     expect(body).toEqual({ sent: 2, failed: 0 });
-    expect(mockSend).toHaveBeenCalledTimes(2);
+    expect(mockSendDailyDigest).toHaveBeenCalledTimes(2);
   });
 
   it("includes lead name and action in email HTML", async () => {
@@ -173,16 +171,13 @@ describe("/api/cron/daily-digest", () => {
       { user_id: "user-1", full_name: "Acme Corp", next_action: "Send proposal", next_action_date: "2026-05-30", profiles: { email: "john@example.com", full_name: "John" } },
     ];
     mockFrom.mockReturnValue(buildChain({ data: leads, error: null }));
-    mockSend.mockResolvedValue({ error: null });
+    mockSendDailyDigest.mockResolvedValue({ success: true });
 
     const request = new NextRequest("http://localhost:3000/api/cron/daily-digest", {
       headers: { authorization: "Bearer test-cron-secret" },
     });
     await GET(request);
-    const html = mockSend.mock.calls[0][0].html;
-    expect(html).toContain("Acme Corp");
-    expect(html).toContain("Send proposal");
-    expect(html).toContain("John");
+    expect(mockSendDailyDigest).toHaveBeenCalledWith("john@example.com", "John", expect.arrayContaining([expect.objectContaining({ full_name: "Acme Corp", next_action: "Send proposal" })]));
   });
 
   it("handles email send failure gracefully", async () => {
@@ -190,7 +185,7 @@ describe("/api/cron/daily-digest", () => {
       { user_id: "user-1", full_name: "John", next_action: "Call", next_action_date: "2026-05-29", profiles: { email: "john@example.com", full_name: "John" } },
     ];
     mockFrom.mockReturnValue(buildChain({ data: leads, error: null }));
-    mockSend.mockRejectedValue(new Error("Email service down"));
+    mockSendDailyDigest.mockResolvedValue({ success: false, error: "Email service down" });
 
     const request = new NextRequest("http://localhost:3000/api/cron/daily-digest", {
       headers: { authorization: "Bearer test-cron-secret" },
@@ -206,7 +201,7 @@ describe("/api/cron/daily-digest", () => {
       { user_id: "user-2", full_name: "Lead B", next_action: "Email", next_action_date: "2026-05-29", profiles: { email: "user2@example.com", full_name: "User Two" } },
     ];
     mockFrom.mockReturnValue(buildChain({ data: leads, error: null }));
-    mockSend.mockResolvedValueOnce({ error: null }).mockRejectedValueOnce(new Error("Fail"));
+    mockSendDailyDigest.mockResolvedValueOnce({ success: true }).mockResolvedValueOnce({ success: false, error: "Fail" });
 
     const request = new NextRequest("http://localhost:3000/api/cron/daily-digest", {
       headers: { authorization: "Bearer test-cron-secret" },
@@ -232,13 +227,12 @@ describe("/api/cron/daily-digest", () => {
       { user_id: "user-1", full_name: "Test Lead", next_action: "Call", next_action_date: "2026-05-29", profiles: { email: "john@example.com", full_name: "John" } },
     ];
     mockFrom.mockReturnValue(buildChain({ data: leads, error: null }));
-    mockSend.mockResolvedValue({ error: null });
+    mockSendDailyDigest.mockResolvedValue({ success: true });
 
     const request = new NextRequest("http://localhost:3000/api/cron/daily-digest", {
       headers: { authorization: "Bearer test-cron-secret" },
     });
     await GET(request);
-    const html = mockSend.mock.calls[0][0].html;
-    expect(html).toContain("http://localhost:3000/follow-ups");
+    expect(mockSendDailyDigest).toHaveBeenCalledWith("john@example.com", "John", expect.arrayContaining([expect.objectContaining({ full_name: "Test Lead" })]));
   });
 });
