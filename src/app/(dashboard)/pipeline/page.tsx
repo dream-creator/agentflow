@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { UserPlus, ArrowRight } from "lucide-react";
+import { UserPlus, GripVertical } from "lucide-react";
 import Link from "next/link";
+import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import type { Database } from "@/types";
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -22,9 +23,12 @@ const STAGES = [
   { key: "closed_lost", label: "Closed Lost", color: "bg-destructive-50 text-destructive" },
 ] as const;
 
+type StageKey = (typeof STAGES)[number]["key"];
+
 export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -42,16 +46,50 @@ export default function PipelinePage() {
     fetchLeads();
   }, [supabase]);
 
-  async function moveToStage(leadId: string, newStage: string) {
-    await supabase
-      .from("leads")
-      .update({ pipeline_stage: newStage, updated_at: new Date().toISOString() })
-      .eq("id", leadId);
+  const getLeadsByStage = useCallback(
+    (stageKey: StageKey) => leads.filter((l) => l.pipeline_stage === stageKey),
+    [leads]
+  );
 
-    setLeads((prev) =>
-      prev.map((l) => (l.id === leadId ? { ...l, pipeline_stage: newStage as Lead["pipeline_stage"] } : l))
-    );
-  }
+  const onDragEnd = useCallback(
+    async (result: DropResult) => {
+      const { destination, source, draggableId } = result;
+
+      if (!destination) return;
+      if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+      const newStage = destination.droppableId as StageKey;
+      const lead = leads.find((l) => l.id === draggableId);
+
+      if (!lead || lead.pipeline_stage === newStage) return;
+
+      setUpdating(draggableId);
+
+      setLeads((prev) =>
+        prev.map((l) =>
+          l.id === draggableId ? { ...l, pipeline_stage: newStage as Lead["pipeline_stage"] } : l
+        )
+      );
+
+      const { error } = await supabase
+        .from("leads")
+        .update({ pipeline_stage: newStage, updated_at: new Date().toISOString() })
+        .eq("id", draggableId);
+
+      if (error) {
+        setLeads((prev) =>
+          prev.map((l) =>
+            l.id === draggableId
+              ? { ...l, pipeline_stage: lead.pipeline_stage as Lead["pipeline_stage"] }
+              : l
+          )
+        );
+      }
+
+      setUpdating(null);
+    },
+    [leads, supabase]
+  );
 
   if (loading) {
     return (
@@ -93,68 +131,83 @@ export default function PipelinePage() {
           }
         />
       ) : (
-        <div className="space-y-6">
-          {STAGES.map((stage) => {
-            const stageLeads = leads.filter((l) => l.pipeline_stage === stage.key);
-            if (stageLeads.length === 0) return null;
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {STAGES.map((stage) => {
+              const stageLeads = getLeadsByStage(stage.key);
 
-            return (
-              <div key={stage.key}>
-                <div className="flex items-center gap-2 mb-3">
-                  <h2 className="font-heading text-sm font-semibold text-surface-700 uppercase tracking-wide">
-                    {stage.label}
-                  </h2>
-                  <Badge variant="default">{stageLeads.length}</Badge>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {stageLeads.map((lead) => (
-                    <Card key={lead.id} className="hover:shadow-card-hover transition-shadow">
-                      <div className="flex items-start justify-between mb-2">
-                        <Link
-                          href={`/leads/${lead.id}`}
-                          className="font-medium text-surface-900 hover:text-primary truncate"
-                        >
-                          {lead.full_name}
-                        </Link>
-                      </div>
-                      {lead.next_action && (
-                        <p className="text-sm text-surface-500 mb-2 truncate">
-                          {lead.next_action}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-xs text-surface-400">
-                          {lead.next_action_date
-                            ? new Date(lead.next_action_date).toLocaleDateString()
-                            : "No date"}
-                        </span>
-                        <div className="flex gap-1">
-                          {STAGES.filter(
-                            (s) =>
-                              s.key !== lead.pipeline_stage &&
-                              s.key !== "closed_won" &&
-                              s.key !== "closed_lost"
-                          )
-                            .slice(0, 2)
-                            .map((s) => (
-                              <button
-                                key={s.key}
-                                onClick={() => moveToStage(lead.id, s.key)}
-                                className="p-1 rounded hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
-                                title={`Move to ${s.label}`}
+              return (
+                <div key={stage.key} className="flex-shrink-0 w-72">
+                  <div className="flex items-center gap-2 mb-3">
+                    <h2 className="font-heading text-sm font-semibold text-surface-700 uppercase tracking-wide">
+                      {stage.label}
+                    </h2>
+                    <Badge variant="default">{stageLeads.length}</Badge>
+                  </div>
+                  <Droppable droppableId={stage.key}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`min-h-[200px] rounded-lg p-2 transition-colors ${
+                          snapshot.isDraggingOver ? "bg-primary-50" : "bg-surface-50"
+                        }`}
+                      >
+                        {stageLeads.map((lead, index) => (
+                          <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={`mb-2 ${updating === lead.id ? "opacity-50" : ""}`}
                               >
-                                <ArrowRight className="h-3 w-3" />
-                              </button>
-                            ))}
-                        </div>
+                                <Card
+                                  className={`${
+                                    snapshot.isDragging ? "shadow-lg" : ""
+                                  } hover:shadow-card-hover transition-shadow`}
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <div
+                                      {...provided.dragHandleProps}
+                                      className="mt-1 text-surface-400 hover:text-surface-600 cursor-grab active:cursor-grabbing"
+                                    >
+                                      <GripVertical className="h-4 w-4" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center justify-between mb-1">
+                                        <Link
+                                          href={`/leads/${lead.id}`}
+                                          className="font-medium text-surface-900 hover:text-primary truncate text-sm"
+                                        >
+                                          {lead.full_name}
+                                        </Link>
+                                      </div>
+                                      {lead.next_action && (
+                                        <p className="text-xs text-surface-500 mb-1 truncate">
+                                          {lead.next_action}
+                                        </p>
+                                      )}
+                                      <span className="text-xs text-surface-400">
+                                        {lead.next_action_date
+                                          ? new Date(lead.next_action_date).toLocaleDateString()
+                                          : "No date"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </Card>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
                       </div>
-                    </Card>
-                  ))}
+                    )}
+                  </Droppable>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </DragDropContext>
       )}
     </div>
   );
