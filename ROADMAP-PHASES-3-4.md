@@ -1,8 +1,8 @@
 # AgentFlow — Remaining Roadmap (Phases 3 & 4)
 
-> **Assessment Date:** 2026-05-29
-> **Status:** Phase 1 & 2 complete (66/85 items). Build passing. Lint clean. 20 routes.
-> **Next:** Phase 3 (Staging & QA) → Phase 4 (Production & Launch)
+> **Last Updated:** 2026-05-30
+> **Status:** Phase 1 & 2 complete. Phase 3 ~85% complete. Build passing. Lint clean. 21 routes.
+> **Next:** Phase 3 remaining items → Phase 4 (Production & Launch)
 
 ---
 
@@ -10,17 +10,17 @@
 
 ### 3.1 Fix MVP Gaps (Must-do before testing)
 
-| # | Task | Files | Priority |
-|---|------|-------|----------|
-| 3.1.1 | Create edit lead page | `src/app/(dashboard)/leads/[id]/edit/page.tsx` | HIGH |
-| 3.1.2 | Add PWA icon files (192px, 512px) | `public/icons/icon-192.png`, `public/icons/icon-512.png` | HIGH |
-| 3.1.3 | Create service worker | `public/sw.js` | HIGH |
-| 3.1.4 | Add `scope` to manifest | `public/manifest.json` | MEDIUM |
-| 3.1.5 | Wire up Toast component for CRUD feedback | All pages with create/update/delete | MEDIUM |
-| 3.1.6 | Fix billing page — fetch actual plan from profile | `src/app/(dashboard)/settings/billing/page.tsx` | MEDIUM |
-| 3.1.7 | Fix sidebar — fetch actual user name/plan | `src/components/layout/sidebar.tsx` | MEDIUM |
-| 3.1.8 | Extract duplicated `formatStage`/`getStageVariant` to `src/lib/utils.ts` | 4 files | LOW |
-| 3.1.9 | Create `src/lib/stripe.ts` and `src/lib/resend.ts` shared modules | 2 new files + 2 route updates | LOW |
+| # | Task | Files | Status |
+|---|------|-------|--------|
+| 3.1.1 | Create edit lead page | `src/app/(dashboard)/leads/[id]/edit/page.tsx` | DONE |
+| 3.1.2 | Add PWA icon files (192px, 512px) | `public/icons/icon-192.png`, `public/icons/icon-512.png` | DONE |
+| 3.1.3 | Create service worker | `public/sw.js` | DONE |
+| 3.1.4 | Add `scope` to manifest | `public/manifest.json` | DONE |
+| 3.1.5 | Wire up Toast component for CRUD feedback | All pages with create/update/delete | DONE |
+| 3.1.6 | Fix billing page — fetch actual plan from profile | `src/app/(dashboard)/settings/billing/page.tsx` | DONE |
+| 3.1.7 | Fix sidebar — fetch actual user name/plan | `src/components/layout/sidebar.tsx` | DONE |
+| 3.1.8 | Extract duplicated `formatStage`/`getStageVariant` to `src/lib/utils.ts` | 4 files | TODO |
+| 3.1.9 | Create `src/lib/stripe.ts` and `src/lib/resend.ts` shared modules | 2 new files + 2 route updates | TODO |
 
 ### 3.2 GitHub Actions CI Pipeline
 
@@ -47,15 +47,17 @@
 
 ### 3.4 E2E Tests (Playwright)
 
-| # | Test File | Flow | Priority |
-|---|-----------|------|----------|
-| 3.4.1 | `tests/e2e/auth.spec.ts` | Signup → Magic link → Dashboard redirect | P0 |
-| 3.4.2 | `tests/e2e/lead-crud.spec.ts` | Add lead → View in list → Edit → Delete | P0 |
-| 3.4.3 | `tests/e2e/pipeline.spec.ts` | Add lead → Move through stages → Close | P0 |
-| 3.4.4 | `tests/e2e/follow-ups.spec.ts` | Add lead with due date → See in follow-ups → Mark complete | P0 |
-| 3.4.5 | `tests/e2e/csv-import.spec.ts` | Upload CSV → Map columns → Verify leads created | P1 |
-| 3.4.6 | `tests/e2e/mobile-nav.spec.ts` | Bottom nav → All pages → Touch targets ≥44px | P1 |
-| 3.4.7 | `playwright.config.ts` | Playwright configuration with web server | — |
+| # | Test File | Flow | Status |
+|---|-----------|------|--------|
+| 3.4.1 | `tests/e2e/auth.spec.ts` | Signup → Magic link → Dashboard redirect | DONE (11 tests) |
+| 3.4.2 | `tests/e2e/lead-crud.spec.ts` | Add lead → View in list → Edit → Delete | DONE (10 tests) |
+| 3.4.3 | `tests/e2e/pipeline.spec.ts` | Add lead → Move through stages → Close | DONE (8 tests) |
+| 3.4.4 | `tests/e2e/follow-ups.spec.ts` | Add lead with due date → See in follow-ups → Mark complete | DONE (8 tests) |
+| 3.4.5 | `tests/e2e/csv-import.spec.ts` | Upload CSV → Map columns → Verify leads created | DONE (8 tests) |
+| 3.4.6 | `tests/e2e/mobile-nav.spec.ts` | Bottom nav → All pages → Touch targets ≥44px | DONE (8 tests) |
+| 3.4.7 | `playwright.config.ts` | Playwright configuration with web server | DONE |
+
+**Total: 45 E2E tests passing across 3 browsers (chromium, firefox, mobile-chrome)**
 
 ### 3.5 Quality Gates Checklist
 
