@@ -2,6 +2,7 @@
 
 import { BottomNav } from "./bottom-nav";
 import { Sidebar } from "./sidebar";
+import { ToastContainer } from "@/components/ui/toast";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
       <BottomNav />
+      <ToastContainer />
     </div>
   );
 }
