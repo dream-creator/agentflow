@@ -79,7 +79,7 @@ AgentFlow is designed with a security-first approach. User data is strictly isol
 
 Have a question, found a bug, or want to request a feature?
 
-- **Email:** support@agentflow.app
+- **Email:** ryan.gabrielle01@gmail.com
 - **Issues:** [GitHub Issues](https://github.com/dream-creator/agentflow/issues)
 
 ---
