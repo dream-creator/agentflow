@@ -7,38 +7,50 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Phone, Mail, MessageSquare, Trash2, Edit } from "lucide-react";
+import { showToast } from "@/components/ui/toast";
+import { ArrowLeft, Phone, Mail, MessageSquare, Trash2, Edit, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import type { Database } from "@/types";
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
+type Action = Database["public"]["Tables"]["actions"]["Row"];
 
 export default function LeadDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [lead, setLead] = useState<Lead | null>(null);
+  const [actions, setActions] = useState<Action[]>([]);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
-    async function fetchLead() {
-      const { data } = await supabase
+    async function fetchLeadAndActions() {
+      const { data: leadData } = await supabase
         .from("leads")
         .select("*")
         .eq("id", params.id)
         .single();
 
-      if (data) setLead(data);
+      if (leadData) {
+        setLead(leadData);
+        const { data: actionsData } = await supabase
+          .from("actions")
+          .select("*")
+          .eq("lead_id", params.id as string)
+          .order("created_at", { ascending: false });
+        if (actionsData) setActions(actionsData);
+      }
       setLoading(false);
     }
 
-    fetchLead();
+    fetchLeadAndActions();
   }, [supabase, params.id]);
 
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this lead?")) return;
 
     await supabase.from("leads").delete().eq("id", params.id as string);
+    showToast("Lead deleted successfully!", "success");
     router.push("/leads");
     router.refresh();
   }
@@ -210,6 +222,51 @@ export default function LeadDetailPage() {
               </a>
             )}
           </div>
+        </Card>
+
+        {/* Action History */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Action History</CardTitle>
+          </CardHeader>
+          {actions.length === 0 ? (
+            <p className="text-sm text-surface-400">No actions recorded yet</p>
+          ) : (
+            <div className="space-y-3">
+              {actions.map((action) => (
+                <div
+                  key={action.id}
+                  className="flex items-start gap-3 p-3 rounded-lg bg-surface-50"
+                >
+                  <div className="mt-0.5">
+                    {action.completed ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Clock className="h-4 w-4 text-surface-400" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant={action.completed ? "success" : "default"}>
+                        {action.action_type}
+                      </Badge>
+                      <span className="text-xs text-surface-400">
+                        {new Date(action.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {action.description && (
+                      <p className="text-sm text-surface-700">{action.description}</p>
+                    )}
+                    {action.due_date && (
+                      <p className="text-xs text-surface-400 mt-1">
+                        Due: {new Date(action.due_date).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
     </div>
