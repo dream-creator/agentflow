@@ -301,13 +301,10 @@ jobs:
             CONTRIBUTORS="github-actions[bot]"
           fi
 
-          # Categorize commits using awk for reliable multi-line parsing
+          # Categorize commits using awk — write directly to category files
           echo "$ALL_COMMITS" | awk '
             /^COMMIT_SEP$/ { 
-              if (n > 0 && hash != "") {
-                # Categorize previous commit
-                categorize()
-              }
+              if (n > 0 && hash != "") categorize()
               hash = ""; subject = ""; body = ""
               getline hash
               getline subject
@@ -315,9 +312,7 @@ jobs:
               next
             }
             { body = body (body ? "\n" : "") $0 }
-            END {
-              if (n > 0 && hash != "") categorize()
-            }
+            END { if (n > 0 && hash != "") categorize() }
             function categorize() {
               prefix = "other"
               clean = subject
@@ -352,27 +347,16 @@ jobs:
               entry = "- " clean " (#" hash ")"
               if (formatted != "") entry = entry "\n" formatted
               
-              print prefix "|" entry
+              print entry > ("/tmp/release-" prefix ".txt")
             }
-          ' > /tmp/commit-categorized.txt
+          '
 
-          # Parse categorized output into variables
-          FEATURES=""
-          IMPROVEMENTS=""
-          BUG_FIXES=""
-          BREAKING=""
-          OTHER_CHANGES=""
-
-          while IFS='|' read -r ptype entry; do
-            [ -z "$ptype" ] && continue
-            case "$ptype" in
-              feat)      FEATURES="${FEATURES}${entry}"$'\n' ;;
-              fix)       BUG_FIXES="${BUG_FIXES}${entry}"$'\n' ;;
-              refactor|perf) IMPROVEMENTS="${IMPROVEMENTS}${entry}"$'\n' ;;
-              breaking)  BREAKING="${BREAKING}${entry}"$'\n' ;;
-              *)         OTHER_CHANGES="${OTHER_CHANGES}${entry}"$'\n' ;;
-            esac
-          done < /tmp/commit-categorized.txt
+          # Read each category file into variables (empty if file doesn't exist)
+          FEATURES=$(cat /tmp/release-feat.txt 2>/dev/null || true)
+          IMPROVEMENTS=$(cat /tmp/release-refactor.txt 2>/dev/null /tmp/release-perf.txt 2>/dev/null | grep -v '^$' || true)
+          BUG_FIXES=$(cat /tmp/release-fix.txt 2>/dev/null || true)
+          BREAKING=$(cat /tmp/release-breaking.txt 2>/dev/null || true)
+          OTHER_CHANGES=$(cat /tmp/release-test.txt 2>/dev/null /tmp/release-docs.txt 2>/dev/null /tmp/release-ci.txt 2>/dev/null /tmp/release-chore.txt 2>/dev/null /tmp/release-other.txt 2>/dev/null | grep -v '^$' || true)
 
           # Build summary from first commit's subject line
           SUMMARY=$(echo "$ALL_COMMITS" | tr '\0' '\n' | sed -n '2p')
