@@ -6,6 +6,21 @@ Status: Phase 4 (Production) ~70% complete
 
 ---
 
+## TOP PRIORITY — Do First (June 1, 2026)
+
+### Price Change $19/mo → $5/mo
+- **Why:** Strategic pricing decision for more clients
+- **Time:** 7 minutes
+- **Code changes:**
+  - src/lib/stripe.ts:16 — `price: 1900` → `price: 500`
+  - src/app/page.tsx:218 — `$19` → `$5`
+  - src/app/(dashboard)/settings/billing/page.tsx:87,115 — `$19/mo` → `$5/mo`
+  - src/app/(dashboard)/settings/page.tsx:109 — `$19/mo` → `$5/mo`
+  - tests/unit/lib/stripe.test.ts:58 — `1900` → `500`
+- **Stripe dashboard:** Create new price at $5/mo, deactivate old $19 price
+
+---
+
 ## CRITICAL — Must Complete Before Public Launch
 
 ### 1. Google OAuth End-to-End Testing
