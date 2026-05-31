@@ -256,8 +256,8 @@ jobs:
             PREV_DISPLAY="(initial)"
           fi
 
-          # Collect all data
-          ALL_COMMITS=$(git log ${COMMIT_RANGE} --pretty=format:"%h|%s|%an|%ae" --no-merges 2>/dev/null)
+          # Collect all data — use § as commit separator, | as field separator
+          ALL_COMMITS=$(git log ${COMMIT_RANGE} --pretty=format:"%h§%s§%b§%an§%ae" --no-merges 2>/dev/null)
           COMMIT_COUNT=$(git log ${COMMIT_RANGE} --oneline --no-merges 2>/dev/null | wc -l)
           FILES_CHANGED=$(git diff --stat ${COMMIT_RANGE} 2>/dev/null | tail -1)
           ADDITIONS=$(echo "$FILES_CHANGED" | grep -oP '\d+(?= insertion)' || echo "0")
@@ -307,31 +307,96 @@ jobs:
           BREAKING=""
           OTHER_CHANGES=""
 
-          while IFS='|' read -r hash subject author; do
-            [ -z "$hash" ] && continue
-            if echo "$subject" | grep -qiE "^feat"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^feat(\([^)]*\))?!?:[ ]*//')
-              FEATURES="${FEATURES}${CLEAN} (#${hash} -- @${author})\n"
-            elif echo "$subject" | grep -qiE "^fix"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^fix(\([^)]*\))?!?:[ ]*//')
-              BUG_FIXES="${BUG_FIXES}Fixed ${CLEAN}. (#${hash})\n"
-            elif echo "$subject" | grep -qiE "^refactor"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^refactor(\([^)]*\))?!?:[ ]*//')
-              IMPROVEMENTS="${IMPROVEMENTS}Refactored ${CLEAN}. (#${hash})\n"
-            elif echo "$subject" | grep -qiE "^perf"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^perf(\([^)]*\))?!?:[ ]*//')
-              IMPROVEMENTS="${IMPROVEMENTS}Optimized ${CLEAN}. (#${hash})\n"
-            elif echo "$subject" | grep -qiE "^BREAKING|^feat!"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^(BREAKING CHANGE|feat!)!?:[ ]*//')
-              BREAKING="${BREAKING}[Change] -- ${CLEAN}\n"
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            
+            # Parse: hash§subject§body§author§email
+            HASH=$(echo "$line" | cut -d'§' -f1)
+            SUBJECT=$(echo "$line" | cut -d'§' -f2)
+            BODY=$(echo "$line" | cut -d'§' -f3- | sed 's/§.*//')
+            AUTHOR=$(echo "$line" | cut -d'§' -f4)
+            
+            [ -z "$HASH" ] && continue
+            
+            # Extract prefix type and clean subject
+            PREFIX_TYPE=""
+            CLEAN=""
+            
+            if echo "$SUBJECT" | grep -qiE "^feat"; then
+              PREFIX_TYPE="feat"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^feat[^:]*:[ ]*//')
+            elif echo "$SUBJECT" | grep -qiE "^fix"; then
+              PREFIX_TYPE="fix"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^fix[^:]*:[ ]*//')
+            elif echo "$SUBJECT" | grep -qiE "^refactor"; then
+              PREFIX_TYPE="refactor"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^refactor[^:]*:[ ]*//')
+            elif echo "$SUBJECT" | grep -qiE "^perf"; then
+              PREFIX_TYPE="perf"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^perf[^:]*:[ ]*//')
+            elif echo "$SUBJECT" | grep -qiE "^test"; then
+              PREFIX_TYPE="test"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^test[^:]*:[ ]*//')
+            elif echo "$SUBJECT" | grep -qiE "^docs"; then
+              PREFIX_TYPE="docs"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^docs[^:]*:[ ]*//')
+            elif echo "$SUBJECT" | grep -qiE "^ci"; then
+              PREFIX_TYPE="ci"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^ci[^:]*:[ ]*//')
+            elif echo "$SUBJECT" | grep -qiE "^chore"; then
+              PREFIX_TYPE="chore"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^chore[^:]*:[ ]*//')
+            elif echo "$SUBJECT" | grep -qiE "^BREAKING|^feat!"; then
+              PREFIX_TYPE="breaking"
+              CLEAN=$(echo "$SUBJECT" | sed -E 's/^(BREAKING CHANGE|feat!)!?:[ ]*//')
             else
-              CLEAN=$(echo "$subject" | sed -E 's/^[a-z]+(\([^)]*\))?!?:[ ]*//')
-              OTHER_CHANGES="${OTHER_CHANGEStidy}- ${CLEAN} (#${hash})\n"
+              PREFIX_TYPE="other"
+              CLEAN="$SUBJECT"
             fi
+
+            # Fallback: if sed didn't strip the prefix, use the full subject
+            if [ -z "$CLEAN" ]; then
+              CLEAN="$SUBJECT"
+            fi
+
+            # Format body: extract meaningful lines (skip empty, skip commit msg separators)
+            FORMATTED_BODY=""
+            if [ -n "$BODY" ]; then
+              FORMATTED_BODY=$(echo "$BODY" | sed '/^[[:space:]]*$/d' | sed '/^Change-Id:/d' | sed '/^Co-authored-by:/d' | sed '/^Reviewed-by:/d' | sed '/^Signed-off-by:/d' | sed 's/^[[:space:]]*//')
+            fi
+
+            # Build entry: title + optional body bullets
+            ENTRY="- ${CLEAN} (#${HASH})"
+            if [ -n "$FORMATTED_BODY" ]; then
+              ENTRY="${ENTRY}\n"
+              while IFS= read -r bodyline; do
+                [ -z "$bodyline" ] && continue
+                ENTRY="${ENTRY}  ${bodyline}\n"
+              done <<< "$FORMATTED_BODY"
+            fi
+
+            # Categorize into sections
+            case "$PREFIX_TYPE" in
+              feat)
+                FEATURES="${FEATURES}${ENTRY}\n"
+                ;;
+              fix)
+                BUG_FIXES="${BUG_FIXES}${ENTRY}\n"
+                ;;
+              refactor|perf)
+                IMPROVEMENTS="${IMPROVEMENTS}${ENTRY}\n"
+                ;;
+              breaking)
+                BREAKING="${BREAKING}${ENTRY}\n"
+                ;;
+              *)
+                OTHER_CHANGES="${OTHER_CHANGES}${ENTRY}\n"
+                ;;
+            esac
           done <<< "$ALL_COMMITS"
 
           # Build summary from first meaningful commit
-          SUMMARY=$(echo "$ALL_COMMITS" | head -1 | cut -d'|' -f2)
+          SUMMARY=$(echo "$ALL_COMMITS" | head -1 | cut -d'§' -f2)
           if [ -z "$SUMMARY" ]; then
             SUMMARY="Production deployment with latest fixes and improvements."
           fi
@@ -374,9 +439,11 @@ jobs:
 
           $([ -n "$BUG_FIXES" ] && echo -e "$BUG_FIXES" || echo "_No bug fixes in this release._")
 
-          ### Performance
+          ---
 
-          _Performance benchmarks to be added in future releases._
+          ## Other Changes
+
+          $([ -n "$OTHER_CHANGES" ] && echo -e "$OTHER_CHANGES" || echo "_No other changes in this release._")
 
           ---
 
