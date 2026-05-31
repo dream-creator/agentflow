@@ -14,8 +14,9 @@ export const config = {
      * - favicon.ico (favicon file)
      * - manifest.json (PWA manifest)
      * - sw.js (service worker)
+     * - auth/callback (Supabase OAuth PKCE callback — must not be intercepted)
      * - public files (images, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw\\.js|auth/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
