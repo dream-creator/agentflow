@@ -256,8 +256,9 @@ jobs:
             PREV_DISPLAY="(initial)"
           fi
 
-          # Collect all data
-          ALL_COMMITS=$(git log ${COMMIT_RANGE} --pretty=format:"%h|%s|%an|%ae" --no-merges 2>/dev/null)
+          # Collect all data — use unique separator between commits
+          # Each commit block: hash|subject|body (until next separator)
+          ALL_COMMITS=$(git log ${COMMIT_RANGE} --pretty=format:"COMMIT_SEP%n%h%n%s%n%b" --no-merges 2>/dev/null)
           COMMIT_COUNT=$(git log ${COMMIT_RANGE} --oneline --no-merges 2>/dev/null | wc -l)
           FILES_CHANGED=$(git diff --stat ${COMMIT_RANGE} 2>/dev/null | tail -1)
           ADDITIONS=$(echo "$FILES_CHANGED" | grep -oP '\d+(?= insertion)' || echo "0")
@@ -300,38 +301,81 @@ jobs:
             CONTRIBUTORS="github-actions[bot]"
           fi
 
-          # Categorize commits
+          # Categorize commits using awk for reliable multi-line parsing
+          echo "$ALL_COMMITS" | awk '
+            /^COMMIT_SEP$/ { 
+              if (n > 0 && hash != "") {
+                # Categorize previous commit
+                categorize()
+              }
+              hash = ""; subject = ""; body = ""
+              getline hash
+              getline subject
+              n++
+              next
+            }
+            { body = body (body ? "\n" : "") $0 }
+            END {
+              if (n > 0 && hash != "") categorize()
+            }
+            function categorize() {
+              prefix = "other"
+              clean = subject
+              if (subject ~ /^feat/) { prefix = "feat"; sub(/^feat[^:]*:[ ]*/, "", clean) }
+              else if (subject ~ /^fix/) { prefix = "fix"; sub(/^fix[^:]*:[ ]*/, "", clean) }
+              else if (subject ~ /^refactor/) { prefix = "refactor"; sub(/^refactor[^:]*:[ ]*/, "", clean) }
+              else if (subject ~ /^perf/) { prefix = "perf"; sub(/^perf[^:]*:[ ]*/, "", clean) }
+              else if (subject ~ /^test/) { prefix = "test"; sub(/^test[^:]*:[ ]*/, "", clean) }
+              else if (subject ~ /^docs/) { prefix = "docs"; sub(/^docs[^:]*:[ ]*/, "", clean) }
+              else if (subject ~ /^ci/) { prefix = "ci"; sub(/^ci[^:]*:[ ]*/, "", clean) }
+              else if (subject ~ /^chore/) { prefix = "chore"; sub(/^chore[^:]*:[ ]*/, "", clean) }
+              else if (subject ~ /^BREAKING/ || subject ~ /^feat!/) { prefix = "breaking"; sub(/^(BREAKING CHANGE|feat!)!?:[ ]*/, "", clean) }
+              
+              if (clean == "") clean = subject
+              
+              # Format body: strip empty lines and git metadata
+              formatted = ""
+              if (body != "") {
+                split(body, blines, "\n")
+                for (i in blines) {
+                  line = blines[i]
+                  gsub(/^[[:space:]]+/, "", line)
+                  if (line == "") continue
+                  if (line ~ /^Change-Id:/) continue
+                  if (line ~ /^Co-authored-by:/) continue
+                  if (line ~ /^Reviewed-by:/) continue
+                  if (line ~ /^Signed-off-by:/) continue
+                  formatted = formatted (formatted ? "\n" : "") "  " line
+                }
+              }
+              
+              entry = "- " clean " (#" hash ")"
+              if (formatted != "") entry = entry "\n" formatted
+              
+              print prefix "|" entry
+            }
+          ' > /tmp/commit-categorized.txt
+
+          # Parse categorized output into variables
           FEATURES=""
           IMPROVEMENTS=""
           BUG_FIXES=""
           BREAKING=""
           OTHER_CHANGES=""
 
-          while IFS='|' read -r hash subject author; do
-            [ -z "$hash" ] && continue
-            if echo "$subject" | grep -qiE "^feat"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^feat(\([^)]*\))?!?:[ ]*//')
-              FEATURES="${FEATURES}${CLEAN} (#${hash} -- @${author})\n"
-            elif echo "$subject" | grep -qiE "^fix"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^fix(\([^)]*\))?!?:[ ]*//')
-              BUG_FIXES="${BUG_FIXES}Fixed ${CLEAN}. (#${hash})\n"
-            elif echo "$subject" | grep -qiE "^refactor"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^refactor(\([^)]*\))?!?:[ ]*//')
-              IMPROVEMENTS="${IMPROVEMENTS}Refactored ${CLEAN}. (#${hash})\n"
-            elif echo "$subject" | grep -qiE "^perf"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^perf(\([^)]*\))?!?:[ ]*//')
-              IMPROVEMENTS="${IMPROVEMENTS}Optimized ${CLEAN}. (#${hash})\n"
-            elif echo "$subject" | grep -qiE "^BREAKING|^feat!"; then
-              CLEAN=$(echo "$subject" | sed -E 's/^(BREAKING CHANGE|feat!)!?:[ ]*//')
-              BREAKING="${BREAKING}[Change] -- ${CLEAN}\n"
-            else
-              CLEAN=$(echo "$subject" | sed -E 's/^[a-z]+(\([^)]*\))?!?:[ ]*//')
-              OTHER_CHANGES="${OTHER_CHANGEStidy}- ${CLEAN} (#${hash})\n"
-            fi
-          done <<< "$ALL_COMMITS"
+          while IFS='|' read -r ptype entry; do
+            [ -z "$ptype" ] && continue
+            case "$ptype" in
+              feat)      FEATURES="${FEATURES}${entry}"$'\n' ;;
+              fix)       BUG_FIXES="${BUG_FIXES}${entry}"$'\n' ;;
+              refactor|perf) IMPROVEMENTS="${IMPROVEMENTS}${entry}"$'\n' ;;
+              breaking)  BREAKING="${BREAKING}${entry}"$'\n' ;;
+              *)         OTHER_CHANGES="${OTHER_CHANGES}${entry}"$'\n' ;;
+            esac
+          done < /tmp/commit-categorized.txt
 
-          # Build summary from first meaningful commit
-          SUMMARY=$(echo "$ALL_COMMITS" | head -1 | cut -d'|' -f2)
+          # Build summary from first commit's subject line
+          SUMMARY=$(echo "$ALL_COMMITS" | tr '\0' '\n' | sed -n '2p')
           if [ -z "$SUMMARY" ]; then
             SUMMARY="Production deployment with latest fixes and improvements."
           fi
@@ -374,9 +418,11 @@ jobs:
 
           $([ -n "$BUG_FIXES" ] && echo -e "$BUG_FIXES" || echo "_No bug fixes in this release._")
 
-          ### Performance
+          ---
 
-          _Performance benchmarks to be added in future releases._
+          ## Other Changes
+
+          $([ -n "$OTHER_CHANGES" ] && echo -e "$OTHER_CHANGES" || echo "_No other changes in this release._")
 
           ---
 
