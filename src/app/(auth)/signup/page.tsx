@@ -11,14 +11,15 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const supabase = createClient();
+
+  const getSupabase = () => createClient();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await getSupabase().auth.signInWithOtp({
       email,
       options: {
         data: { full_name: fullName },
@@ -35,7 +36,7 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignup = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await getSupabase().auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: getOAuthRedirectTo(),
