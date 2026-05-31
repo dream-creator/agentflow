@@ -31,7 +31,7 @@
 
 ## CI/CD Gotchas (Lessons Learned)
 - **Sentry config:** `withSentryConfig()` in `next.config.mjs` must be conditional — crashes Vercel build if `SENTRY_ORG`/`SENTRY_PROJECT` aren't set
-- **Supabase client:** Must use lazy init pattern in auth pages — `createClient()` called at component top-level crashes during Next.js prerendering (env vars unavailable server-side). Use `getSupabase = () => createClient()` and call inside event handlers only
+- **Supabase client:** Must use lazy init pattern in auth pages — `createClient()` called at component top-level crashes during Next.js prerendering (env vars unavailable server-side). Use `getSupabase = () => createClient()` and call inside event handlers only. In `client.ts`, return a stub `{}` object during SSR prerendering (when `typeof window === "undefined"`) instead of throwing — the real client initializes on the client side where `NEXT_PUBLIC_` vars are available.
 - **Staging workflow:** Avoid `case` shell statements with `${{ matrix.* }}` inline expansion — use `if/elif` with env vars instead (GitHub Actions YAML validator rejects it)
 - **Shell scripts in YAML:** Pass GitHub expressions as `env:` vars, reference via `$VAR` in shell — never inline `${{ }}` in shell syntax
 
@@ -59,4 +59,5 @@
 - Fixed staging-promotion.yml YAML error (line 230): replaced `case` with `if/elif` + env var
 - Fixed Vercel production build crash: conditional Sentry config in next.config.mjs
 - Fixed Vercel production build crash: lazy Supabase client in auth pages (login/signup)
+- Fixed Vercel production build crash: stub Supabase client during SSR prerendering (all dashboard pages)
 - All fixes pushed to main — 140 tests passing, build clean
