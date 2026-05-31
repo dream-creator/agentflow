@@ -46,3 +46,5 @@ supabase/migrations/
 
 # internal docs (do not commit)
 OAUTH-CONFIG-GUIDE.md
+AGENTS.md
+ROADMAP-REMAINING.md
