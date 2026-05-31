@@ -227,6 +227,18 @@ curl -X PATCH "https://api.supabase.com/v1/projects/fsxdduvwshirrheenmag/config/
 
 ## Next Session Plan (June 1, 2026)
 
+### TOP PRIORITY: Price Change $19/mo → $5/mo
+- **Why:** Strategic pricing decision for more clients
+- **Time:** 7 minutes (5 min code + 2 min Stripe dashboard)
+- **Code changes:**
+  - src/lib/stripe.ts:16 — `price: 1900` → `price: 500`
+  - src/app/page.tsx:218 — `$19` → `$5`
+  - src/app/(dashboard)/settings/billing/page.tsx:87,115 — `$19/mo` → `$5/mo`
+  - src/app/(dashboard)/settings/page.tsx:109 — `$19/mo` → `$5/mo`
+  - tests/unit/lib/stripe.test.ts:58 — `1900` → `500`
+- **Stripe dashboard:** Create new price at $5/mo, deactivate old $19 price
+- **DO THIS FIRST before Block 2 (Stripe Integration)**
+
 ### Block 1: Google OAuth Testing (30 min)
 - Manual test: /login → "Continue with Google" → authenticate → verify redirect
 - Test on mobile (Safari iOS, Chrome Android)
