@@ -1,21 +1,67 @@
-MIT License
+Business Source License 1.1
 
-Copyright (c) 2026 AgentFlow
+Copyright © 2025 AgentFlow. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software is licensed under the Business Source License 1.1 (BUSL 1.1).
+License Summary
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The BUSL 1.1 license makes this source code publicly visible but not freely usable for commercial purposes. It is not an open-source license. The distinction matters:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Term Meaning
+Licensor AgentFlow
+Licensed Work AgentFlow CRM — all source code, assets, and configuration in this repository
+Permitted Use Viewing, local evaluation, and non-production use only
+Restricted Use Commercial use, production deployment, redistribution, and sublicensing
+Change Date Four (4) years from the release date of each version
+Change License MIT License
+
+What You Can Do
+
+- Read and review the source code for educational or evaluation purposes
+- Run the software locally in a non-production, non-commercial environment
+- Inspect the architecture for research or personal learning
+
+What You Cannot Do
+
+Without explicit written permission from AgentFlow, you may not:
+
+- Deploy or host this software for any production or commercial use
+- Use this software to provide a competing or similar service to third parties
+- Copy, modify, sublicense, or distribute any portion of this codebase
+- Remove or alter any copyright, license, or proprietary notices
+- Use the AgentFlow name, logo, or branding in any derivative or competing product
+- Resell, relicense, or transfer access to this software to any third party
+
+Change Date & Open Source Conversion
+
+Each released version of AgentFlow has a Change Date set to four (4) years after its release. On that date, the corresponding version automatically converts to the MIT License, becoming fully open source. This conversion applies only to that specific version — newer releases will carry their own Change Dates.
+
+This mechanism ensures long-term openness while protecting the commercial viability of the product during its active lifecycle.
+
+Third-Party Licenses
+
+AgentFlow is built on top of open-source dependencies. Each dependency is governed by its own license. Key dependencies and their licenses include:
+
+Dependency License
+Next.js MIT
+React MIT
+Tailwind CSS MIT
+Supabase JS Client MIT
+Stripe JS Apache 2.0
+Resend MIT
+Lucide React ISC
+Vitest MIT
+Playwright Apache 2.0
+
+A full list of dependencies and their licenses can be found in package.json. AgentFlow's BUSL 1.1 license applies solely to original source code authored by AgentFlow and does not override or modify the licenses of any third-party packages.
+
+Commercial Licensing & Enterprise Access
+
+If you are interested in using AgentFlow in a commercial context, self-hosting it within your organization, or building on top of it under a separate agreement, commercial licenses are available.
+
+Contact us to discuss terms:
+
+Email: ryan.gabrielle01@gmail.com
+Subject line: Commercial License Inquiry — AgentFlow
+
+We typically respond within 1–2 business days.
