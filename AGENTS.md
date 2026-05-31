@@ -99,7 +99,28 @@ All set for Production + Development on `agentflow` project:
 - Keep existing Tailwind + Teal/Sky tokens — Hallmark is reference, not replacement
 
 ## Session History
-### May 31, 2026 Session (34 observations)
+### May 31, 2026 — Security Audit & CI/CD Session (this session)
+1. Ran comprehensive DevSecOps security audit using ECC skills (security-review, production-audit, react-patterns, coding-standards)
+2. Fixed 17 findings across 15 files (3 CRITICAL, 4 HIGH, 4 MEDIUM, 6 LOW)
+3. Added 9 security headers to next.config.mjs (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, CORP)
+4. Fixed stored XSS in email templates — added escapeHtml() to resend.ts
+5. Sanitized error responses across all API routes (leads, cron, stripe webhook)
+6. Fixed open redirect in auth callback — blocked protocol-relative URLs
+7. Added user_id ownership checks on client-side lead queries (IDOR defense-in-depth)
+8. Removed version/environment disclosure from health endpoint
+9. Replaced null-as-any with explicit throw in Supabase server client
+10. Removed non-null assertions in Supabase browser client
+11. Fixed PR gatekeeper coverage artifact error (skip download when tests fail)
+12. Automated release notes from commit bodies using awk-based parser
+13. Fixed awk body iteration order bug (for-in → for-i=1-to-n)
+14. Fixed release notes parsing to write directly to category files (while-read loses multi-line content)
+15. Verified release notes automation end-to-end (v0.2.14 confirmed working)
+16. Removed ARCHITECTURE.md and TEST_RELEASE_NOTES.txt from entire git history (git filter-repo)
+17. Added both files to .gitignore
+18. Force pushed rewritten history to remote
+
+### Previous Sessions
+See AGENTS.md session history from earlier sessions (May 30-31, 2026).
 1. Created `opencode.json` with skill paths
 2. Created `AGENTS.md` with project context
 3. Installed Hallmark skill for audit/study/redesign workflows
