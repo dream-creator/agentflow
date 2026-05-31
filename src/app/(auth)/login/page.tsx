@@ -13,7 +13,8 @@ function LoginPageContent() {
   const [message, setMessage] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
+
+  const getSupabase = () => createClient();
 
   useEffect(() => {
     const error = searchParams.get("error");
@@ -27,7 +28,7 @@ function LoginPageContent() {
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await getSupabase().auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: getOAuthRedirectTo(),
@@ -43,7 +44,7 @@ function LoginPageContent() {
   };
 
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await getSupabase().auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: getOAuthRedirectTo(),
