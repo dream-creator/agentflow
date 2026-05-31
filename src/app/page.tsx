@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
+import { Suspense } from "react";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AuthCallbackRescue } from "@/components/auth-callback-rescue";
 import {
   Phone,
   Users,
@@ -32,6 +34,11 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-white">
+      {/* OAuth PKCE rescue — redirects ?code= to /auth/callback */}
+      <Suspense fallback={null}>
+        <AuthCallbackRescue />
+      </Suspense>
+
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-surface-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
