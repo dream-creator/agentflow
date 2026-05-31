@@ -80,7 +80,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="text-sm text-surface-400 mt-4">
-            Free plan includes 1 lead. No credit card required.
+            Free plan includes 10 leads. No credit card required.
           </p>
         </div>
       </section>
@@ -196,7 +196,7 @@ export default function LandingPage() {
               <h3 className="font-heading text-lg font-semibold text-surface-900 mb-1">Free</h3>
               <div className="text-3xl font-bold text-surface-900 mb-4">$0</div>
               <ul className="space-y-2 mb-6">
-                {["1 active lead", "1 pipeline", "Daily email digest"].map((f) => (
+                {["10 active leads", "10 pipelines", "Daily email digest"].map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm text-surface-600">
                     <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                     {f}
@@ -215,7 +215,7 @@ export default function LandingPage() {
               </div>
               <h3 className="font-heading text-lg font-semibold text-surface-900 mb-1">Pro</h3>
               <div className="text-3xl font-bold text-surface-900 mb-4">
-                $19<span className="text-sm font-normal text-surface-500">/mo</span>
+                $5<span className="text-sm font-normal text-surface-500">/mo</span>
               </div>
               <ul className="space-y-2 mb-6">
                 {[
