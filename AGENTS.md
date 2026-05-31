@@ -98,7 +98,7 @@ All set for Production + Development on `agentflow` project:
 - Keep existing Tailwind + Teal/Sky tokens — Hallmark is reference, not replacement
 
 ## Session History
-### May 31, 2026 Session (22 observations)
+### May 31, 2026 Session (28 observations)
 1. Created `opencode.json` with skill paths
 2. Created `AGENTS.md` with project context
 3. Installed Hallmark skill for audit/study/redesign workflows
@@ -127,6 +127,9 @@ All set for Production + Development on `agentflow` project:
 26. Excluded `/auth/callback` from middleware matcher to prevent cookie interference
 27. Fixed stale fallback URL in layout.tsx
 28. **UNRESOLVED:** Google OAuth login still needs end-to-end testing after fixes deployed
+29. Wired up data-fetching hooks in all 6 dashboard pages (settings, settings/profile/edit, leads, pipeline, dashboard, follow-ups)
+30. Removed duplicate Supabase client creation from all pages — now using centralized hooks
+31. Added professional release notes format to production-release.yml (no emojis, structured sections)
 
 ## Detailed Fix Report — Google OAuth (May 31, 2026)
 
@@ -178,8 +181,9 @@ curl -X PATCH "https://api.supabase.com/v1/projects/fsxdduvwshirrheenmag/config/
 |----------|------|--------|
 | CRITICAL | Create new Google OAuth client in GCloud Console | DONE |
 | CRITICAL | Update Supabase with new Google credentials | DONE |
-| CRITICAL | Test full OAuth flow end-to-end | PENDING — needs user testing |
+| CRITICAL | Test full OAuth flow end-to-end | PENDING -- needs user testing |
 | HIGH | Configure Stripe keys (env vars not set) | PENDING |
 | HIGH | Configure Resend API key | PENDING |
-| MEDIUM | Wire up data-fetching hooks in pages | PENDING |
-| MEDIUM | Commit and deploy code changes | PENDING |
+| MEDIUM | Wire up data-fetching hooks in pages | DONE |
+| MEDIUM | Commit and deploy code changes | DONE |
+| LOW | Professional release notes format in CI/CD | DONE |
