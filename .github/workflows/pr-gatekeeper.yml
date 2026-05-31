@@ -89,6 +89,7 @@ jobs:
     name: coverage-gate
     runs-on: ubuntu-latest
     needs: [unit-tests]
+    if: ${{ needs.unit-tests.result == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -227,6 +228,7 @@ jobs:
     steps:
       - name: Download coverage
         uses: actions/download-artifact@v4
+        if: ${{ needs.unit-tests.result == 'success' }}
         with:
           name: coverage-report
           path: coverage/
