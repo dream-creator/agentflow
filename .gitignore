@@ -41,7 +41,6 @@ next-env.d.ts
 # sensitive / internal docs
 ARCHITECTURE.md
 TEST_RELEASE_NOTES.txt
-supabase/migrations/
 
 # env examples (do not commit)
 .env.local.example
