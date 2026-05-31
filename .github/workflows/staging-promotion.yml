@@ -229,18 +229,15 @@ jobs:
 
       - name: "Run E2E tests (shard: ${{ matrix.shard }})"
         run: |
-          case "${{ matrix.shard }}" in
-            auth-pipeline)
-              npx playwright test e2e-auth.spec.ts e2e-pipeline.spec.ts --reporter=html
-              ;;
-            csv-cron)
-              npx playwright test e2e-csv-upload.spec.ts e2e-cron.spec.ts --reporter=html
-              ;;
-            stripe)
-              npx playwright test e2e-stripe.spec.ts --reporter=html
-              ;;
-          esac
+          if [ "$SHARD" = "auth-pipeline" ]; then
+            npx playwright test e2e-auth.spec.ts e2e-pipeline.spec.ts --reporter=html
+          elif [ "$SHARD" = "csv-cron" ]; then
+            npx playwright test e2e-csv-upload.spec.ts e2e-cron.spec.ts --reporter=html
+          elif [ "$SHARD" = "stripe" ]; then
+            npx playwright test e2e-stripe.spec.ts --reporter=html
+          fi
         env:
+          SHARD: ${{ matrix.shard }}
           BASE_URL: ${{ needs.vercel-staging-deploy.outputs.deploy-url }}
           CI: true
 
