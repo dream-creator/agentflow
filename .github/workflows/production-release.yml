@@ -158,20 +158,38 @@ jobs:
 
       - name: Determine version bump
         id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get latest release tag
-          LATEST_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "v0.0.0")
+          # Get latest release tag — try multiple methods
+          LATEST_TAG=$(gh release view --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          
+          # Fallback: check git tags
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG=$(git tag --sort=-v:refname | head -1 2>/dev/null || echo "")
+          fi
+          
+          # Final fallback
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+          
           echo "Latest tag: ${LATEST_TAG}"
 
           # Strip 'v' prefix and split
           VERSION="${LATEST_TAG#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
 
+          # Ensure we have valid numbers
+          MAJOR=${MAJOR:-0}
+          MINOR=${MINOR:-0}
+          PATCH=${PATCH:-0}
+
           # Determine bump type from input or commit messages
           BUMP="${{ github.event.inputs.version_bump }}"
           if [ -z "$BUMP" ]; then
             # Auto-detect from commit messages since last release
-            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s" -20)
             if echo "$COMMITS" | grep -qiE "^BREAKING|^feat!"; then
               BUMP="major"
             elif echo "$COMMITS" | grep -qiE "^feat"; then
@@ -198,15 +216,31 @@ jobs:
           esac
 
           NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          
+          # Check if tag already exists, increment if needed
+          while git rev-parse "$NEW_TAG" >/dev/null 2>&1; do
+            echo "Tag ${NEW_TAG} already exists, incrementing patch..."
+            PATCH=$((PATCH + 1))
+            NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          done
+
           echo "new_tag=${NEW_TAG}" >> "$GITHUB_OUTPUT"
           echo "bump_type=${BUMP}" >> "$GITHUB_OUTPUT"
           echo "New version: ${NEW_TAG} (${BUMP} bump)"
 
       - name: Generate release notes
         id: notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           NEW_TAG="${{ steps.version.outputs.new_tag }}"
-          PREV_TAG=$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo "")
+          
+          # Get previous tag — try multiple methods
+          PREV_TAG=$(gh release view --json tagName --jq '.tagName' 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git tag --sort=-v:refname | head -1 2>/dev/null || echo "")
+          fi
+          
           RELEASE_DATE=$(date +%Y-%m-%d)
           REPO_URL="https://github.com/${{ github.repository }}"
 
