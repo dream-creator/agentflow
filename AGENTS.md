@@ -176,3 +176,72 @@ All set for Production + Development on `agentflow` project:
 | HIGH | Set VERCEL_TOKEN secret | PENDING |
 | MEDIUM | Clean up test releases | PENDING |
 | LOW | Update Node.js actions | PENDING |
+
+---
+
+## Post-Session Analysis (June 1, 2026)
+
+### 1. E2E Testing Gaps (HIGH Priority)
+| Missing Test | Why It Matters |
+|-------------|----------------|
+| Settings/Billing page | No E2E test for billing page rendering, plan display, upgrade CTA |
+| Stripe checkout flow | No E2E test for clicking "Upgrade" → Stripe redirect |
+| Plan limit enforcement | No E2E test that hits 10 leads → toast appears → upgrade CTA link works |
+| Lead edit page | No E2E test for `/leads/[id]/edit` |
+| Profile edit page | No E2E test for `/settings/profile/edit` |
+| Toast notifications | No E2E test verifying toast renders with correct message + action link |
+
+### 2. Missing Error Boundaries (HIGH Priority)
+| Issue | Impact |
+|-------|--------|
+| No `error.tsx` files in any route | Unhandled errors show white screen instead of friendly error page |
+| No `loading.tsx` files | No skeleton/loading states during data fetches |
+| Global error boundary exists (`global-error.tsx`) but no route-level boundaries | Crashes in one route bring down entire app |
+
+### 3. Security Audit Status (MEDIUM Priority)
+| Finding | Status |
+|---------|--------|
+| `console.log` in API routes | Clean — none found |
+| Hardcoded secrets | Clean — none found |
+| `as any` type assertions | Clean — none found |
+| TODO/FIXME comments | Clean — none found |
+| Rate limiting on leads API | Present |
+| Auth checks on protected routes | Present |
+| Input validation (Zod) on leads API | Present |
+
+### 4. Performance Gaps (MEDIUM Priority)
+| Finding | Impact |
+|---------|--------|
+| No `next/image` usage | All images render as raw `<img>` — no optimization, no lazy loading |
+| No skeleton loading states | Pages show nothing during data fetch |
+| No `loading.tsx` in route directories | Next.js can't stream loading states |
+| No virtual scrolling for long lists | May lag with 50+ leads |
+
+### 5. Test Coverage Gaps (LOW Priority)
+| File | Coverage | Gap |
+|------|----------|-----|
+| `app/api/health/route.ts` | 0% | Not tested at all |
+| `lib/auth.ts` | 0% | Not tested |
+| `lib/rate-limiter.ts` | 81% | Lines 58-61 uncovered |
+| Branch coverage overall | 82% | Below 85% target |
+
+### 6. Production Readiness Checklist
+| Item | Status |
+|------|--------|
+| Stripe keys configured | ❌ `.env.local` has placeholders |
+| Resend API key | ❌ `.env.local` has placeholder |
+| Google OAuth | ⚠️ Fix deployed, needs user testing |
+| Sentry error tracking | ⚠️ Config exists but not verified |
+| Custom domain | ❌ Not configured |
+| PRODUCTION_APP_URL secret | ❌ Not set in GitHub |
+| VERCEL_TOKEN secret | ❌ Not set in GitHub |
+
+### Recommended Execution Order
+1. Add error boundaries (`error.tsx`) to key routes — prevents white screen crashes
+2. E2E test for plan limit enforcement — verifies the full flow we just built
+3. E2E test for billing/settings pages — covers untested routes
+4. Performance: add `loading.tsx` skeleton states
+5. Security audit: full pass with `security-reviewer` agent
+6. Performance audit: full pass with `performance-optimizer` agent
+7. Configure Stripe + Resend keys for production
+8. Test Google OAuth end-to-end
