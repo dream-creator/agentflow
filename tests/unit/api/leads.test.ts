@@ -48,6 +48,18 @@ function buildChain(result: { data: unknown; error: unknown }) {
   chain.eq = vi.fn(() => chain);
   chain.order = vi.fn(() => Promise.resolve(result));
   chain.single = vi.fn(() => Promise.resolve(result));
+  // Make chain awaitable for count queries (no .single() call)
+  chain.then = (resolve: (v: unknown) => unknown) => resolve(result);
+  return chain;
+}
+
+function buildLeadCountChain(count: number) {
+  const result = { data: null, error: null, count };
+  const chain: Record<string, unknown> = {};
+  chain.select = vi.fn(() => chain);
+  chain.eq = vi.fn(() => chain);
+  chain.single = vi.fn(() => Promise.resolve({ data: null, error: null }));
+  chain.then = (resolve: (v: unknown) => unknown) => resolve(result);
   return chain;
 }
 
@@ -113,8 +125,16 @@ describe("/api/leads", () => {
 
     it("creates a new lead with all fields", async () => {
       mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
-      const chain = buildChain({ data: { id: "new-lead", full_name: "John Doe" }, error: null });
-      mockFrom.mockReturnValue(chain);
+
+      // Profile query, count query, insert query
+      const profileChain = buildChain({ data: { plan: "free" }, error: null });
+      const countChain = buildLeadCountChain(5);
+      const insertChain = buildChain({ data: { id: "new-lead", full_name: "John Doe" }, error: null });
+
+      mockFrom
+        .mockReturnValueOnce(profileChain)   // profiles.select().eq().single()
+        .mockReturnValueOnce(countChain)     // leads.select(count).eq().eq()
+        .mockReturnValueOnce(insertChain);   // leads.insert().select().single()
 
       const request = new NextRequest("http://localhost:3000/api/leads", {
         method: "POST",
@@ -135,8 +155,15 @@ describe("/api/leads", () => {
 
     it("creates a new lead with default values", async () => {
       mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
-      const chain = buildChain({ data: { id: "new-lead" }, error: null });
-      mockFrom.mockReturnValue(chain);
+
+      const profileChain = buildChain({ data: { plan: "free" }, error: null });
+      const countChain = buildLeadCountChain(3);
+      const insertChain = buildChain({ data: { id: "new-lead" }, error: null });
+
+      mockFrom
+        .mockReturnValueOnce(profileChain)
+        .mockReturnValueOnce(countChain)
+        .mockReturnValueOnce(insertChain);
 
       const request = new NextRequest("http://localhost:3000/api/leads", {
         method: "POST",
@@ -148,8 +175,15 @@ describe("/api/leads", () => {
 
     it("returns 500 on database error", async () => {
       mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
-      const chain = buildChain({ data: null, error: { message: "Insert failed" } });
-      mockFrom.mockReturnValue(chain);
+
+      const profileChain = buildChain({ data: { plan: "free" }, error: null });
+      const countChain = buildLeadCountChain(3);
+      const insertChain = buildChain({ data: null, error: { message: "Insert failed" } });
+
+      mockFrom
+        .mockReturnValueOnce(profileChain)
+        .mockReturnValueOnce(countChain)
+        .mockReturnValueOnce(insertChain);
 
       const request = new NextRequest("http://localhost:3000/api/leads", {
         method: "POST",
@@ -161,8 +195,15 @@ describe("/api/leads", () => {
 
     it("sets optional fields to null when not provided", async () => {
       mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
-      const chain = buildChain({ data: {}, error: null });
-      mockFrom.mockReturnValue(chain);
+
+      const profileChain = buildChain({ data: { plan: "free" }, error: null });
+      const countChain = buildLeadCountChain(2);
+      const insertChain = buildChain({ data: {}, error: null });
+
+      mockFrom
+        .mockReturnValueOnce(profileChain)
+        .mockReturnValueOnce(countChain)
+        .mockReturnValueOnce(insertChain);
 
       const request = new NextRequest("http://localhost:3000/api/leads", {
         method: "POST",
@@ -170,7 +211,7 @@ describe("/api/leads", () => {
       });
       await POST(request);
 
-      expect(chain.insert).toHaveBeenCalledWith(
+      expect(insertChain.insert).toHaveBeenCalledWith(
         expect.objectContaining({
           user_id: "user-1",
           full_name: "Minimal Lead",
@@ -183,6 +224,64 @@ describe("/api/leads", () => {
           notes: null,
         })
       );
+    });
+
+    it("returns 403 when free tier lead limit is reached", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
+
+      const profileChain = buildChain({ data: { plan: "free" }, error: null });
+      const countChain = buildLeadCountChain(10); // at limit
+
+      mockFrom
+        .mockReturnValueOnce(profileChain)
+        .mockReturnValueOnce(countChain);
+
+      const request = new NextRequest("http://localhost:3000/api/leads", {
+        method: "POST",
+        body: JSON.stringify({ full_name: "Blocked Lead" }),
+      });
+      const response = await POST(request);
+      expect(response.status).toBe(403);
+    });
+
+    it("allows lead creation when under free tier limit", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
+
+      const profileChain = buildChain({ data: { plan: "free" }, error: null });
+      const countChain = buildLeadCountChain(9); // under limit
+      const insertChain = buildChain({ data: { id: "new-lead" }, error: null });
+
+      mockFrom
+        .mockReturnValueOnce(profileChain)
+        .mockReturnValueOnce(countChain)
+        .mockReturnValueOnce(insertChain);
+
+      const request = new NextRequest("http://localhost:3000/api/leads", {
+        method: "POST",
+        body: JSON.stringify({ full_name: "Allowed Lead" }),
+      });
+      const response = await POST(request);
+      expect(response.status).toBe(201);
+    });
+
+    it("allows unlimited leads for pro plan", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
+
+      const profileChain = buildChain({ data: { plan: "pro" }, error: null });
+      const countChain = buildLeadCountChain(50); // way over free limit
+      const insertChain = buildChain({ data: { id: "new-lead" }, error: null });
+
+      mockFrom
+        .mockReturnValueOnce(profileChain)
+        .mockReturnValueOnce(countChain)
+        .mockReturnValueOnce(insertChain);
+
+      const request = new NextRequest("http://localhost:3000/api/leads", {
+        method: "POST",
+        body: JSON.stringify({ full_name: "Pro Lead" }),
+      });
+      const response = await POST(request);
+      expect(response.status).toBe(201);
     });
   });
 });

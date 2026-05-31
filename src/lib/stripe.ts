@@ -13,7 +13,7 @@ function getStripeClient(): Stripe {
 }
 
 export const STRIPE_CONFIG = {
-  price: 1900, // $19.00
+  price: 500, // $5.00
   currency: "usd",
   productName: "AgentFlow Pro",
   productDescription:
