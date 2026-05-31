@@ -64,7 +64,7 @@ export async function updateSession(request: NextRequest) {
   } catch (error) {
     // If Supabase client fails, continue without auth check
     // This allows public pages to render even if Supabase is misconfigured
-    console.error("Middleware auth error:", error);
+    console.error("Middleware auth error:", error instanceof Error ? error.message : "Unknown error");
   }
 
   return supabaseResponse;

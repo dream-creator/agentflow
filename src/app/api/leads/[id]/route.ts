@@ -24,7 +24,8 @@ export async function GET(
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Lead GET error:", error.message);
+    return NextResponse.json({ error: "Failed to fetch lead" }, { status: 500 });
   }
 
   return NextResponse.json(data);
@@ -66,7 +67,8 @@ export async function PUT(
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Lead PUT error:", error.message);
+    return NextResponse.json({ error: "Failed to update lead" }, { status: 500 });
   }
 
   return NextResponse.json(data);
@@ -93,7 +95,8 @@ export async function DELETE(
     .eq("user_id", user.id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Lead DELETE error:", error.message);
+    return NextResponse.json({ error: "Failed to delete lead" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

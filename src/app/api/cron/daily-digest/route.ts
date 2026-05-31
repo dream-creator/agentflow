@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
     .not("next_action", "is", null);
 
   if (error || !leads) {
-    return NextResponse.json({ error: error?.message }, { status: 500 });
+    console.error("Daily digest query error:", error?.message);
+    return NextResponse.json({ error: "Failed to fetch leads for digest" }, { status: 500 });
   }
 
   const userLeads: Record<string, { email: string; name: string; leads: typeof leads }> = {};
