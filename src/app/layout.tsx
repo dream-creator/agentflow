@@ -15,7 +15,7 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://startupvo1.vercel.app";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agentflow-inky.vercel.app";
 
 export const metadata: Metadata = {
   title: "AgentFlow — The CRM for agents who hate CRMs",
