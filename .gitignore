@@ -43,3 +43,6 @@ supabase/migrations/
 
 # env examples (do not commit)
 .env.local.example
+
+# internal docs (do not commit)
+OAUTH-CONFIG-GUIDE.md
