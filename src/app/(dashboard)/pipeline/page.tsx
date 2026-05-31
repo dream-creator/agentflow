@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { fetchLeads, updateLead } from "@/hooks/useLeads";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -29,22 +29,16 @@ export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
-    async function fetchLeads() {
-      const { data } = await supabase
-        .from("leads")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-
+    async function loadLeads() {
+      const { data, error } = await fetchLeads();
       if (data) setLeads(data);
       setLoading(false);
     }
 
-    fetchLeads();
-  }, [supabase]);
+    loadLeads();
+  }, []);
 
   const getLeadsByStage = useCallback(
     (stageKey: StageKey) => leads.filter((l) => l.pipeline_stage === stageKey),
@@ -71,10 +65,9 @@ export default function PipelinePage() {
         )
       );
 
-      const { error } = await supabase
-        .from("leads")
-        .update({ pipeline_stage: newStage, updated_at: new Date().toISOString() })
-        .eq("id", draggableId);
+      const { data, error } = await updateLead(draggableId, {
+        pipeline_stage: newStage,
+      });
 
       if (error) {
         setLeads((prev) =>
@@ -88,7 +81,7 @@ export default function PipelinePage() {
 
       setUpdating(null);
     },
-    [leads, supabase]
+    [leads]
   );
 
   if (loading) {
