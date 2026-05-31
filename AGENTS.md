@@ -31,7 +31,7 @@
 
 ## CI/CD Gotchas (Lessons Learned)
 - **Sentry config:** `withSentryConfig()` in `next.config.mjs` must be conditional — crashes Vercel build if `SENTRY_ORG`/`SENTRY_PROJECT` aren't set
-- **Supabase client:** Must use lazy init pattern in auth pages — `createClient()` called at component top-level crashes during Next.js prerendering (env vars unavailable server-side). Use `getSupabase = () => createClient()` and call inside event handlers only. In `client.ts`, return a stub `{}` object during SSR prerendering (when `typeof window === "undefined"`) instead of throwing — the real client initializes on the client side where `NEXT_PUBLIC_` vars are available.
+- **Supabase client:** Must use lazy init pattern in auth pages — `createClient()` called at component top-level crashes during Next.js prerendering (env vars unavailable server-side). Use `getSupabase = () => createClient()` and call inside event handlers only. In `client.ts`, return a stub `{}` object during SSR prerendering (when `typeof window === "undefined"`) instead of throwing — the real client initializes on the client side where `NEXT_PUBLIC_` vars are available. In `server.ts` and `middleware.ts`, check for env vars before calling `createServerClient()` and return early if missing.
 - **Staging workflow:** Avoid `case` shell statements with `${{ matrix.* }}` inline expansion — use `if/elif` with env vars instead (GitHub Actions YAML validator rejects it)
 - **Shell scripts in YAML:** Pass GitHub expressions as `env:` vars, reference via `$VAR` in shell — never inline `${{ }}` in shell syntax
 
