@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { fetchLeads } from "@/hooks/useLeads";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -19,27 +19,19 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
-  const supabase = createClient();
 
   useEffect(() => {
-    async function fetchLeads() {
-      let query = supabase
-        .from("leads")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-
-      if (filter !== "all") {
-        query = query.eq("pipeline_stage", filter);
+    async function loadLeads() {
+      const { data, error } = await fetchLeads();
+      if (data) {
+        const filtered = filter === "all" ? data : data.filter(l => l.pipeline_stage === filter);
+        setLeads(filtered);
       }
-
-      const { data } = await query;
-      if (data) setLeads(data);
       setLoading(false);
     }
 
-    fetchLeads();
-  }, [supabase, filter]);
+    loadLeads();
+  }, [filter]);
 
   const filteredLeads = leads.filter(
     (lead) =>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { fetchProfile, updateProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,33 +24,22 @@ export default function EditProfilePage() {
   const [email, setEmail] = useState("");
   const [brokerage, setBrokerage] = useState("");
 
-  const supabase = createClient();
-
   useEffect(() => {
-    async function fetchProfile() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+    async function loadProfile() {
+      const { data, error } = await fetchProfile();
+      if (error || !data) {
         router.push("/login");
         return;
       }
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (data) {
-        setProfile(data);
-        setFullName(data.full_name);
-        setEmail(data.email);
-        setBrokerage(data.brokerage || "");
-      }
+      setProfile(data);
+      setFullName(data.full_name);
+      setEmail(data.email);
+      setBrokerage(data.brokerage || "");
       setLoading(false);
     }
 
-    fetchProfile();
-  }, [supabase, router]);
+    loadProfile();
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,17 +52,13 @@ export default function EditProfilePage() {
       return;
     }
 
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({
-        full_name: fullName,
-        brokerage: brokerage || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", profile.id);
+    const { data, error: updateError } = await updateProfile({
+      full_name: fullName,
+      brokerage: brokerage || null,
+    });
 
     if (updateError) {
-      setError(updateError.message);
+      setError(updateError);
       setSaving(false);
       return;
     }
