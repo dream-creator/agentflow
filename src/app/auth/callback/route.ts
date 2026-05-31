@@ -17,12 +17,16 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-    if (!exchangeError) {
-      const redirectUrl = next.startsWith("/") ? next : "/";
-      return NextResponse.redirect(`${origin}${redirectUrl}`);
+    if (supabase) {
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      if (!exchangeError) {
+        const redirectUrl = next.startsWith("/") ? next : "/";
+        return NextResponse.redirect(`${origin}${redirectUrl}`);
+      }
+      console.error("Session exchange error:", exchangeError.message);
+    } else {
+      console.error("Supabase client not available - check env vars");
     }
-    console.error("Session exchange error:", exchangeError.message);
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
