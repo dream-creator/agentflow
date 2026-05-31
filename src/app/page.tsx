@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-export const dynamic = "force-dynamic";
 import { Suspense } from "react";
+export const dynamic = "force-dynamic";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

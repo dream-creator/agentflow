@@ -14,6 +14,7 @@ function BillingContent() {
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<"free" | "pro">("free");
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [error, setError] = useState("");
   const supabase = createClient();
 
   useEffect(() => {
@@ -43,7 +44,7 @@ function BillingContent() {
         window.location.href = data.url;
       }
     } catch {
-      // Handle error
+      setError("Failed to start checkout. Please try again.");
     }
     setLoading(false);
   }
@@ -113,6 +114,9 @@ function BillingContent() {
                   )}
                   Upgrade to Pro — $19/mo
                 </Button>
+                {error && (
+                  <p className="text-sm text-destructive mt-2 text-center">{error}</p>
+                )}
               </div>
             )}
           </Card>

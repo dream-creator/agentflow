@@ -12,8 +12,9 @@ export function createClient() {
     if (typeof window === "undefined") {
       return {} as ReturnType<typeof createBrowserClient>;
     }
+    throw new Error("Supabase environment variables are not configured");
   }
 
-  client = createBrowserClient(url!, key!);
+  client = createBrowserClient(url, key);
   return client;
 }
