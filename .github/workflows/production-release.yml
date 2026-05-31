@@ -257,12 +257,48 @@ jobs:
           fi
 
           # Collect all data
-          ALL_COMMITS=$(git log ${COMMIT_RANGE} --pretty=format:"%h|%s|%an" --no-merges 2>/dev/null)
+          ALL_COMMITS=$(git log ${COMMIT_RANGE} --pretty=format:"%h|%s|%an|%ae" --no-merges 2>/dev/null)
           COMMIT_COUNT=$(git log ${COMMIT_RANGE} --oneline --no-merges 2>/dev/null | wc -l)
           FILES_CHANGED=$(git diff --stat ${COMMIT_RANGE} 2>/dev/null | tail -1)
           ADDITIONS=$(echo "$FILES_CHANGED" | grep -oP '\d+(?= insertion)' || echo "0")
           DELETIONS=$(echo "$FILES_CHANGED" | grep -oP '\d+(?= deletion)' || echo "0")
-          CONTRIBUTORS=$(git log ${COMMIT_RANGE} --pretty=format:"%an" --no-merges 2>/dev/null | sort -u)
+          
+          # Get contributors: workflow actor + commit authors
+          WORKFLOW_ACTOR="${{ github.actor }}"
+          COMMIT_AUTHORS=$(git log ${COMMIT_RANGE} --pretty=format:"%an|%ae" --no-merges 2>/dev/null | sort -u)
+          
+          # Build contributors list with GitHub usernames
+          CONTRIBUTORS=""
+          
+          # Add workflow actor first (person who triggered the release)
+          if [ -n "$WORKFLOW_ACTOR" ] && [ "$WORKFLOW_ACTOR" != "github-actions[bot]" ]; then
+            CONTRIBUTORS="${WORKFLOW_ACTOR}"
+          fi
+          
+          # Add commit authors
+          while IFS='|' read -r name email; do
+            [ -z "$name" ] && continue
+            # Extract username from email (before @)
+            USERNAME=$(echo "$email" | cut -d'@' -f1 | sed 's/^.*+//')
+            # Skip bots
+            if echo "$USERNAME" | grep -qiE "bot|github-actions|noreply"; then
+              continue
+            fi
+            # Skip if already in list
+            if echo "$CONTRIBUTORS" | grep -qiF "$USERNAME"; then
+              continue
+            fi
+            if [ -n "$CONTRIBUTORS" ]; then
+              CONTRIBUTORS="${CONTRIBUTORS} ${USERNAME}"
+            else
+              CONTRIBUTORS="${USERNAME}"
+            fi
+          done <<< "$COMMIT_AUTHORS"
+          
+          # Fallback if no contributors found
+          if [ -z "$CONTRIBUTORS" ]; then
+            CONTRIBUTORS="github-actions[bot]"
+          fi
 
           # Categorize commits
           FEATURES=""
@@ -375,7 +411,7 @@ jobs:
           | Commits since ${PREV_DISPLAY} | ${COMMIT_COUNT} |
           | Files changed | $(echo "$FILES_CHANGED" | tr -s ' ' | cut -d' ' -f1) |
           | Additions / Deletions | +${ADDITIONS} / -${DELETIONS} |
-          | Contributors | $(echo "$CONTRIBUTORS" | wc -l) |
+          | Contributors | $(echo "$CONTRIBUTORS" | tr ' ' '\n' | grep -c . | tr -d ' ') |
 
           ---
 
@@ -383,7 +419,7 @@ jobs:
 
           Thank you to everyone who contributed to this release.
 
-          $(echo "$CONTRIBUTORS" | while read -r name; do echo "- @${name}"; done)
+          $(echo "$CONTRIBUTORS" | tr ' ' '\n' | while read -r username; do [ -n "$username" ] && echo "- @${username}"; done)
 
           ---
 
