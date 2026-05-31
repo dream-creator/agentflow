@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { showToast } from "@/components/ui/toast";
+import { checkPlanLimit } from "@/lib/plan-limit";
 import { ArrowLeft, Upload, FileText, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
@@ -100,12 +102,40 @@ export default function ImportPage() {
       return;
     }
 
+    // Check plan limit before importing
+    const limit = await checkPlanLimit();
+    if (!limit.allowed) {
+      showToast(
+        `Free plan limited to ${limit.maxAllowed} active leads. Upgrade to Pro for unlimited.`,
+        "error",
+        { label: "Upgrade to Pro", href: "/settings/billing" }
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Warn if import would exceed limit
+    const remaining = limit.maxAllowed - limit.currentCount;
+    if (parsedLeads.length > remaining) {
+      showToast(
+        `You can only import ${remaining} more leads on the Free plan. ${parsedLeads.length - remaining} leads will be skipped.`,
+        "info",
+        { label: "Upgrade to Pro", href: "/settings/billing" }
+      );
+    }
+
     let successCount = 0;
     const newErrors: string[] = [];
 
     for (const lead of parsedLeads) {
       if (!lead.full_name.trim()) {
         newErrors.push(`Skipping row: empty name`);
+        continue;
+      }
+
+      // Stop importing if limit reached
+      if (successCount >= remaining) {
+        newErrors.push(`Skipped "${lead.full_name}": free plan limit reached`);
         continue;
       }
 

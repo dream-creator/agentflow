@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { showToast } from "@/components/ui/toast";
+import { checkPlanLimit } from "@/lib/plan-limit";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -43,6 +44,18 @@ export default function NewLeadPage() {
 
     if (!user) {
       setError("Not authenticated");
+      setLoading(false);
+      return;
+    }
+
+    // Check plan limit before inserting
+    const limit = await checkPlanLimit();
+    if (!limit.allowed) {
+      showToast(
+        `Free plan limited to ${limit.maxAllowed} active leads. Upgrade to Pro for unlimited.`,
+        "error",
+        { label: "Upgrade to Pro", href: "/settings/billing" }
+      );
       setLoading(false);
       return;
     }
