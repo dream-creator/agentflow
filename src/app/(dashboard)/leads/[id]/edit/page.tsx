@@ -53,10 +53,17 @@ export default function EditLeadPage() {
 
   useEffect(() => {
     async function fetchLead() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("leads")
         .select("*")
         .eq("id", params.id)
+        .eq("user_id", user.id)
         .single();
 
       if (error || !data) {
