@@ -458,6 +458,6 @@ jobs:
           
           # Then create the release
           gh release create "${NEW_TAG}" \
-            --title "${NEW_TAG} -- Production Release" \
+            --title "${NEW_TAG}" \
             --notes-file /tmp/release-body.md \
             --target main
