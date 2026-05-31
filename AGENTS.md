@@ -222,8 +222,61 @@ curl -X PATCH "https://api.supabase.com/v1/projects/fsxdduvwshirrheenmag/config/
 | HIGH | Configure Resend API key | PENDING | Set RESEND_API_KEY in Vercel, verify domain in Resend dashboard |
 | HIGH | Set PRODUCTION_APP_URL secret | PENDING | Add to GitHub repo secrets for smoke tests |
 | HIGH | Set VERCEL_TOKEN secret | PENDING | Add to GitHub repo secrets for CI/CD deploys |
-| MEDIUM | Clean up test releases | PENDING | Delete v0.2.0-v0.2.4 test releases from GitHub |
+| MEDIUM | Clean up test releases | PENDING | Delete v0.2.0-v0.2.14 test releases from GitHub |
 | LOW | Update Node.js actions | PENDING | GitHub Actions deprecation — Node.js 20 → 24 before Sept 2026 |
+
+## Next Session Plan (June 1, 2026)
+
+### Block 1: Google OAuth Testing (30 min)
+- Manual test: /login → "Continue with Google" → authenticate → verify redirect
+- Test on mobile (Safari iOS, Chrome Android)
+- Files: auth-callback-rescue.tsx, auth/callback/route.ts, auth.ts
+
+### Block 2: Stripe Integration (1-2 hrs)
+- User creates Stripe account, gets API keys
+- Agent sets env vars via Vercel CLI
+- Test checkout flow: Settings → Billing → Upgrade → Stripe checkout
+- Test webhook: subscription activates in profiles table
+- PRICE UPDATE: Change from $19/mo → $5/mo (update STRIPE_CONFIG.price in stripe.ts + recreate Stripe price)
+- Files: stripe.ts, api/stripe/checkout/route.ts, api/stripe/webhook/route.ts, settings/billing/page.tsx
+
+### Block 3: Resend Email Config (45 min)
+- User creates Resend account, adds domain, verifies DNS
+- Agent sets RESEND_API_KEY via Vercel CLI
+- Test daily digest cron + welcome email
+- Files: resend.ts, api/cron/daily-digest/route.ts
+
+### Block 4: Rate Limiter → Upstash Redis (1 hr)
+- Create Upstash account (free tier)
+- Install @upstash/ratelimit + @upstash/redis
+- Rewrite src/lib/rate-limiter.ts
+- Test: 101 rapid requests → verify 429
+- Files: rate-limiter.ts, package.json
+
+### Block 5: TypeScript Strictness (30 min)
+- Enable noUncheckedIndexedAccess + noImplicitReturns in tsconfig.json
+- Fix surfaced errors
+- Files: tsconfig.json + multiple
+
+### Block 6: GitHub Secrets + Cleanup (30 min)
+- Set PRODUCTION_APP_URL + VERCEL_TOKEN
+- Delete test releases v0.2.0-v0.2.14
+- Update actions/checkout@v4 → @v5
+
+### Block 7: Code Cleanup PR (30 min)
+- Extract SOURCES/PIPELINE_STAGES to constants.ts
+- Extract ContactActions component
+- Extract formatDate to utils.ts
+- Files: constants.ts, contact-actions.tsx, utils.ts
+
+### Block 8: E2E Tests (1 hr)
+- Lead CRUD, Pipeline drag-and-drop, Follow-ups, Settings, Stripe checkout
+
+### Block 9: Sentry Verification (15 min)
+- Trigger error, verify Sentry capture
+
+**Total estimated: ~6 hrs**
+**User prep needed:** Google account, Stripe account, Resend account, Upstash account, Vercel token
 
 ## Future Next Steps (Post Phase 4)
 
