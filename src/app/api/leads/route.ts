@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { leadSchema } from "@/lib/validations";
 import { apiRateLimit } from "@/lib/rate-limiter";
+import { PLAN_LIMITS, type PlanType } from "@/lib/constants";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -81,6 +82,29 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "Validation failed", details: result.error.flatten().fieldErrors },
       { status: 400 }
+    );
+  }
+
+  // Plan limit enforcement: check active lead count against plan limits
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("id", user.id)
+    .single();
+
+  const plan: PlanType = (profile?.plan as PlanType) || "free";
+  const limits = PLAN_LIMITS[plan];
+
+  const { count: activeLeadCount } = await supabase
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("is_active", true);
+
+  if (activeLeadCount !== null && activeLeadCount >= limits.maxActiveLeads) {
+    return NextResponse.json(
+      { error: `Free plan limited to ${limits.maxActiveLeads} active leads. Upgrade to Pro for unlimited.` },
+      { status: 403 }
     );
   }
 
