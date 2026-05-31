@@ -336,8 +336,8 @@ jobs:
               # Format body: strip empty lines and git metadata
               formatted = ""
               if (body != "") {
-                split(body, blines, "\n")
-                for (i in blines) {
+                nlines = split(body, blines, "\n")
+                for (i = 1; i <= nlines; i++) {
                   line = blines[i]
                   gsub(/^[[:space:]]+/, "", line)
                   if (line == "") continue
