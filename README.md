@@ -43,8 +43,8 @@ Passwordless sign-in via Magic Link or Google OAuth — no passwords to manage o
 
 | Plan | Price | Leads |
 |---|---|---|
-| **Free** | $0 / month | 1 active lead |
-| **Pro** | $19 / month | Unlimited leads, pipelines & custom branding |
+| **Free** | $0 / month | 10 active leads |
+| **Pro** | $5 / month | Unlimited leads, pipelines & custom branding |
 
 [→ Get started at agentflow.app](https://startupvo1.vercel.app)
 
