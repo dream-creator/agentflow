@@ -26,10 +26,14 @@ export default function LeadDetailPage() {
 
   useEffect(() => {
     async function fetchLeadAndActions() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { data: leadData } = await supabase
         .from("leads")
         .select("*")
         .eq("id", params.id)
+        .eq("user_id", user.id)
         .single();
 
       if (leadData) {
@@ -50,7 +54,10 @@ export default function LeadDetailPage() {
   async function handleDelete() {
     if (!confirm("Are you sure you want to delete this lead?")) return;
 
-    await supabase.from("leads").delete().eq("id", params.id as string);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("leads").delete().eq("id", params.id as string).eq("user_id", user.id);
     showToast("Lead deleted successfully!", "success");
     router.push("/leads");
     router.refresh();
