@@ -40,3 +40,6 @@ next-env.d.ts
 ARCHITECTURE.md
 TEST_RELEASE_NOTES.txt
 supabase/migrations/
+
+# env examples (do not commit)
+.env.local.example
