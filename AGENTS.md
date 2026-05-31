@@ -1,7 +1,7 @@
 # AgentFlow — "The CRM for agents who hate CRMs"
 
 ## Tech Stack
-- **Framework:** Next.js 14.2.3 (App Router, TypeScript strict)
+- **Framework:** Next.js 14.2.35 (App Router, TypeScript strict)
 - **Styling:** Tailwind CSS 3.4.x (Teal #0F766E primary, Sky #0369A1 accent)
 - **Database:** Supabase Cloud (project: fsxdduvwshirrheenmag) — PostgreSQL with RLS
 - **Auth:** Supabase Auth — Magic Link OTP + Google OAuth
@@ -14,8 +14,8 @@
 
 ## Project Status
 - Phase 1-3: 100% complete
-- Phase 4 (Production): 60% complete
-- Build: Passing, lint clean, 140 tests (96.68% coverage)
+- Phase 4 (Production): 65% complete
+- Build: Passing, lint clean, 124 tests (96.68% coverage)
 - **LIVE:** https://agentflow-inky.vercel.app
 
 ## Key Directories
@@ -27,11 +27,12 @@
 - `.github/workflows/` — 4 CI/CD workflows
 
 ## Conventions
-- Use Lucide React icons (no emoji)
+- Use Lucide React icons (no emoji in code)
 - Zod for API input validation
 - Lazy init for Stripe/Resend/Supabase client (build-time safe)
 - In-memory rate limiting
 - SVG PWA icons with gradient
+- GitHub Releases: version-only title (e.g., "v0.2.5"), no emojis in release notes
 
 ## CRITICAL ISSUES (Highest Priority)
 
@@ -98,7 +99,7 @@ All set for Production + Development on `agentflow` project:
 - Keep existing Tailwind + Teal/Sky tokens — Hallmark is reference, not replacement
 
 ## Session History
-### May 31, 2026 Session (28 observations)
+### May 31, 2026 Session (34 observations)
 1. Created `opencode.json` with skill paths
 2. Created `AGENTS.md` with project context
 3. Installed Hallmark skill for audit/study/redesign workflows
@@ -130,6 +131,22 @@ All set for Production + Development on `agentflow` project:
 29. Wired up data-fetching hooks in all 6 dashboard pages (settings, settings/profile/edit, leads, pipeline, dashboard, follow-ups)
 30. Removed duplicate Supabase client creation from all pages — now using centralized hooks
 31. Added professional release notes format to production-release.yml (no emojis, structured sections)
+32. Fixed Next.js security vulnerability: upgraded 14.2.3 → 14.2.35 (authorization bypass CVE)
+33. Fixed release workflow: version detection, tag creation, contributor auto-detection
+34. Simplified release title to version-only format (e.g., "v0.2.5")
+
+## Detailed Fix Report — Next.js Security (May 31, 2026)
+
+### Vulnerability: Authorization Bypass
+- **CVE:** Next.js middleware authorization bypass via `x-middleware-subrequest` header
+- **Impact:** Attackers could skip middleware auth checks by sending requests with the header
+- **Fix:** Upgraded Next.js from 14.2.3 → 14.2.35 (patched version)
+- **Verified:** Build passes, 124 tests green, production deployment successful
+
+### Vulnerability: i18n Data Route Authorization Bypass
+- **CVE:** Pages Router with i18n + middleware authorization bypass
+- **Impact:** Not applicable — project uses App Router, no i18n configured
+- **Action:** No fix required
 
 ## Detailed Fix Report — Google OAuth (May 31, 2026)
 
@@ -177,13 +194,98 @@ curl -X PATCH "https://api.supabase.com/v1/projects/fsxdduvwshirrheenmag/config/
 4. Verify redirect to `/auth/callback` → session created → `/dashboard`
 
 ### Remaining Tasks (Phase 4)
-| Priority | Task | Status |
-|----------|------|--------|
-| CRITICAL | Create new Google OAuth client in GCloud Console | DONE |
-| CRITICAL | Update Supabase with new Google credentials | DONE |
-| CRITICAL | Test full OAuth flow end-to-end | PENDING -- needs user testing |
-| HIGH | Configure Stripe keys (env vars not set) | PENDING |
-| HIGH | Configure Resend API key | PENDING |
-| MEDIUM | Wire up data-fetching hooks in pages | DONE |
-| MEDIUM | Commit and deploy code changes | DONE |
-| LOW | Professional release notes format in CI/CD | DONE |
+| Priority | Task | Status | Details |
+|----------|------|--------|---------|
+| CRITICAL | Test Google OAuth flow end-to-end | PENDING | Visit /login → click "Continue with Google" → authenticate → verify redirect to /dashboard |
+| HIGH | Configure Stripe keys | PENDING | Set STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in Vercel |
+| HIGH | Configure Resend API key | PENDING | Set RESEND_API_KEY in Vercel, verify domain in Resend dashboard |
+| HIGH | Set PRODUCTION_APP_URL secret | PENDING | Add to GitHub repo secrets for smoke tests |
+| HIGH | Set VERCEL_TOKEN secret | PENDING | Add to GitHub repo secrets for CI/CD deploys |
+| MEDIUM | Clean up test releases | PENDING | Delete v0.2.0-v0.2.4 test releases from GitHub |
+| LOW | Update Node.js actions | PENDING | GitHub Actions deprecation — Node.js 20 → 24 before Sept 2026 |
+
+## Future Next Steps (Post Phase 4)
+
+### Immediate (Next Session)
+1. **Google OAuth Testing** — User must manually test the full OAuth flow:
+   - Navigate to `https://agentflow-inky.vercel.app/login`
+   - Click "Continue with Google"
+   - Authenticate with Google account
+   - Verify redirect to `/auth/callback` → session created → `/dashboard`
+   - If fails, check browser console for errors and Supabase logs
+
+2. **Stripe Integration** — Configure payment processing:
+   - Create Stripe account at `https://dashboard.stripe.com`
+   - Get API keys from Developers → API keys
+   - Set `STRIPE_SECRET_KEY` (sk_live_...)
+   - Set `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (pk_live_...)
+   - Create webhook endpoint at `https://agentflow-inky.vercel.app/api/stripe/webhook`
+   - Set `STRIPE_WEBHOOK_SECRET` from webhook signing secret
+   - Test: create a test subscription, verify checkout flow
+
+3. **Resend Email Configuration** — Set up transactional email:
+   - Create Resend account at `https://resend.com`
+   - Add domain `agentflow-inky.vercel.app`
+   - Verify DNS records (SPF, DKIM)
+   - Get API key from Settings → API keys
+   - Set `RESEND_API_KEY` in Vercel
+   - Test: trigger daily digest cron, verify email delivery
+
+### Short-Term (This Week)
+4. **Production Environment Variables** — Complete GitHub secrets:
+   - `PRODUCTION_APP_URL` = `https://agentflow-inky.vercel.app`
+   - `VERCEL_TOKEN` = (from Vercel account settings)
+   - `SUPABASE_ACCESS_TOKEN` = (from Supabase account settings)
+   - Verify all secrets are set: `gh secret list`
+
+5. **Clean Up Test Releases** — Remove debug releases:
+   - Delete v0.2.0, v0.2.1, v0.2.2, v0.2.3, v0.2.4 from GitHub
+   - Keep v0.1.17 as last stable release
+   - Next push will create v0.2.5 (or v0.3.0 if feat commit)
+
+6. **Update GitHub Actions** — Address Node.js deprecation:
+   - Update `actions/checkout@v4` → `actions/checkout@v5` (when available)
+   - Update `actions/setup-node@v4` → `actions/setup-node@v5` (when available)
+   - Or set `ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true` as temporary fix
+
+### Medium-Term (Next 2 Weeks)
+7. **End-to-End Testing** — Verify all user flows:
+   - Login (email/password + Google OAuth)
+   - Signup (email/password + Google OAuth)
+   - Create lead → Edit lead → Delete lead
+   - Pipeline drag-and-drop → Stage change persists
+   - Follow-ups: overdue/today/upcoming sections
+   - Settings: profile edit, subscription status
+   - Stripe checkout → Payment → Pro activation
+
+8. **Performance Optimization** — Improve Core Web Vitals:
+   - Run Lighthouse audit on all pages
+   - Optimize images (Next.js Image component)
+   - Add proper caching headers
+   - Implement ISR for static pages
+
+9. **Monitoring Setup** — Configure error tracking:
+   - Verify Sentry is capturing errors in production
+   - Set up Vercel Analytics dashboard
+   - Configure Speed Insights for performance monitoring
+   - Set up alerts for critical errors
+
+### Long-Term (Month 1)
+10. **Beta Launch Preparation** — Get ready for first users:
+    - Create onboarding flow for new users
+    - Add in-app feedback widget
+    - Set up customer support email
+    - Write help documentation
+    - Create demo video/screenshots
+
+11. **Marketing Assets** — Prepare launch materials:
+    - Landing page optimization (conversion rate)
+    - SEO meta tags and structured data
+    - Social media presence (Twitter, LinkedIn)
+    - Product Hunt launch preparation
+
+12. **Business Logic** — Implement remaining features:
+    - Email templates for proposal notifications
+    - Webhook integrations (Zapier, Make)
+    - CSV export for leads
+    - Bulk operations (import/export)
