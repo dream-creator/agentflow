@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { fetchProfile } from "@/hooks/useProfile";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,28 +21,18 @@ export default function SettingsPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    async function fetchProfile() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
+    async function loadProfile() {
+      const { data, error } = await fetchProfile();
+      if (error || !data) {
         router.push("/login");
         return;
       }
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (data) setProfile(data);
+      setProfile(data);
       setLoading(false);
     }
 
-    fetchProfile();
-  }, [supabase, router]);
+    loadProfile();
+  }, [router]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
