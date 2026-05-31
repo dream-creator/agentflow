@@ -35,3 +35,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env.vercel
+
+# sensitive / internal docs
+ARCHITECTURE.md
+TEST_RELEASE_NOTES.txt
