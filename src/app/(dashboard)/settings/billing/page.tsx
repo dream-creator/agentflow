@@ -84,7 +84,7 @@ function BillingContent() {
                 {plan === "pro" ? "Pro" : "Free"} Plan
               </span>
               <Badge variant={plan === "pro" ? "primary" : "default"}>
-                {plan === "pro" ? "$19/mo" : "$0/mo"}
+                {plan === "pro" ? "$5/mo" : "$0/mo"}
               </Badge>
             </div>
             {plan === "free" && (
@@ -112,7 +112,7 @@ function BillingContent() {
                   ) : (
                     <ExternalLink className="h-4 w-4 mr-2" />
                   )}
-                  Upgrade to Pro — $19/mo
+                  Upgrade to Pro — $5/mo
                 </Button>
                 {error && (
                   <p className="text-sm text-destructive mt-2 text-center">{error}</p>
@@ -136,8 +136,8 @@ function BillingContent() {
                 </thead>
                 <tbody>
                   {[
-                    { feature: "Active leads", free: "1", pro: "Unlimited" },
-                    { feature: "Pipelines", free: "1", pro: "Unlimited" },
+                    { feature: "Active leads", free: "10", pro: "Unlimited" },
+                    { feature: "Pipelines", free: "10", pro: "Unlimited" },
                     { feature: "Daily email digest", free: "✓", pro: "✓" },
                     { feature: "Custom branding", free: "—", pro: "✓" },
                     { feature: "SMS reminders", free: "—", pro: "✓" },
