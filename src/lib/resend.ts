@@ -1,5 +1,14 @@
 import { Resend } from "resend";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 let _resend: Resend | null = null;
 
 function getResendClient(): Resend {
@@ -35,7 +44,7 @@ export async function sendDailyDigest(
   const leadList = leads
     .map(
       (l) =>
-        `<li><strong>${l.full_name}</strong>${l.next_action ? `: ${l.next_action}` : ""}${l.next_action_date ? ` (due ${new Date(l.next_action_date).toLocaleDateString()})` : ""}</li>`
+        `<li><strong>${escapeHtml(l.full_name)}</strong>${l.next_action ? `: ${escapeHtml(l.next_action)}` : ""}${l.next_action_date ? ` (due ${new Date(l.next_action_date).toLocaleDateString()})` : ""}</li>`
     )
     .join("");
 
@@ -77,7 +86,7 @@ export async function sendWelcomeEmail(
   const resend = getResendClient();
 
   const html = `
-    <h2>Welcome to ${EMAIL_CONFIG.appName}, ${userName}!</h2>
+    <h2>Welcome to ${EMAIL_CONFIG.appName}, ${escapeHtml(userName)}!</h2>
     <p>You're all set to start managing your leads like a pro.</p>
     <p>Here's what you can do:</p>
     <ul>

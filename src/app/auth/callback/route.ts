@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     if (supabase) {
       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       if (!exchangeError) {
-        const redirectUrl = next.startsWith("/") ? next : "/";
+        const redirectUrl = next.startsWith("/") && !next.startsWith("//") ? next : "/";
         return NextResponse.redirect(`${origin}${redirectUrl}`);
       }
       console.error("Session exchange error:", exchangeError.message);
