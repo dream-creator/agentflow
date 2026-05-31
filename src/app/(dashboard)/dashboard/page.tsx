@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { fetchLeads } from "@/hooks/useLeads";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -17,25 +17,23 @@ type Lead = Database["public"]["Tables"]["leads"]["Row"];
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
-    async function fetchFollowUps() {
-      const today = new Date().toISOString().split("T")[0];
-      const { data } = await supabase
-        .from("leads")
-        .select("*")
-        .eq("is_active", true)
-        .lte("next_action_date", today)
-        .order("next_action_date", { ascending: true })
-        .limit(10);
-
-      if (data) setLeads(data);
+    async function loadFollowUps() {
+      const { data, error } = await fetchLeads();
+      if (data) {
+        const today = new Date().toISOString().split("T")[0];
+        const filtered = data
+          .filter(l => l.next_action_date && l.next_action_date <= today)
+          .sort((a, b) => (a.next_action_date || "").localeCompare(b.next_action_date || ""))
+          .slice(0, 10);
+        setLeads(filtered);
+      }
       setLoading(false);
     }
 
-    fetchFollowUps();
-  }, [supabase]);
+    loadFollowUps();
+  }, []);
 
   if (loading) {
     return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { fetchLeads, updateLead } from "@/hooks/useLeads";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -17,62 +17,33 @@ export default function FollowUpsPage() {
   const [today, setToday] = useState<Lead[]>([]);
   const [upcoming, setUpcoming] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
-    async function fetchFollowUps() {
-      const now = new Date();
-      const todayStr = now.toISOString().split("T")[0];
+    async function loadFollowUps() {
+      const { data, error } = await fetchLeads();
+      if (data) {
+        const now = new Date();
+        const todayStr = now.toISOString().split("T")[0];
+        const nextWeek = new Date(now);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        const nextWeekStr = nextWeek.toISOString().split("T")[0];
 
-      // Overdue
-      const { data: overdueData } = await supabase
-        .from("leads")
-        .select("*")
-        .eq("is_active", true)
-        .not("next_action_date", "is", null)
-        .lt("next_action_date", todayStr)
-        .order("next_action_date", { ascending: true });
-
-      // Today
-      const { data: todayData } = await supabase
-        .from("leads")
-        .select("*")
-        .eq("is_active", true)
-        .eq("next_action_date", todayStr)
-        .order("created_at", { ascending: false });
-
-      // Upcoming (next 7 days)
-      const nextWeek = new Date(now);
-      nextWeek.setDate(nextWeek.getDate() + 7);
-      const nextWeekStr = nextWeek.toISOString().split("T")[0];
-
-      const { data: upcomingData } = await supabase
-        .from("leads")
-        .select("*")
-        .eq("is_active", true)
-        .gt("next_action_date", todayStr)
-        .lte("next_action_date", nextWeekStr)
-        .order("next_action_date", { ascending: true });
-
-      if (overdueData) setOverdue(overdueData);
-      if (todayData) setToday(todayData);
-      if (upcomingData) setUpcoming(upcomingData);
+        const withDates = data.filter(l => l.next_action_date);
+        setOverdue(withDates.filter(l => l.next_action_date! < todayStr).sort((a, b) => (a.next_action_date || "").localeCompare(b.next_action_date || "")));
+        setToday(withDates.filter(l => l.next_action_date === todayStr));
+        setUpcoming(withDates.filter(l => l.next_action_date! > todayStr && l.next_action_date! <= nextWeekStr).sort((a, b) => (a.next_action_date || "").localeCompare(b.next_action_date || "")));
+      }
       setLoading(false);
     }
 
-    fetchFollowUps();
-  }, [supabase]);
+    loadFollowUps();
+  }, []);
 
   async function markComplete(leadId: string) {
-    const today = new Date().toISOString().split("T")[0];
-    await supabase
-      .from("leads")
-      .update({
-        next_action: null,
-        next_action_date: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", leadId);
+    await updateLead(leadId, {
+      next_action: null,
+      next_action_date: null,
+    });
 
     setOverdue((prev) => prev.filter((l) => l.id !== leadId));
     setToday((prev) => prev.filter((l) => l.id !== leadId));
