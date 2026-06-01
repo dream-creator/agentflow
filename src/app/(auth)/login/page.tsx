@@ -308,7 +308,7 @@ function LoginContent() {
 
         {/* Right panel skeleton */}
         <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white min-h-dvh">
-          <div className="w-full max-w-[380px]">
+        <div className="w-full max-w-[380px] mx-auto">
             {/* Title skeleton */}
             <div className="h-7 w-[220px] bg-[#f1f5f9] rounded-md mb-2 animate-pulse" />
             {/* Subtitle skeleton */}
