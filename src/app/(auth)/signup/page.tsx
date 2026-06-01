@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
-import { Mail, Loader2 } from "lucide-react";
+import { Mail, Loader2, Home, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState("");
@@ -48,25 +49,73 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-primary-50 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="font-heading text-3xl font-bold text-primary-900 mb-2">
-            AgentFlow
+    <div className="min-h-dvh flex">
+      {/* Left: Value Panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary-50 flex-col justify-center px-12 xl:px-20">
+        <div className="max-w-md">
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-12 group">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:bg-primary-700 transition-colors">
+              <Home className="h-5 w-5 text-white" />
+            </div>
+            <span className="font-heading text-xl font-bold text-surface-900">
+              AgentFlow
+            </span>
+          </Link>
+          <h2 className="font-heading text-3xl font-bold text-surface-900 mb-6 leading-tight">
+            The CRM for agents who hate CRMs
+          </h2>
+          <p className="text-surface-500 text-lg mb-8 leading-relaxed">
+            Start managing your leads in 30 seconds. No credit card required.
+          </p>
+          <div className="space-y-4">
+            {[
+              "10 free leads included",
+              "Set up in 3 minutes, not 3 hours",
+              "See who to call today — instantly",
+              "No credit card required",
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <span className="text-surface-600 text-sm">{item}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 p-4 bg-white/60 rounded-xl border border-primary-100">
+            <p className="text-sm text-surface-600 italic">
+              &ldquo;I deleted my Follow Up Boss account after a week with AgentFlow. It&apos;s exactly what I needed.&rdquo;
+            </p>
+            <p className="text-xs text-surface-400 mt-2">
+              — Solo agent, Austin TX
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right: Signup Form */}
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-12">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="text-center mb-8 lg:hidden">
+            <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <Home className="h-5 w-5 text-white" />
+              </div>
+              <span className="font-heading text-xl font-bold text-surface-900">
+                AgentFlow
+              </span>
+            </Link>
+          </div>
+
+          <h1 className="font-heading text-2xl font-bold text-surface-900 mb-2">
+            Create your account
           </h1>
-          <p className="text-surface-500">
+          <p className="text-surface-500 text-sm mb-8">
             Start managing leads in 30 seconds
           </p>
-        </div>
-
-        <div className="card">
-          <h2 className="font-heading text-xl font-semibold text-surface-900 mb-6">
-            Create your account
-          </h2>
 
           <form onSubmit={handleSignup} className="space-y-4">
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-surface-700 mb-1">
+              <label htmlFor="fullName" className="block text-sm font-medium text-surface-700 mb-1.5">
                 Full name
               </label>
               <input
@@ -81,7 +130,7 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-1.5">
                 Email address
               </label>
               <input
@@ -95,18 +144,18 @@ export default function SignupPage() {
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2"
+              className="w-full"
             >
               {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
-                <Mail className="h-4 w-4" />
+                <Mail className="h-4 w-4 mr-2" />
               )}
               Send magic link
-            </button>
+            </Button>
           </form>
 
           <div className="relative my-6">
@@ -118,11 +167,12 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <button
+          <Button
             onClick={handleGoogleSignup}
-            className="btn-secondary w-full flex items-center justify-center gap-2"
+            variant="secondary"
+            className="w-full"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
                 fill="#4285F4"
@@ -141,21 +191,21 @@ export default function SignupPage() {
               />
             </svg>
             Continue with Google
-          </button>
+          </Button>
 
           {message && (
             <div className="mt-4 p-3 rounded-lg bg-primary-50 text-primary-700 text-sm text-center">
               {message}
             </div>
           )}
-        </div>
 
-        <p className="text-center text-sm text-surface-500 mt-6">
-          Already have an account?{" "}
-          <Link href="/login" className="text-primary-600 hover:text-primary-700 font-medium">
-            Sign in
-          </Link>
-        </p>
+          <p className="text-center text-sm text-surface-500 mt-8">
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
