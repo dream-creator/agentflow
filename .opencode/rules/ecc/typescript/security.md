@@ -1,0 +1,21 @@
+# TypeScript/JavaScript Security
+
+> Extends common security rules with TypeScript/JavaScript specific content.
+
+## Secret Management
+
+```typescript
+// NEVER: Hardcoded secrets
+const apiKey = "sk-proj-xxxxx"
+
+// ALWAYS: Environment variables
+const apiKey = process.env.OPENAI_API_KEY
+
+if (!apiKey) {
+  throw new Error('OPENAI_API_KEY not configured')
+}
+```
+
+## Security Audits
+
+- Use **security-reviewer** subagent for comprehensive security audits
