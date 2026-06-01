@@ -3,13 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Phone, Users, Clock, Settings } from "lucide-react";
-
-const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "How it Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
-];
+import { Menu, X, Home } from "lucide-react";
+import { navLinks } from "@/lib/nav-data";
 
 export function StickyHeader() {
   const [scrolled, setScrolled] = useState(false);
