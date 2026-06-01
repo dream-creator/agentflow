@@ -9,7 +9,15 @@ import { UserPlus } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import type { Database } from "@/types";
-import type { DropResult } from "@hello-pangea/dnd";
+
+// DnD DropResult shape — avoids importing @hello-pangea/dnd in this file
+// which would pull the 191KB library into the webpack chunk graph for auth pages
+interface DropResult {
+  draggableId: string;
+  type: string;
+  source: { index: number; droppableId: string };
+  destination: { index: number; droppableId: string } | null;
+}
 
 const DndBoard = dynamic(
   () => import("@/components/pipeline/dnd-board").then((mod) => mod.DndBoard),
