@@ -1,9 +1,9 @@
 [auth]
 enabled = true
-site_url = "https://agentflow-inky.vercel.app"
+site_url = "https://agent-flow.app"
 additional_redirect_urls = [
-  "https://agentflow-inky.vercel.app/auth/callback",
-  "https://agentflow-inky.vercel.app/**"
+  "https://agent-flow.app/auth/callback",
+  "https://agent-flow.app/**"
 ]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
