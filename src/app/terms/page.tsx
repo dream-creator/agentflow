@@ -216,10 +216,10 @@ export default function TermsPage() {
           <p className="text-surface-600 leading-relaxed">
             <strong className="text-surface-800">Support:</strong>{" "}
             <a
-              href="mailto:support@agentflow@gmail.com"
+              href="mailto:support@agent-flow.app"
               className="text-primary hover:underline"
             >
-              support@agentflow@gmail.com
+              support@agent-flow.app
             </a>
           </p>
           <p className="text-surface-600 leading-relaxed">
