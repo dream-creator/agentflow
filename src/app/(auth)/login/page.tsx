@@ -285,9 +285,9 @@ function LoginContent() {
   // Loading skeleton
   if (authLoading) {
     return (
-      <div className="min-h-dvh flex flex-col lg:flex-row">
+      <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
         {/* Left panel - renders normally */}
-        <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center px-16" style={{ minHeight: "100vh" }}>
+        <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center px-16">
           <div className="max-w-[340px]">
             {/* Logo */}
             <div className="flex items-center gap-2.5 mb-14">
@@ -307,7 +307,7 @@ function LoginContent() {
         </div>
 
         {/* Right panel skeleton */}
-        <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white" style={{ minHeight: "100vh" }}>
+        <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
         <div className="w-full max-w-[380px] mx-auto">
             {/* Title skeleton */}
             <div className="h-7 w-[220px] bg-[#f1f5f9] rounded-md mb-2 animate-pulse" />
@@ -324,9 +324,9 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col lg:flex-row">
+    <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
       {/* Left Panel - Teal */}
-      <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center items-start px-16" style={{ minHeight: "100vh" }}>
+      <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center items-start px-16">
         <div className="max-w-[340px]">
           {/* Logo */}
           <div className="flex items-center gap-2.5 mb-14">
@@ -402,7 +402,6 @@ function LoginContent() {
       <div
         role="main"
         className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 py-12 bg-white"
-        style={{ minHeight: "100vh" }}
       >
         <div className="w-full max-w-[380px]">
           {/* Magic link success state */}
@@ -553,9 +552,9 @@ function LoginContent() {
                       height: "36px",
                       backgroundColor: activeView === "magic-link" ? "#ffffff" : "transparent",
                       color: activeView === "magic-link" ? "#0f172a" : "#64748b",
-                      fontWeight: activeView === "magic-link" ? 500 : 400,
-                      boxShadow: activeView === "magic-link" ? "0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)" : "none",
-                      border: "none",
+                      fontWeight: activeView === "magic-link" ? 600 : 400,
+                      boxShadow: activeView === "magic-link" ? "0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)" : "none",
+                      border: activeView === "magic-link" ? "1px solid rgba(0,0,0,0.06)" : "1px solid transparent",
                     }}
                   >
                     Magic link
@@ -573,9 +572,9 @@ function LoginContent() {
                       height: "36px",
                       backgroundColor: activeView === "password" ? "#ffffff" : "transparent",
                       color: activeView === "password" ? "#0f172a" : "#64748b",
-                      fontWeight: activeView === "password" ? 500 : 400,
-                      boxShadow: activeView === "password" ? "0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)" : "none",
-                      border: "none",
+                      fontWeight: activeView === "password" ? 600 : 400,
+                      boxShadow: activeView === "password" ? "0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)" : "none",
+                      border: activeView === "password" ? "1px solid rgba(0,0,0,0.06)" : "1px solid transparent",
                     }}
                   >
                     Password
