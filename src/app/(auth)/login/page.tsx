@@ -326,7 +326,7 @@ function LoginContent() {
   return (
     <div className="min-h-dvh flex flex-col lg:flex-row">
       {/* Left Panel - Teal */}
-      <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center px-16 min-h-dvh">
+      <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center items-start px-16 min-h-dvh">
         <div className="max-w-[340px]">
           {/* Logo */}
           <div className="flex items-center gap-2.5 mb-14">
@@ -401,8 +401,7 @@ function LoginContent() {
       {/* Right Panel - Form */}
       <div
         role="main"
-        className="flex-1 flex items-center justify-center px-6 sm:px-12 py-12 bg-white lg:min-h-dvh"
-        style={{ minHeight: "calc(100dvh - 72px)" }}
+        className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 py-12 bg-white min-h-dvh"
       >
         <div className="w-full max-w-[380px]">
           {/* Magic link success state */}
