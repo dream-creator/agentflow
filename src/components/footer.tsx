@@ -80,13 +80,13 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://agentflow.app"
+                  href="https://agent-flow.app"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-surface-500 hover:text-primary transition-colors"
                 >
                   <Globe className="h-3.5 w-3.5" />
-                  agentflow.app
+agent-flow.app
                 </a>
               </li>
             </ul>
