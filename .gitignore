@@ -49,3 +49,6 @@ TEST_RELEASE_NOTES.txt
 OAUTH-CONFIG-GUIDE.md
 ROADMAP-REMAINING.md
 AGENTS.md
+
+# Supabase config (contains secrets)
+supabase/config.toml
