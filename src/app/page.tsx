@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-export const dynamic = "force-dynamic";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AuthCallbackRescue } from "@/components/auth-callback-rescue";
@@ -14,16 +12,6 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-});
 
 export const metadata: Metadata = {
   title: "AgentFlow — The CRM for agents who hate CRMs",
