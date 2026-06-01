@@ -7,6 +7,7 @@ import { AuthCallbackRescue } from "@/components/auth-callback-rescue";
 import { StickyHeader } from "@/components/layout/sticky-header";
 import { Footer } from "@/components/footer";
 import { LandingPricing } from "@/components/landing-pricing";
+import StatsBar from "@/components/landing/StatsBar";
 import {
   Phone,
   Users,
@@ -167,26 +168,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Social Proof Stats */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 section-alt">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
-            {[
-              { value: "47+", label: "Solo agents" },
-              { value: "2,400+", label: "Leads tracked" },
-              { value: "98%", label: "Follow-up rate" },
-              { value: "3 min", label: "Daily setup" },
-            ].map((stat, i) => (
-              <div key={i}>
-                <div className="font-heading text-2xl sm:text-3xl font-bold text-surface-900 mb-1">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-surface-500">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Animated Stats Bar */}
+      <StatsBar />
 
       {/* Problem Section */}
       <section className="py-20 sm:py-24 px-4 sm:px-6">
