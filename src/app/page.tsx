@@ -104,7 +104,7 @@ export default function LandingPage() {
                     </div>
                     <div className="flex-1 text-center">
                       <div className="inline-block bg-surface-100 rounded-md px-3 py-1 text-xs text-surface-400">
-                        app.agentflow.app/dashboard
+                        app.agent-flow.app/dashboard
                       </div>
                     </div>
                   </div>
