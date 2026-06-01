@@ -14,6 +14,7 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import { Footer } from "@/components/footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -142,7 +143,7 @@ export default function LandingPage() {
       </section>
 
       {/* Solution */}
-      <section className="py-20 px-4 bg-primary-50">
+      <section id="features" className="py-20 px-4 bg-primary-50">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl font-bold text-surface-900 mb-4">
             Three things. That&apos;s it.
@@ -183,7 +184,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section className="py-20 px-4">
+      <section id="pricing" className="py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-heading text-3xl font-bold text-surface-900 mb-4">
             Simple pricing
@@ -258,19 +259,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 border-t border-surface-100">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-[10px]">AF</span>
-            </div>
-            <span className="text-sm text-surface-500">AgentFlow</span>
-          </div>
-          <p className="text-xs text-surface-400">
-            &copy; {new Date().getFullYear()} AgentFlow. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
