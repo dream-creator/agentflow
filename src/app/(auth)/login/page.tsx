@@ -287,7 +287,7 @@ function LoginContent() {
     return (
       <div className="min-h-dvh flex flex-col lg:flex-row">
         {/* Left panel - renders normally */}
-        <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center px-16 min-h-dvh">
+        <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center px-16" style={{ minHeight: "100vh" }}>
           <div className="max-w-[340px]">
             {/* Logo */}
             <div className="flex items-center gap-2.5 mb-14">
@@ -307,7 +307,7 @@ function LoginContent() {
         </div>
 
         {/* Right panel skeleton */}
-        <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white min-h-dvh">
+        <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white" style={{ minHeight: "100vh" }}>
         <div className="w-full max-w-[380px] mx-auto">
             {/* Title skeleton */}
             <div className="h-7 w-[220px] bg-[#f1f5f9] rounded-md mb-2 animate-pulse" />
@@ -326,7 +326,7 @@ function LoginContent() {
   return (
     <div className="min-h-dvh flex flex-col lg:flex-row">
       {/* Left Panel - Teal */}
-      <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center items-start px-16 min-h-dvh">
+      <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center items-start px-16" style={{ minHeight: "100vh" }}>
         <div className="max-w-[340px]">
           {/* Logo */}
           <div className="flex items-center gap-2.5 mb-14">
@@ -401,7 +401,8 @@ function LoginContent() {
       {/* Right Panel - Form */}
       <div
         role="main"
-        className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 py-12 bg-white min-h-dvh"
+        className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 py-12 bg-white"
+        style={{ minHeight: "100vh" }}
       >
         <div className="w-full max-w-[380px]">
           {/* Magic link success state */}
@@ -538,7 +539,7 @@ function LoginContent() {
 
               {/* Tab switcher (hidden during forgot password) */}
               {activeView !== "forgot-password" && (
-                <div className="flex bg-[#f1f5f9] rounded-lg p-1 mb-5">
+                <div className="flex rounded-lg p-1 mb-5" style={{ backgroundColor: "#f1f5f9", gap: "2px" }}>
                   <button
                     type="button"
                     onClick={() => {
@@ -547,11 +548,15 @@ function LoginContent() {
                       setEmailError("");
                       setEmailSuggestion("");
                     }}
-                    className={`flex-1 h-[34px] rounded-md text-[14px] font-medium cursor-pointer transition-all duration-150 ${
-                      activeView === "magic-link"
-                        ? "bg-white text-[#0f172a] shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
-                        : "bg-transparent text-[#64748b] hover:text-[#475569]"
-                    }`}
+                    className="flex-1 rounded-md text-[14px] cursor-pointer transition-all duration-150"
+                    style={{
+                      height: "36px",
+                      backgroundColor: activeView === "magic-link" ? "#ffffff" : "transparent",
+                      color: activeView === "magic-link" ? "#0f172a" : "#64748b",
+                      fontWeight: activeView === "magic-link" ? 500 : 400,
+                      boxShadow: activeView === "magic-link" ? "0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)" : "none",
+                      border: "none",
+                    }}
                   >
                     Magic link
                   </button>
@@ -563,11 +568,15 @@ function LoginContent() {
                       setEmailError("");
                       setEmailSuggestion("");
                     }}
-                    className={`flex-1 h-[34px] rounded-md text-[14px] font-medium cursor-pointer transition-all duration-150 ${
-                      activeView === "password"
-                        ? "bg-white text-[#0f172a] shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
-                        : "bg-transparent text-[#64748b] hover:text-[#475569]"
-                    }`}
+                    className="flex-1 rounded-md text-[14px] cursor-pointer transition-all duration-150"
+                    style={{
+                      height: "36px",
+                      backgroundColor: activeView === "password" ? "#ffffff" : "transparent",
+                      color: activeView === "password" ? "#0f172a" : "#64748b",
+                      fontWeight: activeView === "password" ? 500 : 400,
+                      boxShadow: activeView === "password" ? "0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)" : "none",
+                      border: "none",
+                    }}
                   >
                     Password
                   </button>
