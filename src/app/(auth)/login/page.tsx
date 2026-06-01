@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
-import { Mail, Loader2 } from "lucide-react";
+import { Mail, Loader2, Home, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 function LoginPageContent() {
   const [email, setEmail] = useState("");
@@ -56,25 +57,64 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-primary-50 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="font-heading text-3xl font-bold text-primary-900 mb-2">
-            AgentFlow
-          </h1>
-          <p className="text-surface-500">
-            The CRM for agents who hate CRMs
-          </p>
-        </div>
-
-        <div className="card">
-          <h2 className="font-heading text-xl font-semibold text-surface-900 mb-6">
-            Sign in to your account
+    <div className="min-h-dvh flex">
+      {/* Left: Value Panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-primary-50 flex-col justify-center px-12 xl:px-20">
+        <div className="max-w-md">
+          <Link href="/" className="flex items-center gap-2.5 mb-12 group">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:bg-primary-700 transition-colors">
+              <Home className="h-5 w-5 text-white" />
+            </div>
+            <span className="font-heading text-xl font-bold text-surface-900">
+              AgentFlow
+            </span>
+          </Link>
+          <h2 className="font-heading text-3xl font-bold text-surface-900 mb-6 leading-tight">
+            Welcome back to your daily follow-up tool
           </h2>
+          <p className="text-surface-500 text-lg mb-8 leading-relaxed">
+            The only CRM designed for solo agents who want to close more deals without the complexity.
+          </p>
+          <div className="space-y-4">
+            {[
+              "See who to call today — instantly",
+              "Track every lead without the clutter",
+              "Set up in 3 minutes, not 3 hours",
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <span className="text-surface-600 text-sm">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Right: Login Form */}
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-12">
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="text-center mb-8 lg:hidden">
+            <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+                <Home className="h-5 w-5 text-white" />
+              </div>
+              <span className="font-heading text-xl font-bold text-surface-900">
+                AgentFlow
+              </span>
+            </Link>
+          </div>
+
+          <h1 className="font-heading text-2xl font-bold text-surface-900 mb-2">
+            Sign in to your account
+          </h1>
+          <p className="text-surface-500 text-sm mb-8">
+            Enter your email to receive a magic link
+          </p>
 
           <form onSubmit={handleMagicLink} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-1.5">
                 Email address
               </label>
               <input
@@ -88,18 +128,18 @@ function LoginPageContent() {
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2"
+              className="w-full"
             >
               {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
-                <Mail className="h-4 w-4" />
+                <Mail className="h-4 w-4 mr-2" />
               )}
               Send magic link
-            </button>
+            </Button>
           </form>
 
           <div className="relative my-6">
@@ -111,11 +151,12 @@ function LoginPageContent() {
             </div>
           </div>
 
-          <button
+          <Button
             onClick={handleGoogleLogin}
-            className="btn-secondary w-full flex items-center justify-center gap-2"
+            variant="secondary"
+            className="w-full"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
                 fill="#4285F4"
@@ -134,21 +175,21 @@ function LoginPageContent() {
               />
             </svg>
             Continue with Google
-          </button>
+          </Button>
 
           {message && (
             <div className="mt-4 p-3 rounded-lg bg-primary-50 text-primary-700 text-sm text-center">
               {message}
             </div>
           )}
-        </div>
 
-        <p className="text-center text-sm text-surface-500 mt-6">
-          Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
-            Sign up
-          </Link>
-        </p>
+          <p className="text-center text-sm text-surface-500 mt-8">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
+              Sign up free
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -157,7 +198,7 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-dvh flex items-center justify-center bg-primary-50">
+      <div className="min-h-dvh flex items-center justify-center bg-white">
         <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
       </div>
     }>
