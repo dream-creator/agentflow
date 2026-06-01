@@ -4,40 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const plans = [
-  {
-    name: "Free",
-    monthlyPrice: 0,
-    annualPrice: 0,
-    description: "For agents getting started",
-    features: [
-      "10 active leads",
-      "10 pipelines",
-      "Daily email digest",
-      "Mobile + desktop access",
-    ],
-    cta: "Get started free",
-    href: "/signup",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    monthlyPrice: 5,
-    annualPrice: 50,
-    description: "For serious solo agents",
-    features: [
-      "Unlimited leads",
-      "Unlimited pipelines",
-      "Daily email digest",
-      "Custom follow-up reminders",
-      "Priority support",
-    ],
-    cta: "Start 14-day free trial",
-    href: "/signup",
-    highlighted: true,
-  },
-];
+import { pricingPlans } from "@/lib/pricing-data";
 
 export function LandingPricing() {
   const [annual, setAnnual] = useState(false);
@@ -74,7 +41,7 @@ export function LandingPricing() {
 
       {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto text-left">
-        {plans.map((plan) => (
+        {pricingPlans.map((plan) => (
           <div
             key={plan.name}
             className={`rounded-2xl p-6 sm:p-8 transition-all ${
