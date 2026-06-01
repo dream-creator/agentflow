@@ -71,7 +71,7 @@ export function StickyHeader() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-100 transition-colors cursor-pointer"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-lg hover:bg-surface-100 transition-colors cursor-pointer"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

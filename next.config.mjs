@@ -33,7 +33,6 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
-  optimizePackageImports: ["lucide-react"],
   headers: async () => [
     {
       source: "/(.*)",

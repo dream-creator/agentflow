@@ -196,131 +196,48 @@ export default function StatsBar() {
     <section
       ref={sectionRef}
       aria-label="AgentFlow usage statistics"
-      style={{
-        background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)',
-        borderTop: '1px solid #e2e8f0',
-        borderBottom: '1px solid #e2e8f0',
-        padding: '48px 24px',
-      }}
+      className="border-y border-surface-200 bg-gradient-to-b from-surface-50 to-surface-100 py-12 px-6"
     >
-      <style>{`
-        @keyframes pulse-ring {
-          0% { transform: scale(0.8); opacity: 1; }
-          100% { transform: scale(2); opacity: 0; }
-        }
-        @keyframes count-flash {
-          0% { color: #0f766e; }
-          100% { color: #0f172a; }
-        }
-        .stats-flash {
-          animation: count-flash 0.4s ease-out;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .stats-pulse-dot::before {
-            animation: none !important;
-          }
-        }
-      `}</style>
 
       {/* Live badge */}
       <div className="flex justify-center mb-5">
         <span
           aria-label="Live statistics, updating in real time"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
-            borderRadius: '999px',
-            padding: '3px 10px',
-            fontSize: '11px',
-            fontWeight: 600,
-            color: '#16a34a',
-            letterSpacing: '0.04em',
-          }}
+          className="inline-flex items-center gap-[5px] bg-green-50 border border-green-200 rounded-full px-2.5 py-[3px] text-[11px] font-semibold text-green-600 tracking-wide"
         >
           {/* Pulse dot */}
           <span
             aria-hidden="true"
-            className="stats-pulse-dot"
-            style={{
-              width: '7px',
-              height: '7px',
-              background: '#22c55e',
-              borderRadius: '50%',
-              position: 'relative',
-              display: 'inline-block',
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                position: 'absolute',
-                inset: '-3px',
-                borderRadius: '50%',
-                background: 'rgba(34, 197, 94, 0.3)',
-                animation: 'pulse-ring 2s ease-out infinite',
-              }}
-            />
-          </span>
+            className="stats-pulse-dot relative inline-block w-[7px] h-[7px] bg-green-500 rounded-full shrink-0"
+          />
           LIVE STATS
         </span>
       </div>
 
       {/* Stats grid */}
-      <div
-        className="grid grid-cols-2 md:grid-cols-4"
-        style={{
-          maxWidth: '860px',
-          margin: '0 auto',
-        }}
-      >
+      <div className="grid grid-cols-2 md:grid-cols-4 max-w-[860px] mx-auto">
         {STATS.map((stat, index) => (
           <div
             key={stat.id}
             role="group"
             aria-label={stat.label}
-            className="relative"
-            style={{
-              textAlign: 'center',
-              padding: '0 24px',
-            }}
+            className="relative text-center px-6"
           >
             {/* Divider (desktop only, not after last) */}
             {index < STATS.length - 1 && (
               <div
-                className="hidden md:block"
+                className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 h-10 w-px bg-surface-200"
                 aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  height: '40px',
-                  width: '1px',
-                  background: '#e2e8f0',
-                }}
               />
             )}
 
             {/* Stat number */}
-            <div
-              className="flex items-baseline justify-center"
-              style={{ gap: '1px', marginBottom: '6px' }}
-            >
+            <div className="flex items-baseline justify-center gap-px mb-1.5">
               <span
                 ref={(el) => { countRefs.current[stat.id] = el; }}
                 aria-live="polite"
                 aria-atomic="true"
-                className="text-3xl md:text-4xl"
-                style={{
-                  fontWeight: 700,
-                  color: '#0f172a',
-                  letterSpacing: '-0.03em',
-                  lineHeight: 1,
-                  fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-                }}
+                className="text-3xl md:text-4xl font-bold text-surface-900 tracking-tight leading-none font-sans"
               >
                 {stat.formatter
                   ? stat.formatter(stat.target)
@@ -329,49 +246,28 @@ export default function StatsBar() {
 
               {/* Suffix (+, %) */}
               {stat.suffix && (
-                <span
-                  className="text-2xl md:text-[28px]"
-                  style={{
-                    fontWeight: 600,
-                    color: '#0f172a',
-                    lineHeight: 1,
-                  }}
-                >
+                <span className="text-2xl md:text-[28px] font-semibold text-surface-900 leading-none">
                   {stat.suffix}
                 </span>
               )}
 
               {/* Unit (min) */}
               {stat.unit && (
-                <span
-                  style={{
-                    fontSize: '20px',
-                    fontWeight: 500,
-                    color: '#64748b',
-                    marginLeft: '2px',
-                  }}
-                >
+                <span className="text-[20px] font-medium text-surface-500 ml-0.5">
                   {stat.unit}
-                  {/* Empty suffix placeholder for alignment */}
                 </span>
               )}
 
-              {/* Empty suffix placeholder for stats without suffix */}
+              {/* Empty suffix placeholder for alignment */}
               {!stat.suffix && !stat.unit && (
-                <span style={{ fontSize: '28px', visibility: 'hidden' }}>
+                <span className="text-[28px] invisible">
                   +
                 </span>
               )}
             </div>
 
             {/* Stat label */}
-            <div
-              style={{
-                fontSize: '14px',
-                color: '#64748b',
-                fontWeight: 400,
-              }}
-            >
+            <div className="text-sm text-surface-500 font-normal">
               {stat.label}
             </div>
           </div>
