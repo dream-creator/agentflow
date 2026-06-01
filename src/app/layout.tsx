@@ -15,7 +15,7 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
 });
 
-const appUrl = "https://agentflow.app";
+const appUrl = "https://agent-flow.app";
 
 export const metadata: Metadata = {
   title: "AgentFlow — The CRM for agents who hate CRMs",

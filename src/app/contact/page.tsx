@@ -55,7 +55,7 @@ export default function ContactPage() {
 
           {/* Website Card */}
           <a
-            href="https://agentflow.app"
+            href="https://agent-flow.app"
             target="_blank"
             rel="noopener noreferrer"
             className="group block p-6 rounded-xl border border-surface-200 hover:border-primary hover:shadow-md transition-all"
@@ -70,7 +70,7 @@ export default function ContactPage() {
               Learn more about AgentFlow and our features.
             </p>
             <p className="text-sm font-medium text-primary group-hover:underline">
-              agentflow.app
+              agent-flow.app
             </p>
           </a>
         </div>
@@ -90,10 +90,10 @@ export default function ContactPage() {
                 directly.
               </p>
               <a
-                href="mailto:privacy@agentflow.app"
+                href="mailto:privacy@agent-flow.app"
                 className="text-sm font-medium text-primary hover:underline"
               >
-                privacy@agentflow.app
+                privacy@agent-flow.app
               </a>
             </div>
           </div>

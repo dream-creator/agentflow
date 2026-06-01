@@ -225,12 +225,12 @@ export default function TermsPage() {
           <p className="text-surface-600 leading-relaxed">
             <strong className="text-surface-800">Website:</strong>{" "}
             <a
-              href="https://agentflow.app"
+              href="https://agent-flow.app"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              agentflow.app
+              agent-flow.app
             </a>
           </p>
         </div>
