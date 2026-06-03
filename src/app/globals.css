@@ -6,13 +6,16 @@
   :root {
     --color-primary: #0F766E;
     --color-on-primary: #FFFFFF;
+    --color-cta: #F97316;
+    --color-on-cta: #FFFFFF;
     --color-secondary: #14B8A6;
     --color-accent: #0369A1;
     --color-background: #FFFFFF;
     --color-surface: #FFFFFF;
     --color-foreground: #134E4A;
-    --color-muted: #94A3B8;
+    --color-muted: #64748B;
     --color-border: #E2E8F0;
+    --color-success: #16A34A;
     --color-destructive: #DC2626;
   }
 
@@ -36,14 +39,12 @@
     min-height: 100dvh;
   }
 
-  /* Focus visible for accessibility */
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
     border-radius: 4px;
   }
 
-  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -57,12 +58,17 @@
 }
 
 @layer components {
+  .skip-to-content {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999]
+           bg-primary text-white font-semibold px-4 py-2 rounded-lg;
+  }
+
   .btn-primary {
-    @apply bg-primary text-white font-semibold rounded-button px-6 py-3 min-h-touch
-           hover:bg-primary-700 active:bg-primary-800
+    @apply bg-cta text-white font-semibold rounded-button px-6 py-3 min-h-touch
+           hover:bg-cta-600 active:bg-cta-700
            transition-all duration-200 ease-out
            disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none
-           cursor-pointer shadow-sm hover:shadow-md;
+           cursor-pointer;
   }
 
   .btn-secondary {
@@ -95,15 +101,13 @@
   }
 
   .card {
-    @apply bg-surface rounded-xl border border-surface-100 p-6
-           shadow-[0_1px_3px_rgba(0,0,0,0.04)];
+    @apply bg-surface rounded-xl border border-surface-200 p-6;
   }
 
   .card-elevated {
-    @apply bg-surface rounded-xl border border-surface-100 p-6
-           shadow-[0_4px_24px_rgba(0,0,0,0.06)]
-           hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)]
-           transition-shadow duration-300;
+    @apply bg-surface rounded-xl border border-surface-200 p-6
+           hover:border-surface-300
+           transition-colors duration-200;
   }
 
   .section-alt {
@@ -136,7 +140,6 @@
     padding-top: env(safe-area-inset-top);
   }
 
-  /* StatsBar animations */
   .stats-pulse-dot::before {
     content: "";
     position: absolute;
