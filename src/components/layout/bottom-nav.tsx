@@ -32,7 +32,7 @@ export function BottomNav() {
                 "flex flex-col items-center justify-center gap-0.5 w-16 h-14 min-h-touch rounded-lg transition-colors",
                 isActive
                   ? "text-primary"
-                  : "text-surface-400 hover:text-surface-600"
+                  : "text-surface-500 hover:text-surface-600"
               )}
             >
               <item.icon className="h-5 w-5" />

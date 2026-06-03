@@ -129,13 +129,15 @@ export default function LeadDetailPage() {
                   <span className="text-sm text-surface-900">{lead.phone}</span>
                   <a
                     href={`tel:${lead.phone}`}
-                    className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                    aria-label="Call"
+                    className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                   >
                     <Phone className="h-4 w-4" />
                   </a>
                   <a
                     href={`sms:${lead.phone}`}
-                    className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                    aria-label="Send text message"
+                    className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                   >
                     <MessageSquare className="h-4 w-4" />
                   </a>
@@ -149,7 +151,8 @@ export default function LeadDetailPage() {
                   <span className="text-sm text-surface-900">{lead.email}</span>
                   <a
                     href={`mailto:${lead.email}`}
-                    className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                    aria-label="Send email"
+                    className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                   >
                     <Mail className="h-4 w-4" />
                   </a>
@@ -175,13 +178,13 @@ export default function LeadDetailPage() {
               <>
                 <p className="text-sm text-surface-900">{lead.next_action}</p>
                 {lead.next_action_date && (
-                  <p className="text-xs text-surface-400">
+                  <p className="text-xs text-surface-500">
                     Due: {new Date(lead.next_action_date).toLocaleDateString()}
                   </p>
                 )}
               </>
             ) : (
-              <p className="text-sm text-surface-400">No next action set</p>
+              <p className="text-sm text-surface-500">No next action set</p>
             )}
           </div>
         </Card>
@@ -238,7 +241,7 @@ export default function LeadDetailPage() {
             <CardTitle>Action History</CardTitle>
           </CardHeader>
           {actions.length === 0 ? (
-            <p className="text-sm text-surface-400">No actions recorded yet</p>
+            <p className="text-sm text-surface-500">No actions recorded yet</p>
           ) : (
             <div className="space-y-3">
               {actions.map((action) => (
@@ -250,7 +253,7 @@ export default function LeadDetailPage() {
                     {action.completed ? (
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     ) : (
-                      <Clock className="h-4 w-4 text-surface-400" />
+                      <Clock className="h-4 w-4 text-surface-500" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -258,7 +261,7 @@ export default function LeadDetailPage() {
                       <Badge variant={action.completed ? "success" : "default"}>
                         {action.action_type}
                       </Badge>
-                      <span className="text-xs text-surface-400">
+                      <span className="text-xs text-surface-500">
                         {new Date(action.created_at).toLocaleDateString()}
                       </span>
                     </div>
@@ -266,7 +269,7 @@ export default function LeadDetailPage() {
                       <p className="text-sm text-surface-700">{action.description}</p>
                     )}
                     {action.due_date && (
-                      <p className="text-xs text-surface-400 mt-1">
+                      <p className="text-xs text-surface-500 mt-1">
                         Due: {new Date(action.due_date).toLocaleDateString()}
                       </p>
                     )}
