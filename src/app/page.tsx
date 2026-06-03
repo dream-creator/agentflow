@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-dvh bg-white">
+    <div className="min-h-dvh bg-white" id="main-content">
       <AuthCallbackRescue />
 
       <StickyHeader />
@@ -160,9 +160,9 @@ export default function LandingPage() {
               </div>
 
               {/* Floating badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-xl border border-surface-100 shadow-elevated px-4 py-3 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <div className="absolute -bottom-4 -left-4 bg-white rounded-xl border border-surface-200 px-4 py-3 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-success-50 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-success" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-surface-900">Follow-up complete</p>
