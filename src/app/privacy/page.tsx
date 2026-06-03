@@ -166,21 +166,21 @@ export default function PrivacyPage() {
           <p className="text-surface-600 leading-relaxed">
             <strong className="text-surface-800">Email:</strong>{" "}
             <a
-              href="mailto:privacy@agentflow.app"
+              href="mailto:privacy@agent-flow.app"
               className="text-primary hover:underline"
             >
-              privacy@agentflow.app
+              privacy@agent-flow.app
             </a>
           </p>
           <p className="text-surface-600 leading-relaxed">
             <strong className="text-surface-800">Website:</strong>{" "}
             <a
-              href="https://agentflow.app"
+              href="https://agent-flow.app"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              agentflow.app
+              agent-flow.app
             </a>
           </p>
         </div>

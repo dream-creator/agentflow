@@ -2,7 +2,7 @@
 
 > The CRM built exclusively for real estate professionals — manage your pipeline, automate follow-ups, and close more deals from any device.
 
-[![Status](https://img.shields.io/badge/status-live-brightgreen)](https://agentflow.app)
+[![Status](https://img.shields.io/badge/status-live-brightgreen)](https://agent-flow.app)
 [![License: BUSL 1.1](https://img.shields.io/badge/License-BUSL_1.1-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
@@ -46,7 +46,7 @@ Passwordless sign-in via Magic Link or Google OAuth — no passwords to manage o
 | **Free** | $0 / month | 10 active leads |
 | **Pro** | $5 / month | Unlimited leads, pipelines & custom branding |
 
-[→ Get started at agentflow.app](https://startupvo1.vercel.app)
+[→ Get started at agent-flow.app](https://agent-flow.app)
 
 ---
 

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    ".opencode/rules/ecc/common/coding-style.md",
+    ".opencode/rules/ecc/common/testing.md",
+    ".opencode/rules/ecc/common/security.md",
+    ".opencode/rules/ecc/common/patterns.md",
+    ".opencode/rules/ecc/common/git-workflow.md",
+    ".opencode/rules/ecc/typescript/coding-style.md",
+    ".opencode/rules/ecc/typescript/patterns.md",
+    ".opencode/rules/ecc/react/coding-style.md",
+    ".opencode/rules/ecc/react/hooks.md",
+    ".opencode/rules/ecc/react/patterns.md",
+    ".opencode/rules/ecc/react/testing.md",
+    ".opencode/rules/ecc/react/security.md"
+  ],
+  "skills": {
+    "paths": [".opencode/skills", "~/.opencode/skills", "~/.agents/skills"]
+  }
+}
