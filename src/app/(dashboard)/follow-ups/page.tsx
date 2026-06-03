@@ -178,14 +178,14 @@ function FollowUpCard({
           {lead.next_action && (
             <p className="text-sm text-surface-500 mb-2">{lead.next_action}</p>
           )}
-          <div className="flex items-center gap-3 text-xs text-surface-400">
+          <div className="flex items-center gap-3 text-xs text-surface-500">
             <span>Due: {lead.next_action_date ? new Date(lead.next_action_date).toLocaleDateString() : "No date"}</span>
           </div>
         </div>
         <div className="flex items-center gap-1 ml-2">
           <button
             onClick={onComplete}
-            className="p-2 rounded-lg hover:bg-emerald-50 text-surface-400 hover:text-emerald-600 transition-colors min-w-touch min-h-touch flex items-center justify-center"
+            className="p-2 rounded-lg hover:bg-emerald-50 text-surface-500 hover:text-emerald-600 transition-colors min-w-touch min-h-touch flex items-center justify-center"
             title="Mark complete"
           >
             <CheckCircle2 className="h-4 w-4" />
@@ -193,7 +193,8 @@ function FollowUpCard({
           {lead.phone && (
             <a
               href={`tel:${lead.phone}`}
-              className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+              aria-label="Call"
+              className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
             >
               <Phone className="h-4 w-4" />
             </a>
@@ -201,7 +202,8 @@ function FollowUpCard({
           {lead.email && (
             <a
               href={`mailto:${lead.email}`}
-              className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+              aria-label="Send email"
+              className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
             >
               <Mail className="h-4 w-4" />
             </a>
@@ -209,7 +211,8 @@ function FollowUpCard({
           {lead.phone && (
             <a
               href={`sms:${lead.phone}`}
-              className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+              aria-label="Send text message"
+              className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
             >
               <MessageSquare className="h-4 w-4" />
             </a>
