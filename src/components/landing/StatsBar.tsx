@@ -158,11 +158,8 @@ export default function StatsBar() {
       liveValues.current[chosen.id] = newValue;
 
       if (prefersReducedMotion) {
-        // Set value instantly
+        // Set value instantly, no flash
         el.textContent = formatLeads(newValue);
-        // Flash effect
-        el.classList.add('stats-flash');
-        setTimeout(() => el.classList.remove('stats-flash'), 400);
       } else {
         // Animate over 12 frames using easeOutQuart
         const frameCount = 12;
