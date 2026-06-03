@@ -109,7 +109,7 @@ export default function LandingPage() {
                       <div className="w-3 h-3 rounded-full bg-surface-200" />
                     </div>
                     <div className="flex-1 text-center">
-                      <div className="inline-block bg-surface-100 rounded-md px-3 py-1 text-xs text-surface-400">
+                      <div className="inline-block bg-surface-100 rounded-md px-3 py-1 text-xs text-surface-500">
                         app.agent-flow.app/dashboard
                       </div>
                     </div>
@@ -120,7 +120,7 @@ export default function LandingPage() {
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <h3 className="font-heading text-lg font-semibold text-surface-900">Today&apos;s Follow-ups</h3>
-                        <p className="text-sm text-surface-400">3 contacts due today</p>
+                        <p className="text-sm text-surface-500">3 contacts due today</p>
                       </div>
                       <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
                         <CalendarCheck className="h-5 w-5 text-primary" />
@@ -143,12 +143,12 @@ export default function LandingPage() {
                             </div>
                             <div>
                               <p className="text-sm font-medium text-surface-900">{contact.name}</p>
-                              <p className="text-xs text-surface-400">{contact.stage}</p>
+                              <p className="text-xs text-surface-500">{contact.stage}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs text-surface-400">{contact.time}</span>
-                            <button className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary-700 transition-colors">
+                            <span className="text-xs text-surface-500">{contact.time}</span>
+                            <button aria-label="Call" className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary-700 transition-colors">
                               <Phone className="h-3.5 w-3.5" />
                             </button>
                           </div>
@@ -166,7 +166,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-surface-900">Follow-up complete</p>
-                  <p className="text-xs text-surface-400">Sarah Chen — 2 min ago</p>
+                  <p className="text-xs text-surface-500">Sarah Chen — 2 min ago</p>
                 </div>
               </div>
             </div>
@@ -242,7 +242,7 @@ export default function LandingPage() {
                       </div>
                       <div>
                         <p className="text-xs font-medium text-surface-900">Jane Doe</p>
-                        <p className="text-[10px] text-surface-400">jane@email.com</p>
+                        <p className="text-[10px] text-surface-500">jane@email.com</p>
                       </div>
                     </div>
                     <div className="flex gap-1">
