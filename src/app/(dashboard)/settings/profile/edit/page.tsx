@@ -132,7 +132,7 @@ export default function EditProfilePage() {
               disabled
               className="input-field bg-surface-50 text-surface-500"
             />
-            <p className="text-xs text-surface-400 mt-1">
+            <p className="text-xs text-surface-500 mt-1">
               Email cannot be changed here. Contact support to update your email.
             </p>
           </div>

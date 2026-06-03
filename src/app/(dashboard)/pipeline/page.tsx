@@ -132,7 +132,7 @@ export default function PipelinePage() {
 
       {leads.length === 0 ? (
         <EmptyState
-          icon={<UserPlus className="h-6 w-6 text-surface-400" />}
+          icon={<UserPlus className="h-6 w-6 text-surface-500" />}
           title="No leads yet"
           description="Add your first lead to start building your pipeline."
           action={
