@@ -95,14 +95,14 @@ agent-flow.app
 
         {/* Bottom section: Copyright */}
         <div className="pt-8 border-t border-surface-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-surface-400">
+          <p className="text-xs text-surface-500">
             &copy; {currentYear} AgentFlow. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-xs text-surface-400 hover:text-surface-600 transition-colors">
+            <Link href="/privacy" className="text-xs text-surface-500 hover:text-surface-600 transition-colors">
               Privacy
             </Link>
-            <Link href="/terms" className="text-xs text-surface-400 hover:text-surface-600 transition-colors">
+            <Link href="/terms" className="text-xs text-surface-500 hover:text-surface-600 transition-colors">
               Terms
             </Link>
           </div>

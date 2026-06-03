@@ -13,7 +13,7 @@ export function LandingPricing() {
     <div>
       {/* Toggle */}
       <div className="flex items-center justify-center gap-3 mb-10">
-        <span className={`text-sm font-medium ${!annual ? "text-surface-900" : "text-surface-400"}`}>
+        <span className={`text-sm font-medium ${!annual ? "text-surface-900" : "text-surface-500"}`}>
           Monthly
         </span>
         <button
@@ -29,7 +29,7 @@ export function LandingPricing() {
             }`}
           />
         </button>
-        <span className={`text-sm font-medium ${annual ? "text-surface-900" : "text-surface-400"}`}>
+        <span className={`text-sm font-medium ${annual ? "text-surface-900" : "text-surface-500"}`}>
           Annual
         </span>
         {annual && (
@@ -67,7 +67,7 @@ export function LandingPricing() {
                 /{annual ? "year" : "month"}
               </span>
               {annual && plan.annualPrice > 0 && (
-                <p className="text-xs text-surface-400 mt-1">
+                <p className="text-xs text-surface-500 mt-1">
                   Billed ${plan.annualPrice}/year — save 2 months
                 </p>
               )}

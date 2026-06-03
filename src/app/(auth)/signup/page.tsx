@@ -62,10 +62,10 @@ export default function SignupPage() {
           <h2 className="font-heading text-3xl font-bold text-white mb-6 leading-tight">
             The CRM for agents who hate CRMs
           </h2>
-          <p className="text-white/80 text-lg mb-8 leading-relaxed">
+          <p className="text-white/80 text-lg mb-10 leading-relaxed">
             Start managing your leads in 30 seconds. No credit card required.
           </p>
-          <div className="space-y-4">
+          <div className="space-y-5">
             {[
               "10 free leads included",
               "Set up in 3 minutes, not 3 hours",
@@ -78,7 +78,7 @@ export default function SignupPage() {
               </div>
             ))}
           </div>
-          <div className="mt-12 p-4 bg-white/10 rounded-xl border border-white/20">
+          <div className="mt-16 p-5 bg-white/10 rounded-xl border border-white/20">
             <p className="text-sm text-white/90 italic">
               &ldquo;I deleted my Follow Up Boss account after a week with AgentFlow. It&apos;s exactly what I needed.&rdquo;
             </p>
@@ -161,7 +161,7 @@ export default function SignupPage() {
               <div className="w-full border-t border-surface-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-surface text-surface-400">or</span>
+              <span className="px-2 bg-surface text-surface-500">or</span>
             </div>
           </div>
 

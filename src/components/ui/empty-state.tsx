@@ -13,7 +13,7 @@ function EmptyState({ icon, title, description, action, className }: EmptyStateP
   return (
     <div className={cn("flex flex-col items-center justify-center py-12 px-4 text-center", className)}>
       <div className="w-12 h-12 rounded-full bg-surface-100 flex items-center justify-center mb-4">
-        {icon || <Inbox className="h-6 w-6 text-surface-400" />}
+        {icon || <Inbox className="h-6 w-6 text-surface-500" />}
       </div>
       <h3 className="font-heading text-lg font-semibold text-surface-900 mb-1">{title}</h3>
       <p className="text-surface-500 text-sm mb-4 max-w-sm">{description}</p>
