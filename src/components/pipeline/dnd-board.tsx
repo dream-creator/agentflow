@@ -79,7 +79,7 @@ export function DndBoard({ leads, updating, onDragEnd }: DndBoardProps) {
                               <div className="flex items-start gap-2">
                                 <div
                                   {...provided.dragHandleProps}
-                                  className="mt-1 text-surface-400 hover:text-surface-600 cursor-grab active:cursor-grabbing"
+                                  className="mt-1 text-surface-500 hover:text-surface-600 cursor-grab active:cursor-grabbing"
                                 >
                                   <GripVertical className="h-4 w-4" />
                                 </div>
@@ -97,7 +97,7 @@ export function DndBoard({ leads, updating, onDragEnd }: DndBoardProps) {
                                       {lead.next_action}
                                     </p>
                                   )}
-                                  <span className="text-xs text-surface-400">
+                                  <span className="text-xs text-surface-500">
                                     {lead.next_action_date
                                       ? new Date(
                                           lead.next_action_date
