@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
-
 @layer base {
   :root {
     --color-primary: #0F766E;
@@ -31,7 +29,7 @@
   }
 
   body {
-    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     background-color: var(--color-background);
     color: var(--color-foreground);
     line-height: 1.6;
@@ -136,5 +134,35 @@
 
   .safe-top {
     padding-top: env(safe-area-inset-top);
+  }
+
+  /* StatsBar animations */
+  .stats-pulse-dot::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.3);
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+
+  @keyframes count-flash {
+    0% { color: var(--color-primary); }
+    100% { color: var(--color-foreground); }
+  }
+
+  .stats-flash {
+    animation: count-flash 0.4s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stats-pulse-dot::before {
+      animation: none !important;
+    }
   }
 }
