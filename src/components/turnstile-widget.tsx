@@ -1,10 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { lazy, Suspense } from "react";
 
-const Turnstile = dynamic(
-  () => import("@marsidev/react-turnstile").then((mod) => mod.Turnstile),
-  { ssr: false }
+const Turnstile = lazy(() =>
+  import("@marsidev/react-turnstile").then((mod) => ({
+    default: mod.Turnstile,
+  }))
 );
 
 interface TurnstileWidgetProps {
@@ -23,12 +24,14 @@ export function TurnstileWidget({
   size = "normal",
 }: TurnstileWidgetProps) {
   return (
-    <Turnstile
-      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-      onSuccess={onSuccess}
-      onExpire={onExpire}
-      onError={onError}
-      options={{ theme, size }}
-    />
+    <Suspense fallback={null}>
+      <Turnstile
+        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+        onSuccess={onSuccess}
+        onExpire={onExpire}
+        onError={onError}
+        options={{ theme, size }}
+      />
+    </Suspense>
   );
 }
