@@ -79,6 +79,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://browser.sentry-cdn.com" />
       </head>
       <body className="font-body antialiased">
+        <a href="#main-content" className="skip-to-content">
+          Skip to content
+        </a>
         <ServiceWorkerRegistration />
         {children}
         <Analytics />
