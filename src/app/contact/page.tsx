@@ -36,7 +36,7 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Email Card */}
           <a
-            href="mailto:support@agentflow@gmail.com"
+            href="mailto:support@agent-flow.app"
             className="group block p-6 rounded-xl border border-surface-200 hover:border-primary hover:shadow-md transition-all"
           >
             <div className="w-12 h-12 rounded-lg bg-primary-50 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
@@ -49,13 +49,13 @@ export default function ContactPage() {
               For general questions, support, or feedback.
             </p>
             <p className="text-sm font-medium text-primary group-hover:underline">
-              support@agentflow@gmail.com
+              support@agent-flow.app
             </p>
           </a>
 
           {/* Website Card */}
           <a
-            href="https://agentflow.app"
+            href="https://agent-flow.app"
             target="_blank"
             rel="noopener noreferrer"
             className="group block p-6 rounded-xl border border-surface-200 hover:border-primary hover:shadow-md transition-all"
@@ -70,7 +70,7 @@ export default function ContactPage() {
               Learn more about AgentFlow and our features.
             </p>
             <p className="text-sm font-medium text-primary group-hover:underline">
-              agentflow.app
+              agent-flow.app
             </p>
           </a>
         </div>
@@ -90,10 +90,10 @@ export default function ContactPage() {
                 directly.
               </p>
               <a
-                href="mailto:privacy@agentflow.app"
+                href="mailto:privacy@agent-flow.app"
                 className="text-sm font-medium text-primary hover:underline"
               >
-                privacy@agentflow.app
+                privacy@agent-flow.app
               </a>
             </div>
           </div>

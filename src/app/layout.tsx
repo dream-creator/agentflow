@@ -15,7 +15,7 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
 });
 
-const appUrl = "https://agentflow.app";
+const appUrl = "https://agent-flow.app";
 
 export const metadata: Metadata = {
   title: "AgentFlow — The CRM for agents who hate CRMs",
@@ -71,6 +71,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${jakarta.variable}`}>
+      <head>
+        {/* Preconnect to Supabase — saves ~100-200ms on first API call */}
+        <link rel="preconnect" href="https://fsxdduvwshirrheenmag.supabase.co" />
+        {/* DNS-prefetch for third-party analytics and error tracking */}
+        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
+        <link rel="dns-prefetch" href="https://browser.sentry-cdn.com" />
+      </head>
       <body className="font-body antialiased">
         <ServiceWorkerRegistration />
         {children}
