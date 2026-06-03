@@ -28,7 +28,7 @@ export default function PrivacyPage() {
         <h1 className="font-heading text-3xl font-bold text-surface-900 mb-2">
           Privacy Policy
         </h1>
-        <p className="text-sm text-surface-400 mb-8">
+        <p className="text-sm text-surface-500 mb-8">
           Simple CRM for Solo Real Estate Agents
         </p>
 

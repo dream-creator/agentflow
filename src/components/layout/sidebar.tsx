@@ -83,7 +83,7 @@ export function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-surface-900 truncate">{userName}</p>
-            <p className="text-xs text-surface-400 truncate">{userPlan}</p>
+            <p className="text-xs text-surface-500 truncate">{userPlan}</p>
           </div>
         </div>
       </div>

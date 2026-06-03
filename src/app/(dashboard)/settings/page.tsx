@@ -108,7 +108,7 @@ export default function SettingsPage() {
                 <Button className="w-full" onClick={() => router.push("/settings/billing")}>
                   Upgrade to Pro — $5/mo
                 </Button>
-                <p className="text-xs text-surface-400 text-center mt-2">
+                <p className="text-xs text-surface-500 text-center mt-2">
                   Unlimited leads, unlimited pipelines, custom branding
                 </p>
               </div>
