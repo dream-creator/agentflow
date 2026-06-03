@@ -95,7 +95,7 @@ export function ToastContainer() {
             className="ml-1 p-1 hover:bg-surface-100 rounded shrink-0"
             aria-label="Dismiss notification"
           >
-            <X className="h-3 w-3 text-surface-400" />
+            <X className="h-3 w-3 text-surface-500" />
           </button>
         </div>
       ))}

@@ -187,7 +187,7 @@ export default function ImportPage() {
                   ? "bg-primary text-white"
                   : ["upload", "map", "review", "done"].indexOf(step) > i
                   ? "bg-primary-100 text-primary"
-                  : "bg-surface-100 text-surface-400"
+                  : "bg-surface-100 text-surface-500"
               }`}
             >
               {i + 1}
@@ -204,11 +204,11 @@ export default function ImportPage() {
             className="border-2 border-dashed border-surface-200 rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary-50 transition-colors"
             onClick={() => fileRef.current?.click()}
           >
-            <Upload className="h-10 w-10 text-surface-400 mx-auto mb-3" />
+            <Upload className="h-10 w-10 text-surface-500 mx-auto mb-3" />
             <p className="text-surface-700 font-medium mb-1">
               Click to upload CSV
             </p>
-            <p className="text-sm text-surface-400">
+            <p className="text-sm text-surface-500">
               Or drag and drop your file here
             </p>
           </div>

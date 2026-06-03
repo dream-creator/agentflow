@@ -61,7 +61,7 @@ export default function DashboardPage() {
 
       {leads.length === 0 ? (
         <EmptyState
-          icon={<UserPlus className="h-6 w-6 text-surface-400" />}
+          icon={<UserPlus className="h-6 w-6 text-surface-500" />}
           title="No follow-ups today"
           description="Add your first lead to start tracking follow-ups. You'll see them here when they're due."
           action={
@@ -89,7 +89,7 @@ export default function DashboardPage() {
                       {lead.next_action}
                     </p>
                   )}
-                  <div className="flex items-center gap-3 text-xs text-surface-400">
+                  <div className="flex items-center gap-3 text-xs text-surface-500">
                     <span>Due: {formatDate(lead.next_action_date)}</span>
                     {lead.phone && <span>{lead.phone}</span>}
                   </div>
@@ -98,7 +98,8 @@ export default function DashboardPage() {
                   {lead.phone && (
                     <a
                       href={`tel:${lead.phone}`}
-                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                      aria-label="Call"
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                     >
                       <Phone className="h-4 w-4" />
                     </a>
@@ -106,7 +107,8 @@ export default function DashboardPage() {
                   {lead.email && (
                     <a
                       href={`mailto:${lead.email}`}
-                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                      aria-label="Send email"
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                     >
                       <Mail className="h-4 w-4" />
                     </a>
@@ -114,7 +116,8 @@ export default function DashboardPage() {
                   {lead.phone && (
                     <a
                       href={`sms:${lead.phone}`}
-                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                      aria-label="Send text message"
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                     >
                       <MessageSquare className="h-4 w-4" />
                     </a>

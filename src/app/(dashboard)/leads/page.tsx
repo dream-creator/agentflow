@@ -79,7 +79,7 @@ export default function LeadsPage() {
       {/* Search & Filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-surface-500" />
           <input
             type="text"
             placeholder="Search leads..."
@@ -105,7 +105,7 @@ export default function LeadsPage() {
 
       {filteredLeads.length === 0 ? (
         <EmptyState
-          icon={<UserPlus className="h-6 w-6 text-surface-400" />}
+          icon={<UserPlus className="h-6 w-6 text-surface-500" />}
           title={search ? "No leads found" : "No leads yet"}
           description={
             search
@@ -137,7 +137,7 @@ export default function LeadsPage() {
                       {formatStage(lead.pipeline_stage)}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-surface-400">
+                  <div className="flex items-center gap-3 text-xs text-surface-500">
                     {lead.email && <span className="truncate">{lead.email}</span>}
                     {lead.phone && <span>{lead.phone}</span>}
                     <span>Source: {lead.source.replace("_", " ")}</span>
@@ -147,7 +147,8 @@ export default function LeadsPage() {
                   {lead.phone && (
                     <a
                       href={`tel:${lead.phone}`}
-                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                      aria-label="Call"
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                     >
                       <Phone className="h-4 w-4" />
                     </a>
@@ -155,7 +156,8 @@ export default function LeadsPage() {
                   {lead.email && (
                     <a
                       href={`mailto:${lead.email}`}
-                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                      aria-label="Send email"
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                     >
                       <Mail className="h-4 w-4" />
                     </a>
@@ -163,7 +165,8 @@ export default function LeadsPage() {
                   {lead.phone && (
                     <a
                       href={`sms:${lead.phone}`}
-                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-400 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
+                      aria-label="Send text message"
+                      className="p-2 rounded-lg hover:bg-surface-100 text-surface-500 hover:text-primary transition-colors min-w-touch min-h-touch flex items-center justify-center"
                     >
                       <MessageSquare className="h-4 w-4" />
                     </a>

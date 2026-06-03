@@ -250,7 +250,7 @@ function LoginContent() {
   };
 
   const inputBase =
-    "w-full h-11 px-3 text-[15px] text-surface-900 bg-white border-[1.5px] rounded-lg placeholder:text-surface-400 focus:outline-none transition-all duration-150";
+    "w-full h-11 px-3 text-[15px] text-surface-900 bg-white border-[1.5px] rounded-lg placeholder:text-surface-500 focus:outline-none transition-all duration-150";
   const inputNormal = "border-surface-200 hover:border-surface-400 focus:border-primary focus:shadow-[0_0_0_3px_rgba(15,118,110,0.12)]";
   const inputError = "border-destructive shadow-[0_0_0_3px_rgba(220,38,38,0.1)]";
 
@@ -303,12 +303,12 @@ function LoginContent() {
             Welcome back to your daily follow-up tool
           </h2>
 
-          <p className="text-base text-white/80 leading-[1.6] mb-9">
+          <p className="text-base text-white/80 leading-[1.6] mb-12">
             The only CRM designed for solo agents who want to close more deals
             without the complexity.
           </p>
 
-          <div className="flex flex-col gap-[14px] mb-9">
+          <div className="flex flex-col gap-[14px] mb-16">
             {[
               "See who to call today — instantly",
               "Track every lead without the clutter",
@@ -386,7 +386,7 @@ function LoginContent() {
                     : "Resend the link"}
                 </button>
               </p>
-              <p className="text-[13px] text-surface-400 mt-3">
+              <p className="text-[13px] text-surface-500 mt-3">
                 Wrong email?{" "}
                 <button
                   type="button"
@@ -462,7 +462,7 @@ function LoginContent() {
 
                   <div className="flex items-center my-5">
                     <div className="flex-1 h-px bg-surface-200" />
-                    <span className="text-[13px] text-surface-400 px-3">or</span>
+                    <span className="text-[13px] text-surface-500 px-3">or</span>
                     <div className="flex-1 h-px bg-surface-200" />
                   </div>
                 </>
@@ -682,7 +682,7 @@ function LoginContent() {
                         aria-label={
                           showPassword ? "Hide password" : "Show password"
                         }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-500 cursor-pointer"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-500 hover:text-surface-500 cursor-pointer"
                       >
                         {showPassword ? (
                           <EyeOff className="w-4 h-4" />
