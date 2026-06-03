@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-export const dynamic = "force-dynamic";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { AuthCallbackRescue } from "@/components/auth-callback-rescue";
 import { StickyHeader } from "@/components/layout/sticky-header";
+
+// Lazy-load: only needed when Supabase OAuth drops ?code= on root
+// Removes ~165KB Supabase client from the landing page bundle
+const AuthCallbackRescue = dynamic(
+  () =>
+    import("@/components/auth-callback-rescue").then(
+      (mod) => mod.AuthCallbackRescue
+    ),
+  { ssr: false }
+);
 import { Footer } from "@/components/footer";
 import { LandingPricing } from "@/components/landing-pricing";
 import StatsBar from "@/components/landing/StatsBar";
@@ -35,9 +43,7 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-white">
-      <Suspense fallback={null}>
-        <AuthCallbackRescue />
-      </Suspense>
+      <AuthCallbackRescue />
 
       <StickyHeader />
 
@@ -104,7 +110,7 @@ export default function LandingPage() {
                     </div>
                     <div className="flex-1 text-center">
                       <div className="inline-block bg-surface-100 rounded-md px-3 py-1 text-xs text-surface-400">
-                        app.agentflow.app/dashboard
+                        app.agent-flow.app/dashboard
                       </div>
                     </div>
                   </div>
