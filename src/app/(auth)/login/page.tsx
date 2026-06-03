@@ -15,7 +15,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-// Email typo suggestions
 const COMMON_DOMAINS: Record<string, string> = {
   "gmail.con": "gmail.com",
   "gmail.cmo": "gmail.com",
@@ -46,14 +45,12 @@ function LoginContent() {
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
-  // Auth state
   const [authLoading, setAuthLoading] = useState(true);
   const [activeView, setActiveView] = useState<AuthView>("magic-link");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [sentEmail, setSentEmail] = useState("");
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
 
-  // Form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -62,18 +59,15 @@ function LoginContent() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
-  // Error state
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [authError, setAuthError] = useState("");
   const [emailSuggestion, setEmailSuggestion] = useState("");
 
-  // Resend cooldown
   const [resendCooldown, setResendCooldown] = useState(0);
 
   const getSupabase = useCallback(() => createClient(), []);
 
-  // Check if user is already authenticated
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -84,14 +78,13 @@ function LoginContent() {
           return;
         }
       } catch {
-        // Even on error, show the form
+        // Show form even on error
       }
       setAuthLoading(false);
     };
     checkSession();
   }, [getSupabase, router]);
 
-  // Auto-focus email input when view changes
   useEffect(() => {
     if (!authLoading) {
       const timer = setTimeout(() => {
@@ -101,7 +94,6 @@ function LoginContent() {
     }
   }, [authLoading, activeView]);
 
-  // Resend cooldown timer
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => {
@@ -116,7 +108,6 @@ function LoginContent() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  // Email validation
   const validateEmail = (value: string, showSuggestion = false): boolean => {
     if (!value.trim()) {
       setEmailError("Email address is required");
@@ -129,7 +120,6 @@ function LoginContent() {
       setEmailSuggestion("");
       return false;
     }
-    // Check for typos
     if (showSuggestion) {
       const correction = suggestCorrection(value);
       if (correction) {
@@ -143,7 +133,6 @@ function LoginContent() {
     return true;
   };
 
-  // Password validation (only for signup context, not login)
   const validatePassword = (value: string): boolean => {
     if (!value) {
       setPasswordError("Password is required");
@@ -153,20 +142,15 @@ function LoginContent() {
     return true;
   };
 
-  // Handle magic link send
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
-
     if (!validateEmail(email, true)) return;
-
     setMagicLinkLoading(true);
 
     const { error } = await getSupabase().auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: getOAuthRedirectTo(),
-      },
+      options: { emailRedirectTo: getOAuthRedirectTo() },
     });
 
     if (error) {
@@ -179,15 +163,12 @@ function LoginContent() {
     setMagicLinkLoading(false);
   };
 
-  // Handle password sign in
   const handlePasswordSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
     setPasswordError("");
-
     if (!validateEmail(email)) return;
     if (!validatePassword(password)) return;
-
     setPasswordLoading(true);
 
     const { error } = await getSupabase().auth.signInWithPassword({
@@ -198,7 +179,6 @@ function LoginContent() {
     if (error) {
       setAuthError("Incorrect email or password. Please try again.");
       setPassword("");
-      // Focus password input for retry
       setTimeout(() => passwordInputRef.current?.focus(), 100);
     } else {
       router.push("/dashboard");
@@ -206,16 +186,13 @@ function LoginContent() {
     setPasswordLoading(false);
   };
 
-  // Handle Google OAuth
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     setAuthError("");
 
     const { error } = await getSupabase().auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: getOAuthRedirectTo(),
-      },
+      options: { redirectTo: getOAuthRedirectTo() },
     });
 
     if (error) {
@@ -224,13 +201,10 @@ function LoginContent() {
     }
   };
 
-  // Handle forgot password
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
-
     if (!validateEmail(email, false)) return;
-
     setForgotPasswordLoading(true);
 
     const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
@@ -245,25 +219,19 @@ function LoginContent() {
     setForgotPasswordLoading(false);
   };
 
-  // Handle resend magic link
   const handleResend = async () => {
     if (resendCooldown > 0) return;
-
     setMagicLinkLoading(true);
     const { error } = await getSupabase().auth.signInWithOtp({
       email: sentEmail,
-      options: {
-        emailRedirectTo: getOAuthRedirectTo(),
-      },
+      options: { emailRedirectTo: getOAuthRedirectTo() },
     });
-
     if (!error) {
       setResendCooldown(30);
     }
     setMagicLinkLoading(false);
   };
 
-  // Reset to magic link form
   const resetToMagicLink = () => {
     setMagicLinkSent(false);
     setSentEmail("");
@@ -272,7 +240,6 @@ function LoginContent() {
     setAuthError("");
   };
 
-  // Reset to login form
   const resetToLogin = () => {
     setActiveView("magic-link");
     setForgotPasswordSent(false);
@@ -282,14 +249,16 @@ function LoginContent() {
     setAuthError("");
   };
 
-  // Loading skeleton
+  const inputBase =
+    "w-full h-11 px-3 text-[15px] text-surface-900 bg-white border-[1.5px] rounded-lg placeholder:text-surface-400 focus:outline-none transition-all duration-150";
+  const inputNormal = "border-surface-200 hover:border-surface-400 focus:border-primary focus:shadow-[0_0_0_3px_rgba(15,118,110,0.12)]";
+  const inputError = "border-destructive shadow-[0_0_0_3px_rgba(220,38,38,0.1)]";
+
   if (authLoading) {
     return (
       <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
-        {/* Left panel - renders normally */}
-        <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center px-16">
+        <div className="hidden lg:flex lg:w-[55%] bg-primary flex-col justify-center px-16">
           <div className="max-w-[340px]">
-            {/* Logo */}
             <div className="flex items-center gap-2.5 mb-14">
               <div className="w-7 h-7 flex items-center justify-center">
                 <Home className="w-7 h-7 text-white" />
@@ -298,25 +267,18 @@ function LoginContent() {
                 AgentFlow
               </span>
             </div>
-            {/* Headline skeleton */}
             <div className="h-8 w-[280px] bg-white/20 rounded-md mb-4 animate-pulse" />
-            {/* Body skeleton */}
             <div className="h-4 w-[320px] bg-white/15 rounded mb-2 animate-pulse" />
             <div className="h-4 w-[240px] bg-white/15 rounded mb-8 animate-pulse" />
           </div>
         </div>
 
-        {/* Right panel skeleton */}
-        <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white">
-        <div className="w-full max-w-[380px] mx-auto">
-            {/* Title skeleton */}
-            <div className="h-7 w-[220px] bg-[#f1f5f9] rounded-md mb-2 animate-pulse" />
-            {/* Subtitle skeleton */}
-            <div className="h-4 w-[180px] bg-[#f1f5f9] rounded mb-7 animate-pulse" />
-            {/* Input skeleton */}
-            <div className="h-11 w-full bg-[#f1f5f9] rounded-lg mb-3 animate-pulse" />
-            {/* Button skeleton */}
-            <div className="h-11 w-full bg-[#e2e8f0] rounded-lg animate-pulse" />
+        <div className="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 bg-surface">
+          <div className="w-full max-w-[380px] mx-auto">
+            <div className="h-7 w-[220px] bg-surface-100 rounded-md mb-2 animate-pulse" />
+            <div className="h-4 w-[180px] bg-surface-100 rounded mb-7 animate-pulse" />
+            <div className="h-11 w-full bg-surface-100 rounded-lg mb-3 animate-pulse" />
+            <div className="h-11 w-full bg-surface-200 rounded-lg animate-pulse" />
           </div>
         </div>
       </div>
@@ -325,10 +287,9 @@ function LoginContent() {
 
   return (
     <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
-      {/* Left Panel - Teal */}
-      <div className="hidden lg:flex lg:w-[55%] bg-[#0F766E] flex-col justify-center items-start px-16">
+      {/* Left Panel */}
+      <div className="hidden lg:flex lg:w-[55%] bg-primary flex-col justify-center items-start px-16">
         <div className="max-w-[340px]">
-          {/* Logo */}
           <div className="flex items-center gap-2.5 mb-14">
             <div className="w-7 h-7 flex items-center justify-center">
               <Home className="w-7 h-7 text-white" />
@@ -338,18 +299,15 @@ function LoginContent() {
             </span>
           </div>
 
-          {/* Headline */}
           <h2 className="text-[32px] font-semibold text-white leading-[1.2] tracking-[-0.02em] mb-4">
             Welcome back to your daily follow-up tool
           </h2>
 
-          {/* Body copy */}
           <p className="text-base text-white/80 leading-[1.6] mb-9">
             The only CRM designed for solo agents who want to close more deals
             without the complexity.
           </p>
 
-          {/* Benefit bullets */}
           <div className="flex flex-col gap-[14px] mb-9">
             {[
               "See who to call today — instantly",
@@ -357,13 +315,12 @@ function LoginContent() {
               "Set up in 3 minutes, not 3 hours",
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-[18px] h-[18px] text-[#99f6e4] shrink-0" />
+                <CheckCircle2 className="w-[18px] h-[18px] text-primary-200 shrink-0" />
                 <span className="text-[15px] text-white/90">{item}</span>
               </div>
             ))}
           </div>
 
-          {/* Testimonial card */}
           <div className="bg-white/10 border border-white/20 rounded-xl p-5">
             <p className="text-sm text-white/90 italic leading-[1.5] mb-3">
               &ldquo;I tried 4 CRMs. This is the only one I actually open every
@@ -387,7 +344,7 @@ function LoginContent() {
       </div>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden flex items-center h-[72px] bg-[#0F766E] px-6">
+      <div className="lg:hidden flex items-center h-[72px] bg-primary px-6">
         <div className="flex items-center gap-2.5">
           <div className="w-6 h-6 flex items-center justify-center">
             <Home className="w-6 h-6 text-white" />
@@ -401,93 +358,86 @@ function LoginContent() {
       {/* Right Panel - Form */}
       <div
         role="main"
-        className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 py-12 bg-white"
+        className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 py-12 lg:py-0 bg-surface"
       >
         <div className="w-full max-w-[380px]">
-          {/* Magic link success state */}
           {magicLinkSent ? (
             <div className="text-center">
-              {/* Icon */}
-              <div className="w-14 h-14 rounded-full bg-[#f0fdf4] border border-[#bbf7d0] flex items-center justify-center mx-auto mb-5">
-                <Mail className="w-7 h-7 text-[#16a34a]" />
+              <div className="w-14 h-14 rounded-full bg-success-50 border border-success-100 flex items-center justify-center mx-auto mb-5">
+                <Mail className="w-7 h-7 text-success" />
               </div>
-              <h2 className="text-2xl font-semibold text-[#0f172a] mb-2">
+              <h2 className="text-2xl font-semibold text-surface-900 mb-2">
                 Check your email
               </h2>
-              <p className="text-[15px] text-[#64748b] leading-[1.6] mb-7 max-w-[320px] mx-auto">
+              <p className="text-[15px] text-surface-500 leading-[1.6] mb-7 max-w-[320px] mx-auto">
                 We sent a magic link to {sentEmail}. Click the link to sign in
                 — it expires in 10 minutes.
               </p>
-              <p className="text-[14px] text-[#64748b]">
+              <p className="text-[14px] text-surface-500">
                 Didn&apos;t get it?{" "}
                 <button
                   type="button"
                   onClick={handleResend}
                   disabled={resendCooldown > 0 || magicLinkLoading}
-                  className="text-[#0F766E] font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-primary font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {resendCooldown > 0
                     ? `Resend in ${resendCooldown}s...`
                     : "Resend the link"}
                 </button>
               </p>
-              <p className="text-[13px] text-[#94a3b8] mt-3">
+              <p className="text-[13px] text-surface-400 mt-3">
                 Wrong email?{" "}
                 <button
                   type="button"
                   onClick={resetToMagicLink}
-                  className="text-[#0F766E] hover:underline"
+                  className="text-primary hover:underline"
                 >
                   Sign in with a different address
                 </button>
               </p>
             </div>
           ) : forgotPasswordSent ? (
-            /* Forgot password success state */
             <div className="text-center">
-              <div className="w-14 h-14 rounded-full bg-[#f0fdf4] border border-[#bbf7d0] flex items-center justify-center mx-auto mb-5">
-                <Mail className="w-7 h-7 text-[#16a34a]" />
+              <div className="w-14 h-14 rounded-full bg-success-50 border border-success-100 flex items-center justify-center mx-auto mb-5">
+                <Mail className="w-7 h-7 text-success" />
               </div>
-              <h2 className="text-2xl font-semibold text-[#0f172a] mb-2">
+              <h2 className="text-2xl font-semibold text-surface-900 mb-2">
                 Reset link sent
               </h2>
-              <p className="text-[15px] text-[#64748b] leading-[1.6] mb-7 max-w-[320px] mx-auto">
+              <p className="text-[15px] text-surface-500 leading-[1.6] mb-7 max-w-[320px] mx-auto">
                 Check your email for a link to reset your password. It expires
                 in 1 hour.
               </p>
               <button
                 type="button"
                 onClick={resetToLogin}
-                className="text-[14px] text-[#0F766E] font-medium hover:underline"
+                className="text-[14px] text-primary font-medium hover:underline"
               >
                 &larr; Back to sign in
               </button>
             </div>
           ) : (
-            /* Form */
             <>
-              {/* Heading */}
-              <h1 className="text-[26px] font-semibold text-[#0f172a] tracking-[-0.02em] leading-[1.2] mb-2">
+              <h1 className="text-[26px] font-semibold text-surface-900 tracking-[-0.02em] leading-[1.2] mb-2">
                 Sign in to your account
               </h1>
-              <p className="text-[15px] text-[#64748b] mb-7">
+              <p className="text-[15px] text-surface-500 mb-7">
                 {activeView === "forgot-password"
                   ? "Enter your email and we'll send you a reset link."
                   : "Enter your email to receive a magic link"}
               </p>
 
-              {/* Back link for forgot password */}
               {activeView === "forgot-password" && (
                 <button
                   type="button"
                   onClick={resetToLogin}
-                  className="text-[14px] text-[#0F766E] font-medium hover:underline mb-4"
+                  className="text-[14px] text-primary font-medium hover:underline mb-4"
                 >
                   &larr; Back to sign in
                 </button>
               )}
 
-              {/* Google OAuth button (hidden during forgot password) */}
               {activeView !== "forgot-password" && (
                 <>
                   <button
@@ -495,50 +445,31 @@ function LoginContent() {
                     onClick={handleGoogleLogin}
                     disabled={googleLoading}
                     aria-label="Continue with Google"
-                    className="w-full h-11 flex items-center justify-center gap-2.5 bg-white text-[#374151] text-[15px] font-medium border-[1.5px] border-[#e2e8f0] rounded-lg cursor-pointer hover:bg-[#f8fafc] hover:border-[#cbd5e1] active:scale-[0.98] focus:outline-2 focus:outline-[#0F766E] focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
+                    className="w-full h-11 flex items-center justify-center gap-2.5 bg-white text-surface-700 text-[15px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] focus:outline-2 focus:outline-primary focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
                   >
                     {googleLoading ? (
                       <Loader2 className="w-[18px] h-[18px] animate-spin" />
                     ) : (
-                      <svg
-                        className="w-[18px] h-[18px]"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                          fill="#4285F4"
-                        />
-                        <path
-                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                          fill="#34A853"
-                        />
-                        <path
-                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                          fill="#FBBC05"
-                        />
-                        <path
-                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                          fill="#EA4335"
-                        />
+                      <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                       </svg>
                     )}
                     Continue with Google
                   </button>
 
-                  {/* Divider */}
                   <div className="flex items-center my-5">
-                    <div className="flex-1 h-px bg-[#e2e8f0]" />
-                    <span className="text-[13px] text-[#94a3b8] px-3">
-                      or
-                    </span>
-                    <div className="flex-1 h-px bg-[#e2e8f0]" />
+                    <div className="flex-1 h-px bg-surface-200" />
+                    <span className="text-[13px] text-surface-400 px-3">or</span>
+                    <div className="flex-1 h-px bg-surface-200" />
                   </div>
                 </>
               )}
 
-              {/* Tab switcher (hidden during forgot password) */}
               {activeView !== "forgot-password" && (
-                <div className="flex rounded-lg p-1 mb-5" style={{ backgroundColor: "#f1f5f9", gap: "2px" }}>
+                <div className="flex rounded-lg bg-surface-100 p-1 mb-5 gap-0.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -547,15 +478,11 @@ function LoginContent() {
                       setEmailError("");
                       setEmailSuggestion("");
                     }}
-                    className="flex-1 rounded-md text-[14px] cursor-pointer transition-all duration-150"
-                    style={{
-                      height: "36px",
-                      backgroundColor: activeView === "magic-link" ? "#ffffff" : "transparent",
-                      color: activeView === "magic-link" ? "#0f172a" : "#64748b",
-                      fontWeight: activeView === "magic-link" ? 600 : 400,
-                      boxShadow: activeView === "magic-link" ? "0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)" : "none",
-                      border: activeView === "magic-link" ? "1px solid rgba(0,0,0,0.06)" : "1px solid transparent",
-                    }}
+                    className={`flex-1 h-9 rounded-md text-[14px] cursor-pointer transition-all duration-150 border ${
+                      activeView === "magic-link"
+                        ? "bg-white text-surface-900 font-semibold border-surface-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+                        : "bg-transparent text-surface-500 font-normal border-transparent"
+                    }`}
                   >
                     Magic link
                   </button>
@@ -567,41 +494,35 @@ function LoginContent() {
                       setEmailError("");
                       setEmailSuggestion("");
                     }}
-                    className="flex-1 rounded-md text-[14px] cursor-pointer transition-all duration-150"
-                    style={{
-                      height: "36px",
-                      backgroundColor: activeView === "password" ? "#ffffff" : "transparent",
-                      color: activeView === "password" ? "#0f172a" : "#64748b",
-                      fontWeight: activeView === "password" ? 600 : 400,
-                      boxShadow: activeView === "password" ? "0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)" : "none",
-                      border: activeView === "password" ? "1px solid rgba(0,0,0,0.06)" : "1px solid transparent",
-                    }}
+                    className={`flex-1 h-9 rounded-md text-[14px] cursor-pointer transition-all duration-150 border ${
+                      activeView === "password"
+                        ? "bg-white text-surface-900 font-semibold border-surface-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+                        : "bg-transparent text-surface-500 font-normal border-transparent"
+                    }`}
                   >
                     Password
                   </button>
                 </div>
               )}
 
-              {/* Auth error banner */}
               {authError && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 bg-[#fef2f2] border border-[#fecaca] rounded-lg p-3 mb-3"
+                  className="flex items-start gap-2 bg-destructive-50 border border-destructive-100 rounded-lg p-3 mb-3"
                 >
-                  <AlertCircle className="w-4 h-4 text-[#dc2626] mt-0.5 shrink-0" />
-                  <span className="text-[14px] text-[#dc2626] leading-[1.4]">
+                  <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+                  <span className="text-[14px] text-destructive leading-[1.4]">
                     {authError}
                   </span>
                 </div>
               )}
 
-              {/* Magic link form */}
               {activeView === "magic-link" && !magicLinkSent && (
                 <form onSubmit={handleMagicLink}>
                   <div className="mb-3">
                     <label
                       htmlFor="magic-email"
-                      className="block text-[14px] font-medium text-[#374151] mb-1.5"
+                      className="block text-[14px] font-medium text-surface-700 mb-1.5"
                     >
                       Email address
                     </label>
@@ -627,16 +548,12 @@ function LoginContent() {
                             : undefined
                       }
                       aria-invalid={!!emailError}
-                      className={`w-full h-11 px-3 text-[15px] text-[#0f172a] bg-white border-[1.5px] rounded-lg placeholder:text-[#94a3b8] focus:outline-none transition-all duration-150 ${
-                        emailError
-                          ? "border-[#dc2626] shadow-[0_0_0_3px_rgba(220,38,38,0.1)]"
-                          : "border-[#e2e8f0] hover:border-[#94a3b8] focus:border-[#0F766E] focus:shadow-[0_0_0_3px_rgba(15,118,110,0.12)]"
-                      }`}
+                      className={`${inputBase} ${emailError ? inputError : inputNormal}`}
                     />
                     {emailError && (
                       <p
                         id="magic-email-error"
-                        className="flex items-center gap-1 mt-1 text-[13px] text-[#dc2626]"
+                        className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
                         role="alert"
                       >
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -646,7 +563,7 @@ function LoginContent() {
                     {emailSuggestion && !emailError && (
                       <p
                         id="magic-email-suggestion"
-                        className="mt-1 text-[13px] text-[#64748b]"
+                        className="mt-1 text-[13px] text-surface-500"
                       >
                         Did you mean{" "}
                         <button
@@ -655,7 +572,7 @@ function LoginContent() {
                             setEmail(emailSuggestion);
                             setEmailSuggestion("");
                           }}
-                          className="text-[#0F766E] font-medium hover:underline cursor-pointer"
+                          className="text-primary font-medium hover:underline cursor-pointer"
                         >
                           {emailSuggestion}
                         </button>
@@ -668,7 +585,7 @@ function LoginContent() {
                     type="submit"
                     disabled={magicLinkLoading}
                     aria-busy={magicLinkLoading}
-                    className="w-full h-11 flex items-center justify-center gap-2 bg-[#0F766E] text-white text-[15px] font-medium rounded-lg cursor-pointer hover:bg-[#0d6b64] active:bg-[#0a5c56] active:scale-[0.98] focus:outline-2 focus:outline-[#0F766E] focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
+                    className="btn-primary w-full flex items-center justify-center gap-2"
                   >
                     {magicLinkLoading ? (
                       <>
@@ -685,13 +602,12 @@ function LoginContent() {
                 </form>
               )}
 
-              {/* Password form */}
               {activeView === "password" && (
                 <form onSubmit={handlePasswordSignIn}>
                   <div className="mb-3">
                     <label
                       htmlFor="password-email"
-                      className="block text-[14px] font-medium text-[#374151] mb-1.5"
+                      className="block text-[14px] font-medium text-surface-700 mb-1.5"
                     >
                       Email address
                     </label>
@@ -712,16 +628,12 @@ function LoginContent() {
                         emailError ? "password-email-error" : undefined
                       }
                       aria-invalid={!!emailError}
-                      className={`w-full h-11 px-3 text-[15px] text-[#0f172a] bg-white border-[1.5px] rounded-lg placeholder:text-[#94a3b8] focus:outline-none transition-all duration-150 ${
-                        emailError
-                          ? "border-[#dc2626] shadow-[0_0_0_3px_rgba(220,38,38,0.1)]"
-                          : "border-[#e2e8f0] hover:border-[#94a3b8] focus:border-[#0F766E] focus:shadow-[0_0_0_3px_rgba(15,118,110,0.12)]"
-                      }`}
+                      className={`${inputBase} ${emailError ? inputError : inputNormal}`}
                     />
                     {emailError && (
                       <p
                         id="password-email-error"
-                        className="flex items-center gap-1 mt-1 text-[13px] text-[#dc2626]"
+                        className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
                         role="alert"
                       >
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -734,14 +646,14 @@ function LoginContent() {
                     <div className="flex items-center justify-between mb-1.5">
                       <label
                         htmlFor="password-input"
-                        className="text-[14px] font-medium text-[#374151]"
+                        className="text-[14px] font-medium text-surface-700"
                       >
                         Password
                       </label>
                       <button
                         type="button"
                         onClick={() => setActiveView("forgot-password")}
-                        className="text-[13px] text-[#0F766E] hover:underline cursor-pointer"
+                        className="text-[13px] text-primary hover:underline cursor-pointer"
                       >
                         Forgot password?
                       </button>
@@ -762,11 +674,7 @@ function LoginContent() {
                           passwordError ? "password-error" : undefined
                         }
                         aria-invalid={!!passwordError}
-                        className={`w-full h-11 px-3 pr-10 text-[15px] text-[#0f172a] bg-white border-[1.5px] rounded-lg placeholder:text-[#94a3b8] focus:outline-none transition-all duration-150 ${
-                          passwordError
-                            ? "border-[#dc2626] shadow-[0_0_0_3px_rgba(220,38,38,0.1)]"
-                            : "border-[#e2e8f0] hover:border-[#94a3b8] focus:border-[#0F766E] focus:shadow-[0_0_0_3px_rgba(15,118,110,0.12)]"
-                        }`}
+                        className={`${inputBase} pr-10 ${passwordError ? inputError : inputNormal}`}
                       />
                       <button
                         type="button"
@@ -774,7 +682,7 @@ function LoginContent() {
                         aria-label={
                           showPassword ? "Hide password" : "Show password"
                         }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-[#64748b] cursor-pointer"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-500 cursor-pointer"
                       >
                         {showPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -786,7 +694,7 @@ function LoginContent() {
                     {passwordError && (
                       <p
                         id="password-error"
-                        className="flex items-center gap-1 mt-1 text-[13px] text-[#dc2626]"
+                        className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
                         role="alert"
                       >
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -799,7 +707,7 @@ function LoginContent() {
                     type="submit"
                     disabled={passwordLoading}
                     aria-busy={passwordLoading}
-                    className="w-full h-11 flex items-center justify-center gap-2 bg-[#0F766E] text-white text-[15px] font-medium rounded-lg cursor-pointer hover:bg-[#0d6b64] active:bg-[#0a5c56] active:scale-[0.98] focus:outline-2 focus:outline-[#0F766E] focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
+                    className="btn-primary w-full flex items-center justify-center gap-2"
                   >
                     {passwordLoading ? (
                       <>
@@ -813,13 +721,12 @@ function LoginContent() {
                 </form>
               )}
 
-              {/* Forgot password form */}
               {activeView === "forgot-password" && !forgotPasswordSent && (
                 <form onSubmit={handleForgotPassword}>
                   <div className="mb-3">
                     <label
                       htmlFor="forgot-email"
-                      className="block text-[14px] font-medium text-[#374151] mb-1.5"
+                      className="block text-[14px] font-medium text-surface-700 mb-1.5"
                     >
                       Email address
                     </label>
@@ -840,16 +747,12 @@ function LoginContent() {
                         emailError ? "forgot-email-error" : undefined
                       }
                       aria-invalid={!!emailError}
-                      className={`w-full h-11 px-3 text-[15px] text-[#0f172a] bg-white border-[1.5px] rounded-lg placeholder:text-[#94a3b8] focus:outline-none transition-all duration-150 ${
-                        emailError
-                          ? "border-[#dc2626] shadow-[0_0_0_3px_rgba(220,38,38,0.1)]"
-                          : "border-[#e2e8f0] hover:border-[#94a3b8] focus:border-[#0F766E] focus:shadow-[0_0_0_3px_rgba(15,118,110,0.12)]"
-                      }`}
+                      className={`${inputBase} ${emailError ? inputError : inputNormal}`}
                     />
                     {emailError && (
                       <p
                         id="forgot-email-error"
-                        className="flex items-center gap-1 mt-1 text-[13px] text-[#dc2626]"
+                        className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
                         role="alert"
                       >
                         <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -862,7 +765,7 @@ function LoginContent() {
                     type="submit"
                     disabled={forgotPasswordLoading}
                     aria-busy={forgotPasswordLoading}
-                    className="w-full h-11 flex items-center justify-center gap-2 bg-[#0F766E] text-white text-[15px] font-medium rounded-lg cursor-pointer hover:bg-[#0d6b64] active:bg-[#0a5c56] active:scale-[0.98] focus:outline-2 focus:outline-[#0F766E] focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
+                    className="btn-primary w-full flex items-center justify-center gap-2"
                   >
                     {forgotPasswordLoading ? (
                       <>
@@ -876,13 +779,12 @@ function LoginContent() {
                 </form>
               )}
 
-              {/* Sign up link */}
               {activeView !== "forgot-password" && (
-                <p className="text-center text-[14px] text-[#64748b] mt-6">
+                <p className="text-center text-[14px] text-surface-500 mt-6">
                   Don&apos;t have an account?{" "}
                   <Link
                     href="/signup"
-                    className="text-[#0F766E] font-medium hover:underline"
+                    className="text-primary font-medium hover:underline"
                   >
                     Sign up free
                   </Link>
