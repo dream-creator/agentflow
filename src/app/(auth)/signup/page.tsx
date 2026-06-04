@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
-import { TurnstileWidget } from "@/components/turnstile-widget";
 import { Mail, Loader2, Home, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +12,6 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [captchaToken, setCaptchaToken] = useState("");
 
   const getSupabase = () => createClient();
 
@@ -27,7 +25,6 @@ export default function SignupPage() {
       options: {
         data: { full_name: fullName },
         emailRedirectTo: getOAuthRedirectTo(),
-        captchaToken,
       },
     });
 
@@ -142,14 +139,6 @@ export default function SignupPage() {
                 placeholder="you@example.com"
                 required
                 className="input-field"
-              />
-            </div>
-
-            <div className="flex justify-center">
-              <TurnstileWidget
-                onSuccess={(token) => setCaptchaToken(token)}
-                onExpire={() => setCaptchaToken("")}
-                onError={() => setCaptchaToken("")}
               />
             </div>
 
