@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import {
   Mail,
   Home,
@@ -65,6 +66,7 @@ function LoginContent() {
   const [emailSuggestion, setEmailSuggestion] = useState("");
 
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const getSupabase = useCallback(() => createClient(), []);
 
@@ -150,7 +152,7 @@ function LoginContent() {
 
     const { error } = await getSupabase().auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: getOAuthRedirectTo() },
+      options: { emailRedirectTo: getOAuthRedirectTo(), captchaToken },
     });
 
     if (error) {
@@ -174,6 +176,7 @@ function LoginContent() {
     const { error } = await getSupabase().auth.signInWithPassword({
       email,
       password,
+      options: { captchaToken },
     });
 
     if (error) {
@@ -209,6 +212,7 @@ function LoginContent() {
 
     const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
+      captchaToken,
     });
 
     if (error) {
@@ -224,7 +228,7 @@ function LoginContent() {
     setMagicLinkLoading(true);
     const { error } = await getSupabase().auth.signInWithOtp({
       email: sentEmail,
-      options: { emailRedirectTo: getOAuthRedirectTo() },
+      options: { emailRedirectTo: getOAuthRedirectTo(), captchaToken },
     });
     if (!error) {
       setResendCooldown(30);
@@ -515,6 +519,16 @@ function LoginContent() {
                     {authError}
                   </span>
                 </div>
+              )}
+
+              {activeView !== "forgot-password" && (
+                <TurnstileWidget
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken("")}
+                  onError={() => setCaptchaToken("")}
+                  size="invisible"
+                />
               )}
 
               {activeView === "magic-link" && !magicLinkSent && (
