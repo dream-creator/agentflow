@@ -1,15 +1,14 @@
 "use client";
 
-import { lazy, Suspense, forwardRef } from "react";
+import { lazy, Suspense } from "react";
 
-const LazyTurnstile = lazy(() =>
+const Turnstile = lazy(() =>
   import("@marsidev/react-turnstile").then((mod) => ({
     default: mod.Turnstile,
   }))
 );
 
 interface TurnstileWidgetProps {
-  siteKey: string;
   onSuccess: (token: string) => void;
   onExpire?: () => void;
   onError?: () => void;
@@ -17,12 +16,7 @@ interface TurnstileWidgetProps {
   size?: "normal" | "compact" | "invisible";
 }
 
-function TurnstileFallback() {
-  return null;
-}
-
 export function TurnstileWidget({
-  siteKey,
   onSuccess,
   onExpire,
   onError,
@@ -30,9 +24,9 @@ export function TurnstileWidget({
   size = "normal",
 }: TurnstileWidgetProps) {
   return (
-    <Suspense fallback={<TurnstileFallback />}>
-      <LazyTurnstile
-        siteKey={siteKey}
+    <Suspense fallback={null}>
+      <Turnstile
+        siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
         onSuccess={onSuccess}
         onExpire={onExpire}
         onError={onError}

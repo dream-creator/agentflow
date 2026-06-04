@@ -14,6 +14,10 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  Shield,
+  Star,
+  ArrowRight,
+  Lock,
 } from "lucide-react";
 
 const COMMON_DOMAINS: Record<string, string> = {
@@ -39,15 +43,157 @@ function suggestCorrection(email: string): string | null {
   return null;
 }
 
-type AuthView = "magic-link" | "password" | "forgot-password";
+/* ── Product mockup SVG (dashboard preview) ──────────────── */
+function ProductMockup() {
+  return (
+    <div className="relative w-full max-w-[420px] mb-10 rounded-xl overflow-hidden border border-white/20">
+      <svg viewBox="0 0 420 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+        {/* Browser chrome */}
+        <rect width="420" height="260" rx="12" fill="white" fillOpacity="0.08" />
+        <rect x="0" y="0" width="420" height="32" rx="12" fill="white" fillOpacity="0.12" />
+        <circle cx="16" cy="16" r="5" fill="#FF605C" fillOpacity="0.8" />
+        <circle cx="32" cy="16" r="5" fill="#FFBD44" fillOpacity="0.8" />
+        <circle cx="48" cy="16" r="5" fill="#00CA4E" fillOpacity="0.8" />
+        <rect x="80" y="10" width="120" height="12" rx="6" fill="white" fillOpacity="0.15" />
 
+        {/* Sidebar */}
+        <rect x="0" y="32" width="72" height="228" fill="white" fillOpacity="0.06" />
+        <rect x="12" y="48" width="48" height="8" rx="4" fill="white" fillOpacity="0.18" />
+        <rect x="12" y="68" width="48" height="8" rx="4" fill="#0F766E" fillOpacity="0.6" />
+        <rect x="12" y="88" width="48" height="8" rx="4" fill="white" fillOpacity="0.12" />
+        <rect x="12" y="108" width="48" height="8" rx="4" fill="white" fillOpacity="0.12" />
+        <rect x="12" y="128" width="48" height="8" rx="4" fill="white" fillOpacity="0.12" />
+
+        {/* Stats cards row */}
+        <rect x="88" y="44" width="105" height="52" rx="8" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.15" strokeWidth="1" />
+        <rect x="96" y="52" width="36" height="6" rx="3" fill="#0F766E" fillOpacity="0.7" />
+        <rect x="96" y="64" width="60" height="12" rx="4" fill="white" fillOpacity="0.3" />
+        <rect x="96" y="82" width="28" height="5" rx="2.5" fill="#00CA4E" fillOpacity="0.5" />
+
+        <rect x="203" y="44" width="105" height="52" rx="8" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.15" strokeWidth="1" />
+        <rect x="211" y="52" width="36" height="6" rx="3" fill="#F97316" fillOpacity="0.7" />
+        <rect x="211" y="64" width="60" height="12" rx="4" fill="white" fillOpacity="0.3" />
+        <rect x="211" y="82" width="28" height="5" rx="2.5" fill="#00CA4E" fillOpacity="0.5" />
+
+        <rect x="318" y="44" width="90" height="52" rx="8" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.15" strokeWidth="1" />
+        <rect x="326" y="52" width="30" height="6" rx="3" fill="#0369A1" fillOpacity="0.7" />
+        <rect x="326" y="64" width="50" height="12" rx="4" fill="white" fillOpacity="0.3" />
+        <rect x="326" y="82" width="24" height="5" rx="2.5" fill="#00CA4E" fillOpacity="0.5" />
+
+        {/* Pipeline columns */}
+        <rect x="88" y="108" width="105" height="140" rx="8" fill="white" fillOpacity="0.06" stroke="white" strokeOpacity="0.1" strokeWidth="1" />
+        <rect x="96" y="116" width="40" height="6" rx="3" fill="white" fillOpacity="0.25" />
+        <rect x="96" y="132" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
+        <rect x="102" y="138" width="50" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
+        <rect x="102" y="147" width="30" height="4" rx="2" fill="white" fillOpacity="0.12" />
+        <rect x="96" y="164" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
+        <rect x="102" y="170" width="45" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
+        <rect x="102" y="179" width="35" height="4" rx="2" fill="white" fillOpacity="0.12" />
+        <rect x="96" y="196" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
+        <rect x="102" y="202" width="40" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
+        <rect x="102" y="211" width="25" height="4" rx="2" fill="white" fillOpacity="0.12" />
+
+        <rect x="203" y="108" width="105" height="140" rx="8" fill="white" fillOpacity="0.06" stroke="white" strokeOpacity="0.1" strokeWidth="1" />
+        <rect x="211" y="116" width="40" height="6" rx="3" fill="white" fillOpacity="0.25" />
+        <rect x="211" y="132" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
+        <rect x="217" y="138" width="50" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
+        <rect x="217" y="147" width="30" height="4" rx="2" fill="white" fillOpacity="0.12" />
+        <rect x="211" y="164" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
+        <rect x="217" y="170" width="45" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
+        <rect x="217" y="179" width="35" height="4" rx="2" fill="white" fillOpacity="0.12" />
+
+        <rect x="318" y="108" width="90" height="140" rx="8" fill="white" fillOpacity="0.06" stroke="white" strokeOpacity="0.1" strokeWidth="1" />
+        <rect x="326" y="116" width="40" height="6" rx="3" fill="white" fillOpacity="0.25" />
+        <rect x="326" y="132" width="74" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
+        <rect x="332" y="138" width="40" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
+        <rect x="332" y="147" width="28" height="4" rx="2" fill="white" fillOpacity="0.12" />
+      </svg>
+    </div>
+  );
+}
+
+/* ── Stats bar ───────────────────────────────────────────── */
+const STATS = [
+  { value: "47+", label: "Agents" },
+  { value: "2.4K", label: "Leads managed" },
+  { value: "98%", label: "Uptime" },
+  { value: "3 min", label: "Setup time" },
+];
+
+function StatsBar() {
+  return (
+    <div className="grid grid-cols-4 gap-3 w-full max-w-[420px]">
+      {STATS.map((stat) => (
+        <div
+          key={stat.label}
+          className="text-center rounded-lg bg-white/10 border border-white/15 px-2 py-2.5"
+        >
+          <div className="text-[18px] font-bold text-white leading-tight">
+            {stat.value}
+          </div>
+          <div className="text-[11px] text-white/60 mt-0.5 leading-tight">
+            {stat.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Star rating ─────────────────────────────────────────── */
+function StarRating() {
+  return (
+    <div className="flex gap-0.5 mb-3">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star
+          key={i}
+          className="w-3.5 h-3.5 text-amber-400 fill-amber-400"
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ── Loading skeleton ────────────────────────────────────── */
+function LoginSkeleton() {
+  return (
+    <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
+      <div className="hidden lg:flex lg:w-[55%] bg-primary flex-col justify-center px-16">
+        <div className="max-w-[340px]">
+          <div className="flex items-center gap-2.5 mb-14">
+            <div className="w-7 h-7 flex items-center justify-center">
+              <Home className="w-7 h-7 text-white" />
+            </div>
+            <span className="text-xl font-semibold text-white tracking-tight">
+              AgentFlow
+            </span>
+          </div>
+          <div className="h-8 w-[280px] bg-white/20 rounded-md mb-4 animate-pulse" />
+          <div className="h-4 w-[320px] bg-white/15 rounded mb-2 animate-pulse" />
+          <div className="h-4 w-[240px] bg-white/15 rounded mb-8 animate-pulse" />
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 bg-surface">
+        <div className="w-full max-w-[380px] mx-auto">
+          <div className="h-7 w-[220px] bg-surface-100 rounded-md mb-2 animate-pulse" />
+          <div className="h-4 w-[180px] bg-surface-100 rounded mb-7 animate-pulse" />
+          <div className="h-11 w-full bg-surface-100 rounded-lg mb-3 animate-pulse" />
+          <div className="h-11 w-full bg-surface-200 rounded-lg animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main login component ────────────────────────────────── */
 function LoginContent() {
   const router = useRouter();
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
   const [authLoading, setAuthLoading] = useState(true);
-  const [activeView, setActiveView] = useState<AuthView>("magic-link");
+  const [activeView, setActiveView] = useState<"magic-link" | "password" | "forgot-password">("magic-link");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [sentEmail, setSentEmail] = useState("");
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
@@ -258,43 +404,15 @@ function LoginContent() {
   const inputNormal = "border-surface-200 hover:border-surface-400 focus:border-primary focus:shadow-[0_0_0_3px_rgba(15,118,110,0.12)]";
   const inputError = "border-destructive shadow-[0_0_0_3px_rgba(220,38,38,0.1)]";
 
-  if (authLoading) {
-    return (
-      <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
-        <div className="hidden lg:flex lg:w-[55%] bg-primary flex-col justify-center px-16">
-          <div className="max-w-[340px]">
-            <div className="flex items-center gap-2.5 mb-14">
-              <div className="w-7 h-7 flex items-center justify-center">
-                <Home className="w-7 h-7 text-white" />
-              </div>
-              <span className="text-xl font-semibold text-white tracking-tight">
-                AgentFlow
-              </span>
-            </div>
-            <div className="h-8 w-[280px] bg-white/20 rounded-md mb-4 animate-pulse" />
-            <div className="h-4 w-[320px] bg-white/15 rounded mb-2 animate-pulse" />
-            <div className="h-4 w-[240px] bg-white/15 rounded mb-8 animate-pulse" />
-          </div>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 bg-surface">
-          <div className="w-full max-w-[380px] mx-auto">
-            <div className="h-7 w-[220px] bg-surface-100 rounded-md mb-2 animate-pulse" />
-            <div className="h-4 w-[180px] bg-surface-100 rounded mb-7 animate-pulse" />
-            <div className="h-11 w-full bg-surface-100 rounded-lg mb-3 animate-pulse" />
-            <div className="h-11 w-full bg-surface-200 rounded-lg animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (authLoading) return <LoginSkeleton />;
 
   return (
     <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
-      {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-[55%] bg-primary flex-col justify-center items-start px-16">
-        <div className="max-w-[340px]">
-          <div className="flex items-center gap-2.5 mb-14">
+      {/* ─── Left Panel ─── */}
+      <div className="hidden lg:flex lg:w-[55%] bg-primary flex-col justify-center items-center px-12">
+        <div className="w-full max-w-[420px]">
+          {/* Brand */}
+          <div className="flex items-center gap-2.5 mb-10">
             <div className="w-7 h-7 flex items-center justify-center">
               <Home className="w-7 h-7 text-white" />
             </div>
@@ -303,30 +421,27 @@ function LoginContent() {
             </span>
           </div>
 
-          <h2 className="text-[32px] font-semibold text-white leading-[1.2] tracking-[-0.02em] mb-4">
-            Welcome back to your daily follow-up tool
+          {/* Headline */}
+          <h2 className="text-[32px] font-semibold text-white leading-[1.15] tracking-[-0.02em] mb-3">
+            Welcome back to your
+            <br />
+            daily follow-up tool
           </h2>
-
-          <p className="text-base text-white/80 leading-[1.6] mb-12">
+          <p className="text-[15px] text-white/70 leading-[1.6] mb-8 max-w-[340px]">
             The only CRM designed for solo agents who want to close more deals
             without the complexity.
           </p>
 
-          <div className="flex flex-col gap-[14px] mb-16">
-            {[
-              "See who to call today — instantly",
-              "Track every lead without the clutter",
-              "Set up in 3 minutes, not 3 hours",
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-[18px] h-[18px] text-primary-200 shrink-0" />
-                <span className="text-[15px] text-white/90">{item}</span>
-              </div>
-            ))}
-          </div>
+          {/* Product mockup */}
+          <ProductMockup />
 
-          <div className="bg-white/10 border border-white/20 rounded-xl p-5">
-            <p className="text-sm text-white/90 italic leading-[1.5] mb-3">
+          {/* Stats bar */}
+          <StatsBar />
+
+          {/* Testimonial */}
+          <div className="mt-10 bg-white/10 border border-white/20 rounded-xl p-5">
+            <StarRating />
+            <p className="text-[14px] text-white/90 italic leading-[1.5] mb-3">
               &ldquo;I tried 4 CRMs. This is the only one I actually open every
               day.&rdquo;
             </p>
@@ -347,7 +462,7 @@ function LoginContent() {
         </div>
       </div>
 
-      {/* Mobile top bar */}
+      {/* ─── Mobile top bar ─── */}
       <div className="lg:hidden flex items-center h-[72px] bg-primary px-6">
         <div className="flex items-center gap-2.5">
           <div className="w-6 h-6 flex items-center justify-center">
@@ -359,12 +474,13 @@ function LoginContent() {
         </div>
       </div>
 
-      {/* Right Panel - Form */}
+      {/* ─── Right Panel - Auth ─── */}
       <div
         role="main"
         className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 py-12 lg:py-0 bg-surface"
       >
         <div className="w-full max-w-[380px]">
+          {/* ── Success states ── */}
           {magicLinkSent ? (
             <div className="text-center">
               <div className="w-14 h-14 rounded-full bg-success-50 border border-success-100 flex items-center justify-center mx-auto mb-5">
@@ -423,13 +539,16 @@ function LoginContent() {
             </div>
           ) : (
             <>
-              <h1 className="text-[26px] font-semibold text-surface-900 tracking-[-0.02em] leading-[1.2] mb-2">
-                Sign in to your account
+              {/* ── Header ── */}
+              <h1 className="text-[26px] font-semibold text-surface-900 tracking-[-0.02em] leading-[1.2] mb-1.5">
+                {activeView === "forgot-password"
+                  ? "Reset your password"
+                  : "Welcome back"}
               </h1>
               <p className="text-[15px] text-surface-500 mb-7">
                 {activeView === "forgot-password"
                   ? "Enter your email and we'll send you a reset link."
-                  : "Enter your email to receive a magic link"}
+                  : "Sign in to your AgentFlow account"}
               </p>
 
               {activeView === "forgot-password" && (
@@ -442,73 +561,30 @@ function LoginContent() {
                 </button>
               )}
 
+              {/* ── Google OAuth (PRIMARY) ── */}
               {activeView !== "forgot-password" && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    disabled={googleLoading}
-                    aria-label="Continue with Google"
-                    className="w-full h-11 flex items-center justify-center gap-2.5 bg-white text-surface-700 text-[15px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] focus:outline-2 focus:outline-primary focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
-                  >
-                    {googleLoading ? (
-                      <Loader2 className="w-[18px] h-[18px] animate-spin" />
-                    ) : (
-                      <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                      </svg>
-                    )}
-                    Continue with Google
-                  </button>
-
-                  <div className="flex items-center my-5">
-                    <div className="flex-1 h-px bg-surface-200" />
-                    <span className="text-[13px] text-surface-500 px-3">or</span>
-                    <div className="flex-1 h-px bg-surface-200" />
-                  </div>
-                </>
+                <button
+                  type="button"
+                  onClick={handleGoogleLogin}
+                  disabled={googleLoading}
+                  aria-label="Continue with Google"
+                  className="w-full h-12 flex items-center justify-center gap-2.5 bg-white text-surface-700 text-[15px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] focus:outline-2 focus:outline-primary focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed mb-3"
+                >
+                  {googleLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                    </svg>
+                  )}
+                  Continue with Google
+                </button>
               )}
 
-              {activeView !== "forgot-password" && (
-                <div className="flex rounded-lg bg-surface-100 p-1 mb-5 gap-0.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveView("magic-link");
-                      setAuthError("");
-                      setEmailError("");
-                      setEmailSuggestion("");
-                    }}
-                    className={`flex-1 h-9 rounded-md text-[14px] cursor-pointer transition-all duration-150 border ${
-                      activeView === "magic-link"
-                        ? "bg-white text-surface-900 font-semibold border-surface-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
-                        : "bg-transparent text-surface-500 font-normal border-transparent"
-                    }`}
-                  >
-                    Magic link
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveView("password");
-                      setAuthError("");
-                      setEmailError("");
-                      setEmailSuggestion("");
-                    }}
-                    className={`flex-1 h-9 rounded-md text-[14px] cursor-pointer transition-all duration-150 border ${
-                      activeView === "password"
-                        ? "bg-white text-surface-900 font-semibold border-surface-200/60 shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
-                        : "bg-transparent text-surface-500 font-normal border-transparent"
-                    }`}
-                  >
-                    Password
-                  </button>
-                </div>
-              )}
-
+              {/* ── Error banner ── */}
               {authError && (
                 <div
                   role="alert"
@@ -521,19 +597,22 @@ function LoginContent() {
                 </div>
               )}
 
+              {/* ── Turnstile CAPTCHA ── */}
               {activeView !== "forgot-password" && (
-                <TurnstileWidget
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                  onSuccess={(token) => setCaptchaToken(token)}
-                  onExpire={() => setCaptchaToken("")}
-                  onError={() => setCaptchaToken("")}
-                  size="invisible"
-                />
+                <div className="mb-4">
+                  <TurnstileWidget
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onExpire={() => setCaptchaToken("")}
+                    onError={() => setCaptchaToken("")}
+                    size="invisible"
+                  />
+                </div>
               )}
 
+              {/* ── Magic link form ── */}
               {activeView === "magic-link" && !magicLinkSent && (
                 <form onSubmit={handleMagicLink}>
-                  <div className="mb-3">
+                  <div className="mb-2">
                     <label
                       htmlFor="magic-email"
                       className="block text-[14px] font-medium text-surface-700 mb-1.5"
@@ -608,14 +687,20 @@ function LoginContent() {
                       </>
                     ) : (
                       <>
-                        <Mail className="w-4 h-4" />
                         Send magic link
+                        <ArrowRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
+
+                  <p className="text-center text-[13px] text-surface-500 mt-2.5 flex items-center justify-center gap-1.5">
+                    <Lock className="w-3 h-3" />
+                    No password required — instant sign-in
+                  </p>
                 </form>
               )}
 
+              {/* ── Password form ── */}
               {activeView === "password" && (
                 <form onSubmit={handlePasswordSignIn}>
                   <div className="mb-3">
@@ -735,6 +820,7 @@ function LoginContent() {
                 </form>
               )}
 
+              {/* ── Forgot password form ── */}
               {activeView === "forgot-password" && !forgotPasswordSent && (
                 <form onSubmit={handleForgotPassword}>
                   <div className="mb-3">
@@ -793,16 +879,49 @@ function LoginContent() {
                 </form>
               )}
 
+              {/* ── Secondary links ── */}
               {activeView !== "forgot-password" && (
-                <p className="text-center text-[14px] text-surface-500 mt-6">
-                  Don&apos;t have an account?{" "}
-                  <Link
-                    href="/signup"
-                    className="text-primary font-medium hover:underline"
+                <>
+                  {/* Toggle to password */}
+                  <div className="flex items-center my-5">
+                    <div className="flex-1 h-px bg-surface-200" />
+                    <span className="text-[13px] text-surface-500 px-3">or</span>
+                    <div className="flex-1 h-px bg-surface-200" />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveView("password");
+                      setAuthError("");
+                      setEmailError("");
+                      setEmailSuggestion("");
+                    }}
+                    className="w-full h-11 flex items-center justify-center gap-2 bg-transparent text-surface-600 text-[14px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] transition-all duration-150"
                   >
-                    Sign up free
-                  </Link>
-                </p>
+                    <Lock className="w-4 h-4" />
+                    Sign in with password
+                  </button>
+
+                  {/* Trust badge */}
+                  <div className="flex items-center justify-center gap-2 mt-8 py-3 border-t border-surface-100">
+                    <Shield className="w-4 h-4 text-surface-400" />
+                    <span className="text-[13px] text-surface-500">
+                      256-bit encryption · SOC 2 compliant
+                    </span>
+                  </div>
+
+                  {/* Sign up link */}
+                  <p className="text-center text-[14px] text-surface-500 mt-1">
+                    Don&apos;t have an account?{" "}
+                    <Link
+                      href="/signup"
+                      className="text-primary font-medium hover:underline"
+                    >
+                      Sign up free
+                    </Link>
+                  </p>
+                </>
               )}
             </>
           )}
