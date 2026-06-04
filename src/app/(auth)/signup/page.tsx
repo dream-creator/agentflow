@@ -145,9 +145,8 @@ export default function SignupPage() {
               />
             </div>
 
-            <div className="flex justify-center py-1">
+            <div className="flex justify-center">
               <TurnstileWidget
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                 onSuccess={(token) => setCaptchaToken(token)}
                 onExpire={() => setCaptchaToken("")}
                 onError={() => setCaptchaToken("")}
