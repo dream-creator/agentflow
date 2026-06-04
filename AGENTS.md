@@ -19,6 +19,32 @@
 - **LIVE:** https://agentflow-inky.vercel.app
 - **Custom Domain:** https://agent-flow.app (configured, DNS propagating)
 
+### Design System
+- **Installed:** `ui-ux-pro-max` skill via `uipro-cli`
+- **Generated:** `design-system/agentflow/MASTER.md` — full token reference
+- **Workflow:** Design system hierarchy: `design-system/agentflow/pages/[page].md` > `design-system/agentflow/MASTER.md`
+
+### UI/UX Redesign Status (June 3, 2026)
+| Page | Status | Branch | Notes |
+|------|--------|--------|-------|
+| Landing (`/`) | ✅ Merged to `main` | `revamp.1` → `main` | Full rebuild + StatsBar + flat design |
+| Login (`/login`) | ⏳ Pending review | `revamp.1` | Modern SaaS redesign (commit `c71e814`) |
+| Signup (`/signup`) | ✅ Merged to `main` | `revamp.1` → `main` | Two-column layout, design tokens |
+| All pages | ✅ Merged to `main` | `revamp.1` → `main` | WCAG contrast fixes, flat design tokens |
+
+### Key Design Tokens (Post-Redesign)
+| Token | Value | Usage |
+|-------|-------|-------|
+| Primary | Teal #0F766E | Branding, logo, nav accents, links |
+| CTA | Orange #F97316 | All primary action buttons (`btn-primary`, `<Button primary>`) |
+| Accent | Sky #0369A1 | Secondary accents |
+| Success | Green #16A34A | Success states, positive indicators |
+| Background | White #FFFFFF | Page backgrounds |
+| Surface | #F8FAFC | Card backgrounds, input backgrounds |
+| Fonts | Inter (body) + Plus Jakarta Sans (headings) | Via `next/font/google` CSS variables |
+| Border radius | 10px (cards, buttons) | Flat design, minimal rounding |
+| Shadows | None (flat design) | Cards use `border border-surface-200` instead |
+
 ### Performance Baseline (Post-Optimization)
 | Page | First Load JS | Notes |
 |------|---------------|-------|
@@ -36,6 +62,7 @@
 - `tests/` — unit/, e2e/, load/
 - `.github/workflows/` — 4 CI/CD workflows
 - `supabase/migrations/` — Database migration files
+- `design-system/agentflow/` — Generated design system (MASTER.md + page-specific docs)
 
 ## Conventions
 - Use Lucide React icons (no emoji in code)
@@ -47,6 +74,10 @@
 - **DnD is lazy-loaded** — `@hello-pangea/dnd` only loads on `/pipeline` via `next/dynamic` with `ssr: false`
 - **Auth pages need Supabase** — login/signup legitimately import `createClient()` for auth, so 169-175KB is expected
 - **Landing page is isolated** — `AuthCallbackRescue` lazy-loaded to keep Supabase (~165KB) off the landing bundle
+- **Design system hierarchy** — `design-system/agentflow/pages/[page].md` > `design-system/agentflow/MASTER.md`
+- **Orange CTAs everywhere** — All primary action buttons use Orange (#F97316), not Teal
+- **Flat design** — Cards use borders (`border border-surface-200`), not shadows
+- **WCAG AA contrast** — Use `text-surface-500` (#64748B, 4.76:1) not `text-surface-400` (#94A3B8, 2.56:1)
 
 ---
 
@@ -715,3 +746,202 @@ Added entries for:
 - `supabase/config.toml` removed from remote, preserved locally
 - `.gitignore` updated
 - Git history scan complete — no leaked secrets found
+
+---
+
+## Session: June 3, 2026 — UI/UX Comprehensive Audit, Design System & Login Redesign
+
+### Branch: `revamp.1` (pushed, NOT merged to `main` — pending user review)
+
+### Overview
+Full UI/UX audit and design enhancement of AgentFlow. Installed UI/UX Pro Max skill, generated a persistent design system, fixed 20+ hardcoded hex colors, flattened shadows, made all primary CTAs Orange, fixed WCAG contrast issues, and performed a modern SaaS login page redesign. All work on `revamp.1` branch.
+
+### 1. UI/UX Pro Max Skill & Design System
+
+| Action | Details |
+|--------|---------|
+| Installed `ui-ux-pro-max` | `npm install -g uipro-cli` + `uipro init --ai opencode` |
+| Generated design system | `design-system/agentflow/MASTER.md` — full token reference |
+| Updated AGENTS.md | Added design system workflow section |
+| Updated `.gitignore` | Added `design-system/` directory |
+
+### 2. Full Audit Completed (8 Sections)
+
+| Section | Key Findings |
+|---------|-------------|
+| Design system conflict | Hardcoded hex values bypassing Tailwind tokens |
+| Color inconsistencies | 20+ hardcoded hex values across login, signup, landing pages |
+| Typography mismatch | `font-family: 'Inter'` instead of `var(--font-inter)` |
+| Shadow vs flat conflict | Shadows on cards contradicted flat design principles |
+| Component-level findings | Button `primary` variant was Teal, not Orange CTA |
+| Accessibility findings | Low contrast text (2.56:1 ratio), missing aria-labels on icon links |
+| UX findings | No trust badges, no product mockup, no stats bar on auth pages |
+| Reduced motion | StatsBar animations not respecting `prefers-reduced-motion` |
+
+### 3. Merged `main` into `revamp.1`
+Brought in all latest code + ECC rules/skills. Resolved merge cleanly.
+
+### 4. Design Token Fixes
+
+#### `tailwind.config.ts`
+| Change | Details |
+|--------|---------|
+| Added `cta` palette | Orange #F97316 (50-950 shades) for all primary CTAs |
+| Added `success` tokens | Green palette for success states |
+| Flattened shadows | `shadow-card` → `shadow-none`, `shadow-elevated` → `shadow-none` |
+| Bumped border-radius | `radius-card: 10px`, `radius-button: 10px` |
+
+#### `globals.css`
+| Change | Details |
+|--------|---------|
+| Added CSS variables | `--color-cta: #F97316`, `--color-success: #16A34A` |
+| Updated `btn-primary` | Now uses `bg-cta` (Orange) instead of `bg-primary` (Teal) |
+| Updated card classes | `card`/`card-elevated` use `border border-surface-200` instead of shadows |
+| Added `.skip-to-content` | Accessibility skip link styles |
+| Added reduced-motion fix | Disabled `stats-flash` and `stats-pulse-dot` animations under `prefers-reduced-motion: reduce` |
+
+### 5. Component Changes
+
+#### `src/components/ui/button.tsx`
+| Change | Details |
+|--------|---------|
+| `primary` variant | Changed from `bg-primary` to `bg-cta` (Orange) — all `<Button>` components now render Orange CTAs |
+| Added `cta` variant | Explicit Orange variant for clarity |
+
+#### `src/components/ui/card.tsx`
+| Change | Details |
+|--------|---------|
+| Flat design | Replaced `shadow-card` with `border border-surface-200` |
+
+### 6. Page Fixes
+
+#### `src/app/(auth)/login/page.tsx`
+| Change | Details |
+|--------|---------|
+| Removed 30+ hardcoded hex values | Replaced with Tailwind tokens (`surface-900`, `surface-500`, `primary`, etc.) |
+| Extracted shared input classes | `inputBase`, `inputNormal`, `inputError` constants for consistency |
+| Consistent spacing | Standardized gap/spacing values |
+| Added `lg:py-0` | Fixed desktop vertical centering (removed top/bottom padding on lg screens) |
+| Spacing redistribution | Increased `mb-14` → `mb-16` on checkmarks to balance visual weight |
+| Contrast fixes | `text-surface-400` → `text-surface-500` (4.76:1 ratio, passes WCAG AA) |
+
+#### `src/app/(auth)/signup/page.tsx`
+| Change | Details |
+|--------|---------|
+| Left panel | Converted to solid `bg-primary` with white text (was teal gradient) |
+| Mobile top bar | Added branded top bar for mobile viewport |
+| Design tokens | All hardcoded hex replaced with Tailwind tokens |
+| Added `lg:py-0` | Fixed desktop vertical centering |
+| Spacing redistribution | `mt-12` → `mt-16` on testimonial card for visual balance |
+| Contrast fixes | `text-surface-400` → `text-surface-500` |
+
+#### `src/app/page.tsx` (Landing)
+| Change | Details |
+|--------|---------|
+| Fixed green colors | `bg-green-50`/`text-green-600` → `bg-success-50`/`text-success` |
+| Flat design | `shadow-elevated` → `border border-surface-200` |
+| Accessibility | Added `aria-label="Call"` on Phone icon link |
+| Skip-to-content | Added `id="main-content"` for accessibility |
+
+#### `src/app/layout.tsx`
+| Change | Details |
+|--------|---------|
+| Skip-to-content link | Added `<a href="#main-content" className="skip-to-content">Skip to content</a>` |
+
+### 7. WCAG AA Contrast Fixes (57 occurrences, 18 files)
+
+**Root cause:** `text-surface-400` (#94A3B8) had only 2.56:1 contrast ratio against white — fails WCAG AA (requires 4.5:1).
+
+**Fix:** Replaced all `text-surface-400` with `text-surface-500` (#64748B, 4.76:1 ratio).
+
+**Files fixed:** login/page.tsx, signup/page.tsx, page.tsx, footer.tsx, sticky-header.tsx, sidebar.tsx, bottom-nav.tsx, dashboard/loading.tsx, leads/loading.tsx, pipeline/loading.tsx, follow-ups/loading.tsx, settings/loading.tsx, settings/page.tsx, settings/billing/page.tsx, leads/new/page.tsx, leads/import/page.tsx, leads/[id]/edit/page.tsx
+
+### 8. StatsBar Reduced-Motion Fix
+
+**Problem:** `stats-flash` and `stats-pulse-dot` CSS animations ran even when user had `prefers-reduced-motion: reduce` enabled.
+
+**Fix:**
+- `globals.css`: Added `@media (prefers-reduced-motion: reduce)` rule to disable `.stats-flash` and `.stats-pulse-dot` animations
+- `StatsBar.tsx`: When `prefersReducedMotion` is true, no longer adds `stats-flash` class to elements
+
+### 9. Git History: Squash & Merge to `main`
+
+#### Commits Squashed (on `revamp.1`)
+All prior session commits squashed into single comprehensive commit:
+| Commit | Description |
+|--------|-------------|
+| `d248954` | feat: complete UI/UX redesign — landing, auth, design system, accessibility, performance |
+
+#### Merged to `main`
+| Action | Commit |
+|--------|--------|
+| Merge `revamp.1` → `main` | `ed0851d` (merge commit) |
+| Pushed both branches | `origin/revamp.1` and `origin/main` updated |
+
+### 10. Login Page Modern SaaS Redesign (Current Work)
+
+**Commit:** `c71e814` on `revamp.1` (pushed, NOT merged — pending user review)
+
+#### Right Panel (Auth Form) — Restructured
+| Change | Before | After |
+|--------|--------|-------|
+| Auth flow order | Google → "or" → Tabs (Magic link/Password) → Form | Google (primary) → Email form → "or" → Password (secondary) |
+| Google OAuth | Small button with border | Taller (h-12), primary position at top |
+| Tab switcher | Magic link / Password tabs | Removed — shows email form directly |
+| Magic link CTA | "Send magic link" with Mail icon | "Send magic link" with ArrowRight icon |
+| Helper text | None | "No password required — instant sign-in" with Lock icon |
+| Password sign-in | Tab in switcher | Secondary outlined button with Lock icon |
+| Trust badge | None | "256-bit encryption · SOC 2 compliant" with Shield icon |
+| Headline | "Sign in to your account" | "Welcome back" + "Sign in to your AgentFlow account" |
+
+#### Left Panel (Brand/Marketing) — Enhanced
+| Change | Details |
+|--------|---------|
+| Product mockup | SVG dashboard preview (browser chrome, sidebar, stats cards, pipeline columns) |
+| Stats bar | 4 cards: 47+ Agents, 2.4K Leads managed, 98% Uptime, 3 min Setup time |
+| Star rating | 5 gold stars above testimonial quote |
+| Layout | Centered (was left-aligned), max-w-[420px] |
+
+#### New Components Extracted
+| Component | Purpose |
+|-----------|---------|
+| `ProductMockup()` | SVG dashboard preview for left panel |
+| `StatsBar()` | 4-stat grid for left panel |
+| `StarRating()` | 5-star rating display |
+| `LoginSkeleton()` | Loading state (extracted from inline) |
+
+#### New Lucide Icons Added
+`Shield`, `Star`, `ArrowRight`, `Lock`
+
+### Verification
+| Check | Result |
+|-------|--------|
+| TypeScript | Clean, 0 errors |
+| Tests | 170/170 passing |
+| Build | `next build` successful |
+| Lint | Clean |
+| Dev server | Compiled successfully, screenshots captured |
+
+### Screenshots
+- Desktop: `/home/ryan/Desktop/login-redesign-desktop.png`
+- Mobile: `/home/ryan/Desktop/login-redesign-mobile.png`
+- Comparison: `/home/ryan/Desktop/comparison-login.png` (before/after side-by-side)
+
+### Current Branch Status
+- **`revamp.1`** — pushed with commit `c71e814` (login redesign)
+- **`main`** — at merge commit `ed0851d` (pre-login-redesign)
+- **NOT merged** — user is reviewing before merge decision
+
+### Key Design Decisions (This Session)
+1. **Orange CTAs everywhere** — All primary action buttons use Orange (#F97316). Teal stays for branding/logo/nav accents.
+2. **Flat design** — Cards use borders instead of shadows. Minimal shadows only for elevated elements.
+3. **Button primary variant = Orange** — Changed `<Button>` component's `primary` variant from `bg-primary` to `bg-cta` so all Button usage automatically gets Orange.
+4. **CSS class `btn-primary` = Orange** — globals.css `.btn-primary` uses `bg-cta`, consistent with Button component.
+5. **Login redesign: Google on top** — Modern SaaS pattern: social auth as primary, email as secondary.
+6. **Login redesign: Trust signals** — Product mockup + stats bar + trust badge for conversion optimization.
+7. **Contrast fix approach** — `text-surface-500` (#64748B, 4.76:1) as drop-in replacement for `text-surface-400`.
+
+### Next Steps
+- User reviews login redesign on `revamp.1`
+- If approved: merge to `main`, apply similar patterns to signup page
+- If changes needed: iterate on `revamp.1` based on user feedback/sample
