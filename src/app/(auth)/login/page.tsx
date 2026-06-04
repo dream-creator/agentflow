@@ -604,7 +604,6 @@ function LoginContent() {
                     onSuccess={(token) => setCaptchaToken(token)}
                     onExpire={() => setCaptchaToken("")}
                     onError={() => setCaptchaToken("")}
-                    mode="invisible"
                   />
                 </div>
               )}
