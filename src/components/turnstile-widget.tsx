@@ -13,7 +13,6 @@ interface TurnstileWidgetProps {
   onExpire?: () => void;
   onError?: () => void;
   theme?: "light" | "dark" | "auto";
-  size?: "normal" | "compact" | "invisible";
 }
 
 export function TurnstileWidget({
@@ -21,7 +20,6 @@ export function TurnstileWidget({
   onExpire,
   onError,
   theme = "auto",
-  size = "normal",
 }: TurnstileWidgetProps) {
   return (
     <Suspense fallback={null}>
@@ -30,7 +28,7 @@ export function TurnstileWidget({
         onSuccess={onSuccess}
         onExpire={onExpire}
         onError={onError}
-        options={{ theme, size }}
+        options={{ theme }}
       />
     </Suspense>
   );
