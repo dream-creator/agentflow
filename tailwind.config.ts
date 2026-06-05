@@ -77,6 +77,14 @@ const config: Config = {
           600: "#16A34A",
           700: "#15803D",
         },
+        warning: {
+          DEFAULT: "#F59E0B",
+          50: "#FFFBEB",
+          100: "#FEF3C7",
+          500: "#F59E0B",
+          600: "#D97706",
+          700: "#B45309",
+        },
       },
       fontFamily: {
         heading: ["var(--font-jakarta)", "sans-serif"],
