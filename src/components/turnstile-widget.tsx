@@ -1,7 +1,7 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { Loader2, AlertCircle, RefreshCw, FlaskConical } from "lucide-react";
 
 const Turnstile = lazy(() =>
   import("@marsidev/react-turnstile").then((mod) => ({
@@ -29,6 +29,66 @@ interface TurnstileWidgetProps {
   width?: number;
 }
 
+/**
+ * When the deploy environment sets `NEXT_PUBLIC_TURNSTILE_TEST_BYPASS=true`
+ * the widget skips the Turnstile iframe + Cloudflare round-trip entirely
+ * and auto-fires onSuccess with a mock token. This is for staging / preview
+ * environments only — production Supabase still has `security_captcha_enabled`
+ * on, so a fake token will be rejected at the Supabase auth layer. The env
+ * var is `NEXT_PUBLIC_` because the widget renders client-side and needs
+ * the value at runtime; do NOT set it in production.
+ */
+const TEST_BYPASS_ENABLED =
+  process.env.NEXT_PUBLIC_TURNSTILE_TEST_BYPASS === "true";
+const TEST_BYPASS_TOKEN = "test-bypass-token";
+
+/**
+ * Visual stand-in rendered when the test bypass is active. Shows a clearly
+ * labeled "Test mode" badge so anyone running tests can see at a glance that
+ * captcha is not real. Auto-fires onSuccess once on mount so the form
+ * becomes submittable the same way it would after a real verification.
+ */
+function TurnstileTestBypass({
+  onSuccess,
+  width,
+}: {
+  onSuccess: (token: string) => void;
+  width: number;
+}) {
+  useEffect(() => {
+    // Fire once after mount. The auth page's `captchaVerified` derived
+    // value flips to true and the submit button enables. We deliberately
+    // skip onLoad — the auth page's "Loading..." → "Complete verification"
+    // text transition is meaningless when there's nothing to verify.
+    onSuccess(TEST_BYPASS_TOKEN);
+  }, [onSuccess]);
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      data-testid="turnstile-widget"
+      data-bypass="true"
+      data-width={width}
+      className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-amber-300 bg-amber-50 px-3 py-3"
+      style={{ width, minHeight: 65 }}
+    >
+      <FlaskConical
+        className="h-4 w-4 text-amber-700 shrink-0"
+        aria-hidden="true"
+      />
+      <div className="flex flex-col leading-tight">
+        <span className="text-[13px] font-medium text-amber-900">
+          Test mode
+        </span>
+        <span className="text-[11px] text-amber-800">
+          Captcha bypassed (NEXT_PUBLIC_TURNSTILE_TEST_BYPASS)
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function TurnstileWidget({
   onSuccess,
   onExpire,
@@ -44,6 +104,14 @@ export function TurnstileWidget({
   // Bumping this key forces React to remount the lazy chunk and re-run
   // the script load — simplest reliable retry for an iframe-based widget.
   const [retryKey, setRetryKey] = useState(0);
+
+  // Short-circuit before any Turnstile code runs. The bypass renders its
+  // own component so the @marsidev/react-turnstile chunk is never fetched
+  // in test environments — saves the ~40 KB lazy import and avoids any
+  // CSP / network issues with challenges.cloudflare.com in test runners.
+  if (TEST_BYPASS_ENABLED) {
+    return <TurnstileTestBypass onSuccess={onSuccess} width={width} />;
+  }
 
   const handleRetry = () => {
     setLoadError(null);
