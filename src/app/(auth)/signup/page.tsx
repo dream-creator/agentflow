@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
 import { TurnstileWidget } from "@/components/turnstile-widget";
-import { Mail, Loader2, Home, CheckCircle2 } from "lucide-react";
+import { Mail, Loader2, Home, CheckCircle2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
@@ -14,6 +14,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaReady, setCaptchaReady] = useState(false);
+  const captchaVerified = captchaToken !== "";
 
   const getSupabase = () => createClient();
 
@@ -145,17 +147,44 @@ export default function SignupPage() {
               />
             </div>
 
-            <div className="flex justify-center">
-              <TurnstileWidget
-                onSuccess={(token) => setCaptchaToken(token)}
-                onExpire={() => setCaptchaToken("")}
-                onError={() => setCaptchaToken("")}
-              />
+            <div>
+              <div className="flex justify-center">
+                <TurnstileWidget
+                  onLoad={() => setCaptchaReady(true)}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken("")}
+                  onError={() => setCaptchaToken("")}
+                />
+              </div>
+              <p
+                id="captcha-hint"
+                className={`mt-2 flex items-center justify-center gap-1.5 text-[12px] ${
+                  captchaVerified ? "text-success-600" : "text-surface-500"
+                }`}
+                aria-live="polite"
+              >
+                {captchaVerified ? (
+                  <>
+                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Verification complete</span>
+                  </>
+                ) : (
+                  <>
+                    <Shield className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>
+                      {captchaReady
+                        ? "Complete the verification above to continue"
+                        : "Loading security check..."}
+                    </span>
+                  </>
+                )}
+              </p>
             </div>
 
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || !captchaVerified}
+              aria-describedby="captcha-hint"
               className="w-full"
             >
               {loading ? (
