@@ -31,6 +31,15 @@ async function deleteTestUser(userId: string) {
   await supabaseAdmin.auth.admin.deleteUser(userId);
 }
 
+/**
+ * Signs a test user in via the login page. Requires the deploy environment
+ * to have `NEXT_PUBLIC_TURNSTILE_TEST_BYPASS=true` set — otherwise the
+ * Cloudflare Turnstile widget renders and the submit button stays disabled
+ * until the user interacts with the iframe, which Playwright cannot do
+ * cross-origin without a frameLocator. The bypass is safe to use in
+ * staging/preview because production Supabase still verifies captcha
+ * server-side and rejects the mock token.
+ */
 async function signIn(page: Page, email: string, password: string) {
   await page.goto("/login");
   await page.fill('input[type="email"]', email);
