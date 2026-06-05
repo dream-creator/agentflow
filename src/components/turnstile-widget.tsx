@@ -101,9 +101,35 @@ export function TurnstileWidget({
   // challenge errors out, we surface a visible message with a retry button
   // instead of letting the page silently submit an empty token.
   const [loadError, setLoadError] = useState<string | null>(null);
+  // Tracks whether the Turnstile iframe has rendered at least once. Once
+  // the challenge is visible the user is past the "script blocked" stage,
+  // so the 10s load-timeout below becomes redundant and would otherwise
+  // flash an error after a slow-but-successful load.
+  const [hasLoaded, setHasLoaded] = useState(false);
   // Bumping this key forces React to remount the lazy chunk and re-run
   // the script load — simplest reliable retry for an iframe-based widget.
   const [retryKey, setRetryKey] = useState(0);
+
+  // 10s fallback: if `onLoad` never fires (ad blocker, blocked network,
+  // CSP issue, slow first paint on 4G) the Suspense fallback would spin
+  // forever and the submit button would stay disabled. After the
+  // timeout we surface the same error UI as `onError` so the user gets
+  // a clear "refresh or disable ad blocker" message instead of a silent
+  // hang. The retry button bumps `retryKey` which remounts the lazy
+  // chunk and re-arms the timer. The effect skips scheduling once
+  // `hasLoaded` is true so a slow-but-successful load doesn't get a
+  // false-positive error at the 10s mark, and skips entirely in
+  // test-bypass mode where there's no Turnstile script to time out.
+  useEffect(() => {
+    if (TEST_BYPASS_ENABLED) return;
+    if (loadError || hasLoaded) return;
+    const timeoutId = window.setTimeout(() => {
+      setLoadError(
+        "Verification failed to load. Check your connection and retry.",
+      );
+    }, 10_000);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadError, hasLoaded, retryKey]);
 
   // Short-circuit before any Turnstile code runs. The bypass renders its
   // own component so the @marsidev/react-turnstile chunk is never fetched
@@ -115,6 +141,7 @@ export function TurnstileWidget({
 
   const handleRetry = () => {
     setLoadError(null);
+    setHasLoaded(false);
     setRetryKey((k) => k + 1);
   };
 
@@ -184,7 +211,10 @@ export function TurnstileWidget({
             );
             onError?.();
           }}
-          onLoad={onLoad}
+          onLoad={() => {
+            setHasLoaded(true);
+            onLoad?.();
+          }}
           options={{ theme, size: "flexible" }}
         />
       </Suspense>
