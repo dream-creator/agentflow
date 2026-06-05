@@ -70,18 +70,18 @@ function TurnstileTestBypass({
       data-testid="turnstile-widget"
       data-bypass="true"
       data-width={width}
-      className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-amber-300 bg-amber-50 px-3 py-3"
+      className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-warning-300 bg-warning-50 px-3 py-3"
       style={{ width, minHeight: 65 }}
     >
       <FlaskConical
-        className="h-4 w-4 text-amber-700 shrink-0"
+        className="h-4 w-4 text-warning-700 shrink-0"
         aria-hidden="true"
       />
       <div className="flex flex-col leading-tight">
-        <span className="text-[13px] font-medium text-amber-900">
+        <span className="text-[13px] font-medium text-warning-700">
           Test mode
         </span>
-        <span className="text-[11px] text-amber-800">
+        <span className="text-[11px] text-warning-700/80">
           Captcha bypassed (NEXT_PUBLIC_TURNSTILE_TEST_BYPASS)
         </span>
       </div>
