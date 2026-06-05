@@ -605,39 +605,37 @@ function LoginContent() {
               )}
 
               {/* ── Turnstile CAPTCHA ── */}
-              {activeView !== "forgot-password" && (
-                <div className="mb-4">
-                  <TurnstileWidget
-                    onLoad={() => setCaptchaReady(true)}
-                    onSuccess={(token) => setCaptchaToken(token)}
-                    onExpire={() => setCaptchaToken("")}
-                    onError={() => setCaptchaToken("")}
-                  />
-                  <p
-                    id="captcha-hint"
-                    className={`mt-2 flex items-center justify-center gap-1.5 text-[12px] ${
-                      captchaVerified ? "text-success-600" : "text-surface-500"
-                    }`}
-                    aria-live="polite"
-                  >
-                    {captchaVerified ? (
-                      <>
-                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Verification complete</span>
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>
-                          {captchaReady
-                            ? "Complete the verification above to continue"
-                            : "Loading security check..."}
-                        </span>
-                      </>
-                    )}
-                  </p>
-                </div>
-              )}
+              <div className="mb-4">
+                <TurnstileWidget
+                  onLoad={() => setCaptchaReady(true)}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken("")}
+                  onError={() => setCaptchaToken("")}
+                />
+                <p
+                  id="captcha-hint"
+                  className={`mt-2 flex items-center justify-center gap-1.5 text-[12px] ${
+                    captchaVerified ? "text-success-600" : "text-surface-500"
+                  }`}
+                  aria-live="polite"
+                >
+                  {captchaVerified ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>Verification complete</span>
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>
+                        {captchaReady
+                          ? "Complete the verification above to continue"
+                          : "Loading security check..."}
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
 
               {/* ── Magic link form ── */}
               {activeView === "magic-link" && !magicLinkSent && (
@@ -895,7 +893,7 @@ function LoginContent() {
 
                   <button
                     type="submit"
-                    disabled={forgotPasswordLoading}
+                    disabled={forgotPasswordLoading || !captchaVerified}
                     aria-busy={forgotPasswordLoading}
                     className="btn-primary w-full flex items-center justify-center gap-2"
                   >
