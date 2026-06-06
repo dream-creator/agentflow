@@ -41,9 +41,15 @@ self.addEventListener("activate", (event) => {
 // Fetch — network first, fallback to cache for navigation
 self.addEventListener("fetch", (event) => {
   const { request } = event;
+  const requestUrl = new URL(request.url);
 
-  // Skip non-GET and API requests
-  if (request.method !== "GET" || request.url.includes("/api/")) {
+  // Skip non-GET, API, and cross-origin requests (Turnstile, analytics, etc.)
+  // — prevents stale cached cross-origin responses from breaking 3rd-party widgets
+  if (
+    request.method !== "GET" ||
+    request.url.includes("/api/") ||
+    requestUrl.origin !== self.location.origin
+  ) {
     return;
   }
 
