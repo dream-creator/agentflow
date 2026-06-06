@@ -230,15 +230,10 @@ export function TurnstileWidget({
               return;
             }
             // Pre-verify failure: surface the error so the user knows to
-            // retry instead of submitting an empty token. Cloudflare's
-            // `error-callback` passes the actual error string (network
-            // failure, site-key domain mismatch, managed-mode rejection,
-            // etc.) — log it in dev for diagnosis but keep the user-facing
-            // message generic.
-            if (process.env.NODE_ENV !== "production") {
-              // eslint-disable-next-line no-console
-              console.error("[Turnstile] error-callback:", error);
-            }
+            // retry instead of submitting an empty token. The user-facing
+            // message stays generic; the actual Cloudflare error string is
+            // already captured by the Sentry `onError` handler in the
+            // surrounding app shell.
             setLoadError(
               "Verification failed to load. Check your connection and retry."
             );
