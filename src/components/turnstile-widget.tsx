@@ -106,6 +106,14 @@ export function TurnstileWidget({
   // so the 10s load-timeout below becomes redundant and would otherwise
   // flash an error after a slow-but-successful load.
   const [hasLoaded, setHasLoaded] = useState(false);
+  // Tracks whether the user has completed verification. Cloudflare's
+  // managed mode can fire `error-callback` AFTER `success-callback` (e.g.
+  // when the session ends, the token expires, or the widget auto-refreshes).
+  // Surfacing the error in that case would overwrite a successful verify
+  // with a confusing "failed to load" message even though the parent's
+  // token is still valid and the form is submittable. We gate the error
+  // UI on this flag so post-verify error-callbacks become no-ops.
+  const [hasSucceeded, setHasSucceeded] = useState(false);
   // Bumping this key forces React to remount the lazy chunk and re-run
   // the script load — simplest reliable retry for an iframe-based widget.
   const [retryKey, setRetryKey] = useState(0);
@@ -122,14 +130,14 @@ export function TurnstileWidget({
   // test-bypass mode where there's no Turnstile script to time out.
   useEffect(() => {
     if (TEST_BYPASS_ENABLED) return;
-    if (loadError || hasLoaded) return;
+    if (loadError || hasLoaded || hasSucceeded) return;
     const timeoutId = window.setTimeout(() => {
       setLoadError(
         "Verification failed to load. Check your connection and retry.",
       );
     }, 10_000);
     return () => window.clearTimeout(timeoutId);
-  }, [loadError, hasLoaded, retryKey]);
+  }, [loadError, hasLoaded, hasSucceeded, retryKey]);
 
   // Short-circuit before any Turnstile code runs. The bypass renders its
   // own component so the @marsidev/react-turnstile chunk is never fetched
@@ -142,6 +150,7 @@ export function TurnstileWidget({
   const handleRetry = () => {
     setLoadError(null);
     setHasLoaded(false);
+    setHasSucceeded(false);
     setRetryKey((k) => k + 1);
   };
 
@@ -200,28 +209,36 @@ export function TurnstileWidget({
           siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
           onSuccess={(token: string) => {
             setLoadError(null);
+            setHasSucceeded(true);
             onSuccess(token);
           }}
           onExpire={() => {
             onExpire?.();
           }}
           onError={(error: string) => {
-            // [TURNSTILE-MYSTERY] Cloudflare's `error-callback` passes the
-            // actual error string. We were discarding it and showing a
-            // generic "failed to load" message, which left us blind to
-            // the real failure mode (network? site key? domain mismatch?
-            // ad-blocker-vs-Cloudflare block?). Surface the code to the
-            // dev console + Sentry so we can diagnose the 1-second-after-
-            // render failure. The user-facing message stays generic.
+            // Post-verify error-callback is a no-op: the parent already has
+            // a valid token, the form is submittable, and showing the error
+            // banner here would be misleading UX.
+            if (hasSucceeded) {
+              if (process.env.NODE_ENV !== "production") {
+                // eslint-disable-next-line no-console
+                console.debug(
+                  "[Turnstile] post-verify error-callback (ignored):",
+                  error,
+                );
+              }
+              return;
+            }
+            // Pre-verify failure: surface the error so the user knows to
+            // retry instead of submitting an empty token. Cloudflare's
+            // `error-callback` passes the actual error string (network
+            // failure, site-key domain mismatch, managed-mode rejection,
+            // etc.) — log it in dev for diagnosis but keep the user-facing
+            // message generic.
             if (process.env.NODE_ENV !== "production") {
               // eslint-disable-next-line no-console
               console.error("[Turnstile] error-callback:", error);
             }
-            // TODO([TURNSTILE-MYSTERY]): wire to Sentry captureMessage
-            // with the error string as extra so production failures
-            // show up in the dashboard. Blocked on Sentry init being
-            // safe in this code path (currently lazy-imported in
-            // global-error.tsx only).
             setLoadError(
               "Verification failed to load. Check your connection and retry."
             );
