@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -989,5 +989,13 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-  return <LoginContent />;
+  // useSearchParams() inside LoginContent forces client-side rendering, which
+  // Next.js 14 requires to live behind a Suspense boundary so the static
+  // prerender pass can produce a fallback instead of failing with
+  // "useSearchParams() should be wrapped in a suspense boundary".
+  return (
+    <Suspense fallback={<LoginSkeleton />}>
+      <LoginContent />
+    </Suspense>
+  );
 }
