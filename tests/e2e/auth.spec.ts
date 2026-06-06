@@ -58,6 +58,20 @@ test.describe("Authentication", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
+  test("should redirect unauthenticated users from leads/import to login", async ({
+    page,
+  }) => {
+    await page.goto("/leads/import");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("should redirect unauthenticated users from follow-ups to login", async ({
+    page,
+  }) => {
+    await page.goto("/follow-ups");
+    await expect(page).toHaveURL(/\/login/);
+  });
+
   test("should show error message for invalid credentials", async ({ page }) => {
     await page.goto("/login?error=auth_callback_failed");
     await expect(page.locator("text=auth callback failed")).toBeVisible();
