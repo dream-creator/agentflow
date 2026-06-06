@@ -216,8 +216,8 @@ jobs:
       fail-fast: false
       matrix:
         shard:
-          - auth-pipeline
-          - csv-import
+          - auth-public
+          - authed-features
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -236,15 +236,27 @@ jobs:
 
       - name: "Run E2E tests (shard: ${{ matrix.shard }})"
         run: |
-          if [ "$SHARD" = "auth-pipeline" ]; then
-            npx playwright test auth.spec.ts pipeline.spec.ts --reporter=html
-          elif [ "$SHARD" = "csv-import" ]; then
-            npx playwright test csv-import.spec.ts --reporter=html
+          if [ "$SHARD" = "auth-public" ]; then
+            npx playwright test \
+              auth.spec.ts \
+              pricing-plan-limits.spec.ts \
+              --reporter=html
+          elif [ "$SHARD" = "authed-features" ]; then
+            npx playwright test \
+              lead-crud-auth.spec.ts \
+              pipeline-auth.spec.ts \
+              follow-ups-auth.spec.ts \
+              mobile-nav.spec.ts \
+              --reporter=html
           fi
         env:
           SHARD: ${{ matrix.shard }}
           BASE_URL: ${{ needs.vercel-staging-deploy.outputs.deploy-url }}
           CI: true
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_TURNSTILE_TEST_BYPASS: "true"
 
       - name: Upload E2E report
         uses: actions/upload-artifact@v4
@@ -273,5 +285,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Shard | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| auth-pipeline | ${{ needs.e2e-test-matrix.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| csv-import | ${{ needs.e2e-test-matrix.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| auth-public | ${{ needs.e2e-test-matrix.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| authed-features | ${{ needs.e2e-test-matrix.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> $GITHUB_STEP_SUMMARY
