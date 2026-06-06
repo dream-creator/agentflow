@@ -1,0 +1,14 @@
+-- Migration 001: initial schema
+-- Already applied to remote database on initial project setup (May 2026).
+-- This placeholder exists to satisfy the Supabase CLI's local-migrations check.
+-- The remote migration history already records 001 as applied, so this file
+-- will not be re-run on `supabase db push`. See supabase_migrations.schema_migrations.
+--
+-- The full schema was originally applied via the Supabase dashboard SQL editor
+-- during project bootstrap. The original migration SQL is documented in
+-- ARCHITECTURE.md and was lost when the initial migrations directory was not
+-- committed to git. To regenerate the full schema, run:
+--   supabase db pull --db-url "$STAGING_SUPABASE_DB_URL"
+-- from an environment that has IPv6 access to db.fsxdduvwshirrheenmag.supabase.co
+-- (e.g., GitHub Actions runners) — but ONLY after first clearing the leftover
+-- prepared statement 'lrupsc_1_0' that blocks the CLI.
