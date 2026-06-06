@@ -163,7 +163,7 @@ function StarRating() {
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
-          className="w-3.5 h-3.5 text-amber-400 fill-amber-400"
+          className="w-3.5 h-3.5 text-warning-500 fill-warning-500"
         />
       ))}
     </div>
