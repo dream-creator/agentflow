@@ -52,3 +52,6 @@ AGENTS.md
 
 # Supabase config (contains secrets)
 supabase/config.toml
+
+# Supabase CLI temp files
+supabase/.temp/
