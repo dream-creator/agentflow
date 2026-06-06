@@ -56,3 +56,6 @@ supabase/config.toml
 # Supabase CLI temp files
 supabase/.temp/
 .env*
+
+# local debug scripts (do not commit)
+scripts/debug-*.ts
