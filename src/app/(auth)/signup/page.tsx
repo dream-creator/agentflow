@@ -15,7 +15,12 @@ export default function SignupPage() {
   const [message, setMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaReady, setCaptchaReady] = useState(false);
-  const captchaVerified = captchaToken !== "";
+  // Emergency kill switch — when set, the widget returns null and we
+  // treat the form as captcha-verified. MUST be paired with disabling
+  // `security_captcha_enabled` in the Supabase dashboard.
+  const captchaDisabled =
+    process.env.NEXT_PUBLIC_TURNSTILE_DISABLED === "true";
+  const captchaVerified = captchaDisabled || captchaToken !== "";
 
   const getSupabase = () => createClient();
 
@@ -147,39 +152,41 @@ export default function SignupPage() {
               />
             </div>
 
-            <div>
-              <div className="flex justify-center">
-                <TurnstileWidget
-                  onLoad={() => setCaptchaReady(true)}
-                  onSuccess={(token) => setCaptchaToken(token)}
-                  onExpire={() => setCaptchaToken("")}
-                  onError={() => setCaptchaToken("")}
-                />
+            {!captchaDisabled && (
+              <div>
+                <div className="flex justify-center">
+                  <TurnstileWidget
+                    onLoad={() => setCaptchaReady(true)}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onExpire={() => setCaptchaToken("")}
+                    onError={() => setCaptchaToken("")}
+                  />
+                </div>
+                <p
+                  id="captcha-hint"
+                  className={`mt-2 flex items-center justify-center gap-1.5 text-[12px] ${
+                    captchaVerified ? "text-success-600" : "text-surface-500"
+                  }`}
+                  aria-live="polite"
+                >
+                  {captchaVerified ? (
+                    <>
+                      <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>Verification complete</span>
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>
+                        {captchaReady
+                          ? "Complete the verification above to continue"
+                          : "Loading security check..."}
+                      </span>
+                    </>
+                  )}
+                </p>
               </div>
-              <p
-                id="captcha-hint"
-                className={`mt-2 flex items-center justify-center gap-1.5 text-[12px] ${
-                  captchaVerified ? "text-success-600" : "text-surface-500"
-                }`}
-                aria-live="polite"
-              >
-                {captchaVerified ? (
-                  <>
-                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>Verification complete</span>
-                  </>
-                ) : (
-                  <>
-                    <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>
-                      {captchaReady
-                        ? "Complete the verification above to continue"
-                        : "Loading security check..."}
-                    </span>
-                  </>
-                )}
-              </p>
-            </div>
+            )}
 
             <Button
               type="submit"
