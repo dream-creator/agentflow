@@ -243,7 +243,12 @@ export function TurnstileWidget({
             setHasLoaded(true);
             onLoad?.();
           }}
-          options={{ theme, size: "flexible" }}
+          // appearance: "interaction-only" defers verification to user click —
+          // recommended for 3rd-party-cookie-restricted mobile environments
+          // (iOS Safari ITP, Chrome Privacy Sandbox) where the default
+          // "always" managed-mode auto-verification fails with the
+          // misleading "No internet connection" error.
+          options={{ theme, size: "flexible", appearance: "interaction-only" }}
         />
       </Suspense>
     </div>
