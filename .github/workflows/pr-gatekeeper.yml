@@ -36,6 +36,43 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck]
+    # Runs `next build` with placeholder env vars to catch the class of
+    # build-only errors (CSR bailout / useSearchParams, missing static
+    # asset refs, Server Component client-import violations) that
+    # `tsc` and `next lint` can't see. The full Vercel build happens
+    # in `preview-deploy` below; this is a fast-feedback check that
+    # fails the PR before the more expensive preview + Lighthouse
+    # steps. Placeholder values are safe because the build only
+    # inlines NEXT_PUBLIC_* vars into the bundle — it doesn't
+    # actually connect to any service.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Next.js build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key"
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_placeholder"
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA"
+          NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+          NEXT_PUBLIC_TURNSTILE_TEST_BYPASS: "false"
+
   security-audit:
     name: security-audit
     runs-on: ubuntu-latest
@@ -63,7 +100,7 @@ jobs:
   unit-tests:
     name: unit-tests
     runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, security-audit]
+    needs: [lint-and-typecheck, security-audit, build]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -226,7 +263,7 @@ jobs:
   pr-comment-summary:
     name: pr-comment
     runs-on: ubuntu-latest
-    needs: [preview-deploy, lighthouse-ci, coverage-gate, unit-tests]
+    needs: [preview-deploy, lighthouse-ci, coverage-gate, unit-tests, build]
     if: always()
     permissions:
       pull-requests: write
@@ -254,6 +291,7 @@ jobs:
           EOF
 
           echo "| Lint & TypeCheck | ${{ needs.lint-and-typecheck.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
+          echo "| Build | ${{ needs.build.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
           echo "| Security Audit | ${{ needs.security-audit.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
           echo "| Unit Tests | ${{ needs.unit-tests.result == 'success' && '[PASSED]' || '[FAILED]' }} |" >> /tmp/pr-comment.md
           echo "| Coverage Gate | ${{ needs.coverage-gate.result == 'success' && '[PASSED]' || '[FAILED]' }} ($COVERAGE) |" >> /tmp/pr-comment.md
