@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
@@ -19,6 +19,22 @@ import {
   ArrowRight,
   Lock,
 } from "lucide-react";
+
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  auth_callback_failed:
+    "We couldn't complete your sign-in. Please try again.",
+  access_denied: "Access was denied. Please try a different sign-in method.",
+  invalid_credentials: "Invalid email or password.",
+  email_not_confirmed:
+    "Please confirm your email address before signing in.",
+  otp_expired: "Your sign-in link has expired. Please request a new one.",
+};
+
+function humanizeAuthError(code: string): string {
+  const humanized = code.replace(/_/g, " ").toLowerCase();
+  const friendly = AUTH_ERROR_MESSAGES[code];
+  return friendly ? `${friendly} (${humanized})` : `Sign-in failed: ${humanized}`;
+}
 
 const COMMON_DOMAINS: Record<string, string> = {
   "gmail.con": "gmail.com",
@@ -222,6 +238,17 @@ function LoginContent() {
   const captchaVerified = captchaToken !== "";
 
   const getSupabase = useCallback(() => createClient(), []);
+
+  // Read any ?error= param left behind by the OAuth callback route
+  // (src/app/auth/callback/route.ts) and surface it as the banner
+  // error so the user sees a real reason instead of a silent redirect.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      setAuthError(humanizeAuthError(errorParam));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const checkSession = async () => {
