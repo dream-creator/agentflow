@@ -132,12 +132,12 @@ export default function LandingPage() {
                       {[
                         { name: "Sarah Chen", stage: "Showing", time: "10:00 AM", color: "bg-primary" },
                         { name: "Marcus Johnson", stage: "New Lead", time: "2:30 PM", color: "bg-accent" },
-                        { name: "Emily Rodriguez", stage: "Offer", time: "4:00 PM", color: "bg-amber-500" },
+                        { name: "Emily Rodriguez", stage: "Offer", time: "4:00 PM", color: "bg-warning-500" },
                       ].map((contact, i) => (
                         <div key={i} className="flex items-center justify-between p-4 bg-white rounded-xl border border-surface-100 hover:border-primary-200 transition-colors">
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-full ${contact.color} bg-opacity-10 flex items-center justify-center`}>
-                              <span className={`text-sm font-semibold ${contact.color === "bg-primary" ? "text-primary" : contact.color === "bg-accent" ? "text-accent" : "text-amber-600"}`}>
+                              <span className={`text-sm font-semibold ${contact.color === "bg-primary" ? "text-primary" : contact.color === "bg-accent" ? "text-accent" : contact.color === "bg-warning-500" ? "text-warning-600" : "text-primary"}`}>
                                 {contact.name.split(" ").map(n => n[0]).join("")}
                               </span>
                             </div>
@@ -277,8 +277,8 @@ export default function LandingPage() {
                   <div className="mt-4 p-3 bg-white rounded-lg border border-surface-100 text-left">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center">
-                          <span className="text-[10px] font-semibold text-amber-700">MC</span>
+                        <div className="w-6 h-6 rounded-full bg-warning-100 flex items-center justify-center">
+                          <span className="text-[10px] font-semibold text-warning-700">MC</span>
                         </div>
                         <span className="text-xs font-medium text-surface-900">Mike Chen</span>
                       </div>
