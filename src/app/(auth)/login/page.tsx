@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
 import { TurnstileWidget } from "@/components/turnstile-widget";
+import { CaptchaStatusPill } from "@/components/auth/captcha-status-pill";
 import {
   Mail,
   Home,
@@ -586,7 +587,7 @@ function LoginContent() {
                   ? "Reset your password"
                   : "Welcome back"}
               </h1>
-              <p className="text-[15px] text-surface-500 mb-7">
+              <p className="text-[15px] text-surface-500 mb-6">
                 {activeView === "forgot-password"
                   ? "Enter your email and we'll send you a reset link."
                   : "Sign in to your AgentFlow account"}
@@ -604,25 +605,39 @@ function LoginContent() {
 
               {/* ── Google OAuth (PRIMARY) ── */}
               {activeView !== "forgot-password" && (
-                <button
-                  type="button"
-                  onClick={handleGoogleLogin}
-                  disabled={googleLoading}
-                  aria-label="Continue with Google"
-                  className="w-full h-12 flex items-center justify-center gap-2.5 bg-white text-surface-700 text-[15px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] focus:outline-2 focus:outline-primary focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed mb-3"
-                >
-                  {googleLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                    </svg>
-                  )}
-                  Continue with Google
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={googleLoading}
+                    aria-label="Continue with Google"
+                    className="w-full h-12 flex items-center justify-center gap-2.5 bg-white text-surface-700 text-[15px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] focus:outline-2 focus:outline-primary focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed mb-4"
+                  >
+                    {googleLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                      </svg>
+                    )}
+                    Continue with Google
+                  </button>
+
+                  {/* "or" divider between OAuth and email form */}
+                  <div
+                    className="flex items-center mb-4"
+                    aria-hidden="true"
+                  >
+                    <div className="flex-1 h-px bg-surface-200" />
+                    <span className="text-[12px] text-surface-500 uppercase tracking-wider px-3">
+                      or
+                    </span>
+                    <div className="flex-1 h-px bg-surface-200" />
+                  </div>
+                </>
               )}
 
               {/* ── Error banner ── */}
@@ -638,36 +653,29 @@ function LoginContent() {
                 </div>
               )}
 
-              {/* ── Turnstile CAPTCHA ── */}
+              {/* ── Off-screen Turnstile widget ──
+                  The widget still needs to mount (the iframe is what talks
+                  to Cloudflare and fires onSuccess), but invisible mode
+                  makes the visual footprint 0×0. Hiding it off-screen keeps
+                  it functional without creating empty space in the form. */}
               {!captchaDisabled && (
-                <div className="mb-4">
+                <div
+                  className="absolute -left-[9999px] -top-[9999px] w-px h-px overflow-hidden pointer-events-none"
+                  aria-hidden="true"
+                >
                   <TurnstileWidget
                     onLoad={() => setCaptchaReady(true)}
                     onSuccess={(token) => setCaptchaToken(token)}
                     onExpire={() => setCaptchaToken("")}
                     onError={() => setCaptchaToken("")}
                   />
-                  <p
-                    id="captcha-hint"
-                    className="mt-2 flex items-center justify-center gap-1.5 text-[12px] text-surface-500"
-                    aria-live="polite"
-                  >
-                    <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span>
-                      {captchaVerified
-                        ? "Verified — protected by Cloudflare"
-                        : captchaReady
-                          ? "Verifying with Cloudflare…"
-                          : "Protected by Cloudflare Turnstile"}
-                    </span>
-                  </p>
                 </div>
               )}
 
               {/* ── Magic link form ── */}
               {activeView === "magic-link" && !magicLinkSent && (
                 <form onSubmit={handleMagicLink}>
-                  <div className="mb-2">
+                  <div className="mb-3">
                     <label
                       htmlFor="magic-email"
                       className="block text-[14px] font-medium text-surface-700 mb-1.5"
@@ -729,11 +737,16 @@ function LoginContent() {
                     )}
                   </div>
 
+                  {/* ── Captcha status pill (lives inside the form so the
+                       captcha verification is visually associated with the
+                       action it gates, not floating between sections) ── */}
+                  {!captchaDisabled && <CaptchaStatusPill captchaVerified={captchaVerified} captchaReady={captchaReady} />}
+
                   <button
                     type="submit"
                     disabled={magicLinkLoading || !captchaVerified}
                     aria-busy={magicLinkLoading}
-                    aria-describedby="captcha-hint"
+                    aria-describedby="captcha-status"
                     className="btn-primary w-full flex items-center justify-center gap-2"
                   >
                     {magicLinkLoading ? (
@@ -858,11 +871,14 @@ function LoginContent() {
                     )}
                   </div>
 
+                  {/* ── Captcha status pill ── */}
+                  {!captchaDisabled && <CaptchaStatusPill captchaVerified={captchaVerified} captchaReady={captchaReady} />}
+
                   <button
                     type="submit"
                     disabled={passwordLoading || !captchaVerified}
                     aria-busy={passwordLoading}
-                    aria-describedby="captcha-hint"
+                    aria-describedby="captcha-status"
                     className="btn-primary w-full flex items-center justify-center gap-2"
                   >
                     {passwordLoading ? (
@@ -918,10 +934,14 @@ function LoginContent() {
                     )}
                   </div>
 
+                  {/* ── Captcha status pill ── */}
+                  {!captchaDisabled && <CaptchaStatusPill captchaVerified={captchaVerified} captchaReady={captchaReady} />}
+
                   <button
                     type="submit"
                     disabled={forgotPasswordLoading || !captchaVerified}
                     aria-busy={forgotPasswordLoading}
+                    aria-describedby="captcha-status"
                     className="btn-primary w-full flex items-center justify-center gap-2"
                   >
                     {forgotPasswordLoading ? (
@@ -940,9 +960,11 @@ function LoginContent() {
               {activeView !== "forgot-password" && (
                 <>
                   {/* Toggle to password */}
-                  <div className="flex items-center my-5">
+                  <div className="flex items-center my-5" aria-hidden="true">
                     <div className="flex-1 h-px bg-surface-200" />
-                    <span className="text-[13px] text-surface-500 px-3">or</span>
+                    <span className="text-[12px] text-surface-500 uppercase tracking-wider px-3">
+                      or
+                    </span>
                     <div className="flex-1 h-px bg-surface-200" />
                   </div>
 
@@ -960,24 +982,22 @@ function LoginContent() {
                     Sign in with password
                   </button>
 
-                  {/* Trust badge */}
-                  <div className="flex items-center justify-center gap-2 mt-8 py-3 border-t border-surface-100">
-                    <Shield className="w-4 h-4 text-surface-400" />
-                    <span className="text-[13px] text-surface-500">
-                      256-bit encryption · SOC 2 compliant
-                    </span>
+                  {/* Trust badge + sign up link, tightened to one block */}
+                  <div className="mt-6 pt-4 border-t border-surface-100 flex flex-col items-center gap-3">
+                    <div className="flex items-center justify-center gap-1.5 text-[12px] text-surface-500">
+                      <Shield className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span>256-bit encryption · SOC 2 compliant</span>
+                    </div>
+                    <p className="text-center text-[14px] text-surface-500">
+                      Don&apos;t have an account?{" "}
+                      <Link
+                        href="/signup"
+                        className="text-primary font-medium hover:underline"
+                      >
+                        Sign up free
+                      </Link>
+                    </p>
                   </div>
-
-                  {/* Sign up link */}
-                  <p className="text-center text-[14px] text-surface-500 mt-1">
-                    Don&apos;t have an account?{" "}
-                    <Link
-                      href="/signup"
-                      className="text-primary font-medium hover:underline"
-                    >
-                      Sign up free
-                    </Link>
-                  </p>
                 </>
               )}
             </>
