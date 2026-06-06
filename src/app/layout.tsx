@@ -74,6 +74,8 @@ export default function RootLayout({
       <head>
         {/* Preconnect to Supabase — saves ~100-200ms on first API call */}
         <link rel="preconnect" href="https://fsxdduvwshirrheenmag.supabase.co" />
+        {/* Preconnect to Cloudflare Turnstile — saves ~100-300ms on first widget load (esp. mobile/4G) */}
+        <link rel="preconnect" href="https://challenges.cloudflare.com" />
         {/* DNS-prefetch for third-party analytics and error tracking */}
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
         <link rel="dns-prefetch" href="https://browser.sentry-cdn.com" />

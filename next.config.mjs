@@ -6,7 +6,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://browser.sentry-cdn.com https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
-      "font-src 'self'",
+      "font-src 'self' https://challenges.cloudflare.com",
       "connect-src 'self' https://fsxdduvwshirrheenmag.supabase.co https://o4509104489611264.ingest.us.sentry.io https://vitals.vercel-insights.com https://challenges.cloudflare.com",
       "frame-src 'self' https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
