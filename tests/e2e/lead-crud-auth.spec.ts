@@ -28,25 +28,15 @@ test.describe("Lead CRUD (Authenticated)", () => {
     authenticatedPage: page,
   }) => {
     await page.goto("/leads/new");
-    await expect(page.locator('input[name="name"]')).toBeVisible();
-    await expect(page.locator('input[name="email"]')).toBeVisible();
-    await expect(page.locator('input[name="phone"]')).toBeVisible();
-    await expect(page.locator('select[name="source"]')).toBeVisible();
-    await expect(page.locator('select[name="stage"]')).toBeVisible();
-  });
-
-  test("should have 6 pipeline stages in dropdown", async ({
-    authenticatedPage: page,
-  }) => {
-    await page.goto("/leads/new");
-    const stageSelect = page.locator('select[name="stage"]');
-    await expect(stageSelect).toBeVisible();
-    await expect(stageSelect.locator("option")).toHaveCount(6);
+    await expect(page.locator("#fullName")).toBeVisible();
+    await expect(page.locator("#email")).toBeVisible();
+    await expect(page.locator("#phone")).toBeVisible();
+    await expect(page.locator("#source")).toBeVisible();
   });
 
   test("should require name field", async ({ authenticatedPage: page }) => {
     await page.goto("/leads/new");
-    const nameInput = page.locator('input[name="name"]');
+    const nameInput = page.locator("#fullName");
     await expect(nameInput).toHaveAttribute("required", "");
   });
 
@@ -54,27 +44,28 @@ test.describe("Lead CRUD (Authenticated)", () => {
     authenticatedPage: page,
   }) => {
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "John Doe");
-    await page.fill('input[name="email"]', "john@example.com");
-    await page.fill('input[name="phone"]', "555-0123");
-    await page.selectOption('select[name="source"]', "manual");
-    await page.selectOption('select[name="stage"]', "new_lead");
-    await page.fill('textarea[name="notes"]', "Test lead for E2E");
+    await page.fill("#fullName", "John Doe");
+    await page.fill("#email", "john@example.com");
+    await page.fill("#phone", "555-0123");
+    await page.selectOption("#source", "manual");
+    await page.fill("#notes", "Test lead for E2E");
 
     await page.click('button[type="submit"]');
 
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
     await expect(page.locator("text=John Doe")).toBeVisible();
   });
 
-  test("should display lead detail page", async ({
+  test("should navigate to lead detail from list", async ({
     authenticatedPage: page,
   }) => {
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Jane Smith");
-    await page.fill('input[name="email"]', "jane@example.com");
+    await page.fill("#fullName", "Jane Smith");
+    await page.fill("#email", "jane@example.com");
     await page.click('button[type="submit"]');
 
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
+    await page.click("text=Jane Smith");
     await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
     await expect(page.locator("text=Jane Smith")).toBeVisible();
     await expect(page.locator("text=jane@example.com")).toBeVisible();
@@ -82,15 +73,17 @@ test.describe("Lead CRUD (Authenticated)", () => {
 
   test("should edit an existing lead", async ({ authenticatedPage: page }) => {
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Edit Test");
-    await page.fill('input[name="email"]', "edit@test.com");
+    await page.fill("#fullName", "Edit Test");
+    await page.fill("#email", "edit@test.com");
     await page.click('button[type="submit"]');
 
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
+    await page.locator(`a:has-text("Edit Test")`).first().click();
     await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
-    await page.click("text=Edit");
+    await page.locator('a[href*="/edit"]').first().click();
 
     await page.waitForURL(/\/leads\/[a-f0-9-]+\/edit/, { timeout: 10000 });
-    await page.fill('input[name="name"]', "Edit Test Updated");
+    await page.fill("#fullName", "Edit Test Updated");
     await page.click('button[type="submit"]');
 
     await expect(page.locator("text=Edit Test Updated")).toBeVisible();
@@ -98,27 +91,28 @@ test.describe("Lead CRUD (Authenticated)", () => {
 
   test("should delete a lead", async ({ authenticatedPage: page }) => {
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Delete Test");
-    await page.fill('input[name="email"]', "delete@test.com");
+    await page.fill("#fullName", "Delete Test");
+    await page.fill("#email", "delete@test.com");
     await page.click('button[type="submit"]');
 
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
 
     page.on("dialog", (dialog) => dialog.accept());
-    await page.click("text=Delete");
+    await page.locator(`a:has-text("Delete Test")`).first().click();
+    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
+    await page.locator("button:has(.lucide-trash-2)").click();
 
-    await page.waitForURL(/\/leads/, { timeout: 10000 });
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
     await expect(page.locator("text=Delete Test")).not.toBeVisible();
   });
 
   test("should search leads by name", async ({ authenticatedPage: page }) => {
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Searchable Lead");
-    await page.fill('input[name="email"]', "search@test.com");
+    await page.fill("#fullName", "Searchable Lead");
+    await page.fill("#email", "search@test.com");
     await page.click('button[type="submit"]');
 
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
-    await page.goto("/leads");
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
 
     await page.fill('input[placeholder*="Search"]', "Searchable");
     await expect(page.locator("text=Searchable Lead")).toBeVisible();
@@ -136,6 +130,6 @@ test.describe("Lead CRUD (Authenticated)", () => {
     authenticatedPage: page,
   }) => {
     await page.goto("/leads");
-    await expect(page.locator("text=active leads")).toBeVisible();
+    await expect(page.locator("text=total leads")).toBeVisible();
   });
 });

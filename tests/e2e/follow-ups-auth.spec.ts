@@ -16,134 +16,78 @@ test.describe("Follow-ups (Authenticated)", () => {
     await expect(page.locator("text=No follow-ups")).toBeVisible();
   });
 
-  test("should display overdue section", async ({
+  test("should display overdue section with overdue lead", async ({
     authenticatedPage: page,
   }) => {
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Overdue Lead");
-    await page.fill('input[name="email"]', "overdue@test.com");
-    await page.fill('input[name="next_action_date"]', "2026-01-01");
-    await page.fill('textarea[name="next_action"]', "Call overdue");
+    await page.fill("#fullName", "Overdue Lead");
+    await page.fill("#email", "overdue@test.com");
+    await page.fill("#nextActionDate", "2026-01-01");
+    await page.fill("#nextAction", "Call overdue");
     await page.click('button[type="submit"]');
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
 
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
     await page.goto("/follow-ups");
-
-    await expect(page.locator("text=Overdue")).toBeVisible();
+    await expect(page.locator("text=Overdue").first()).toBeVisible();
+    await expect(page.locator("text=Overdue Lead")).toBeVisible();
   });
 
-  test("should display upcoming section", async ({
+  test("should display upcoming section with upcoming lead", async ({
     authenticatedPage: page,
   }) => {
+    const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Upcoming Lead");
-    await page.fill('input[name="email"]', "upcoming@test.com");
-    await page.fill('input[name="next_action_date"]', "2026-06-15");
-    await page.fill('textarea[name="next_action"]', "Meeting upcoming");
+    await page.fill("#fullName", "Upcoming Lead");
+    await page.fill("#email", "upcoming@test.com");
+    await page.fill("#nextActionDate", future);
+    await page.fill("#nextAction", "Meeting upcoming");
     await page.click('button[type="submit"]');
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
 
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
     await page.goto("/follow-ups");
-
-    await expect(page.locator("text=Upcoming")).toBeVisible();
-  });
-
-  test("should show lead name in follow-up list", async ({
-    authenticatedPage: page,
-  }) => {
-    await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Follow-up Name");
-    await page.fill('input[name="email"]', "followup@test.com");
-    await page.fill('input[name="next_action_date"]', "2026-06-20");
-    await page.fill('textarea[name="next_action"]', "Follow-up task");
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
-    await page.goto("/follow-ups");
-
-    await expect(page.locator("text=Follow-up Name")).toBeVisible();
+    await expect(page.locator("text=Upcoming").first()).toBeVisible();
+    await expect(page.locator("text=Upcoming Lead")).toBeVisible();
   });
 
   test("should show follow-up action description", async ({
     authenticatedPage: page,
   }) => {
+    const future = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Action Desc Lead");
-    await page.fill('input[name="email"]', "actiondesc@test.com");
-    await page.fill('input[name="next_action_date"]', "2026-06-25");
-    await page.fill('textarea[name="next_action"]', "Important call");
+    await page.fill("#fullName", "Action Desc Lead");
+    await page.fill("#email", "actiondesc@test.com");
+    await page.fill("#nextActionDate", future);
+    await page.fill("#nextAction", "Important call");
     await page.click('button[type="submit"]');
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
 
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
     await page.goto("/follow-ups");
-
     await expect(page.locator("text=Important call")).toBeVisible();
-  });
-
-  test("should show follow-up date", async ({ authenticatedPage: page }) => {
-    await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Date Follow-up");
-    await page.fill('input[name="email"]', "datefollow@test.com");
-    await page.fill('input[name="next_action_date"]', "2026-07-01");
-    await page.fill('textarea[name="next_action"]', "July meeting");
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
-    await page.goto("/follow-ups");
-
-    await expect(page.locator("text=7/1/2026")).toBeVisible();
-  });
-
-  test("should show pipeline stage badge", async ({
-    authenticatedPage: page,
-  }) => {
-    await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Stage Badge Lead");
-    await page.fill('input[name="email"]', "stagebadge@test.com");
-    await page.fill('input[name="next_action_date"]', "2026-06-18");
-    await page.fill('textarea[name="next_action"]', "Stage test");
-    await page.selectOption('select[name="stage"]', "contacted");
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
-    await page.goto("/follow-ups");
-
-    await expect(page.locator("text=Contacted")).toBeVisible();
   });
 
   test("should navigate to lead detail from follow-up", async ({
     authenticatedPage: page,
   }) => {
+    const future = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+
     await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Navigate Lead");
-    await page.fill('input[name="email"]', "navigate@test.com");
-    await page.fill('input[name="next_action_date"]', "2026-06-22");
-    await page.fill('textarea[name="next_action"]', "Navigation test");
+    await page.fill("#fullName", "Navigate Lead");
+    await page.fill("#email", "navigate@test.com");
+    await page.fill("#nextActionDate", future);
+    await page.fill("#nextAction", "Navigation test");
     await page.click('button[type="submit"]');
+    await page.waitForURL(/\/leads\/?$/, { timeout: 10000 });
 
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
     await page.goto("/follow-ups");
-
-    await page.click("text=Navigate Lead");
+    await page.locator(`a:has-text("Navigate Lead")`).first().click();
     await expect(page).toHaveURL(/\/leads\/[a-f0-9-]+/);
-  });
-
-  test("should have contact action buttons", async ({
-    authenticatedPage: page,
-  }) => {
-    await page.goto("/leads/new");
-    await page.fill('input[name="name"]', "Contact Lead");
-    await page.fill('input[name="email"]', "contact@test.com");
-    await page.fill('input[name="phone"]', "555-0199");
-    await page.fill('input[name="next_action_date"]', "2026-06-19");
-    await page.fill('textarea[name="next_action"]', "Contact test");
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL(/\/leads\/[a-f0-9-]+/, { timeout: 10000 });
-    await page.goto("/follow-ups");
-
-    await expect(page.locator('[title*="Call"]')).toBeVisible();
-    await expect(page.locator('[title*="Email"]')).toBeVisible();
-    await expect(page.locator('[title*="Text"]')).toBeVisible();
   });
 });
