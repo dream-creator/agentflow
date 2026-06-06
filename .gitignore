@@ -55,3 +55,4 @@ supabase/config.toml
 
 # Supabase CLI temp files
 supabase/.temp/
+.env*
