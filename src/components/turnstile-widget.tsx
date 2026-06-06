@@ -205,7 +205,23 @@ export function TurnstileWidget({
           onExpire={() => {
             onExpire?.();
           }}
-          onError={() => {
+          onError={(error: string) => {
+            // [TURNSTILE-MYSTERY] Cloudflare's `error-callback` passes the
+            // actual error string. We were discarding it and showing a
+            // generic "failed to load" message, which left us blind to
+            // the real failure mode (network? site key? domain mismatch?
+            // ad-blocker-vs-Cloudflare block?). Surface the code to the
+            // dev console + Sentry so we can diagnose the 1-second-after-
+            // render failure. The user-facing message stays generic.
+            if (process.env.NODE_ENV !== "production") {
+              // eslint-disable-next-line no-console
+              console.error("[Turnstile] error-callback:", error);
+            }
+            // TODO([TURNSTILE-MYSTERY]): wire to Sentry captureMessage
+            // with the error string as extra so production failures
+            // show up in the dashboard. Blocked on Sentry init being
+            // safe in this code path (currently lazy-imported in
+            // global-error.tsx only).
             setLoadError(
               "Verification failed to load. Check your connection and retry."
             );
