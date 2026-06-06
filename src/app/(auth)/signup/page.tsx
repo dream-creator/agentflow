@@ -5,7 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
 import { TurnstileWidget } from "@/components/turnstile-widget";
-import { Mail, Loader2, Home, CheckCircle2, Shield } from "lucide-react";
+import { CaptchaStatusPill } from "@/components/auth/captcha-status-pill";
+import { Mail, Loader2, Home, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
@@ -121,7 +122,7 @@ export default function SignupPage() {
             Start managing leads in 30 seconds
           </p>
 
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignup} className="relative space-y-3">
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-surface-700 mb-1.5">
                 Full name
@@ -152,37 +153,34 @@ export default function SignupPage() {
               />
             </div>
 
+            {/* Off-screen Turnstile widget — the iframe still mounts and
+                fires onSuccess, but invisible mode + 0×0 visual footprint
+                means it doesn't take space in the form. */}
             {!captchaDisabled && (
-              <div>
-                <div className="flex justify-center">
-                  <TurnstileWidget
-                    onLoad={() => setCaptchaReady(true)}
-                    onSuccess={(token) => setCaptchaToken(token)}
-                    onExpire={() => setCaptchaToken("")}
-                    onError={() => setCaptchaToken("")}
-                  />
-                </div>
-                <p
-                  id="captcha-hint"
-                  className="mt-2 flex items-center justify-center gap-1.5 text-[12px] text-surface-500"
-                  aria-live="polite"
-                >
-                  <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span>
-                    {captchaVerified
-                      ? "Verified — protected by Cloudflare"
-                      : captchaReady
-                        ? "Verifying with Cloudflare…"
-                        : "Protected by Cloudflare Turnstile"}
-                  </span>
-                </p>
+              <div
+                className="absolute -left-[9999px] -top-[9999px] w-px h-px overflow-hidden pointer-events-none"
+                aria-hidden="true"
+              >
+                <TurnstileWidget
+                  onLoad={() => setCaptchaReady(true)}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken("")}
+                  onError={() => setCaptchaToken("")}
+                />
               </div>
+            )}
+
+            {!captchaDisabled && (
+              <CaptchaStatusPill
+                captchaVerified={captchaVerified}
+                captchaReady={captchaReady}
+              />
             )}
 
             <Button
               type="submit"
               disabled={loading || !captchaVerified}
-              aria-describedby="captcha-hint"
+              aria-describedby="captcha-status"
               className="w-full"
             >
               {loading ? (
