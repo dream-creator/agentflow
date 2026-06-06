@@ -43,6 +43,17 @@ const TEST_BYPASS_ENABLED =
 const TEST_BYPASS_TOKEN = "test-bypass-token";
 
 /**
+ * Emergency kill switch. When `NEXT_PUBLIC_TURNSTILE_DISABLED=true` the
+ * widget renders nothing and does not load the Turnstile script. Use this
+ * when Cloudflare's verification is failing in production (e.g. on mobile
+ * browsers that block 3rd-party cookies). MUST be paired with disabling
+ * `security_captcha_enabled` in the Supabase dashboard, otherwise auth
+ * requests will be rejected with a captcha-token-missing error.
+ */
+const TURNSTILE_DISABLED =
+  process.env.NEXT_PUBLIC_TURNSTILE_DISABLED === "true";
+
+/**
  * Visual stand-in rendered when the test bypass is active. Shows a clearly
  * labeled "Test mode" badge so anyone running tests can see at a glance that
  * captcha is not real. Auto-fires onSuccess once on mount so the form
@@ -147,6 +158,13 @@ export function TurnstileWidget({
     return <TurnstileTestBypass onSuccess={onSuccess} width={width} />;
   }
 
+  // Emergency kill switch. Renders nothing — the parent page must treat
+  // `captchaDisabled` as "captcha passed" and Supabase must have its
+  // captcha check disabled too, otherwise auth requests will be rejected.
+  if (TURNSTILE_DISABLED) {
+    return null;
+  }
+
   const handleRetry = () => {
     setLoadError(null);
     setHasLoaded(false);
@@ -243,12 +261,15 @@ export function TurnstileWidget({
             setHasLoaded(true);
             onLoad?.();
           }}
-          // appearance: "interaction-only" defers verification to user click —
-          // recommended for 3rd-party-cookie-restricted mobile environments
-          // (iOS Safari ITP, Chrome Privacy Sandbox) where the default
-          // "always" managed-mode auto-verification fails with the
-          // misleading "No internet connection" error.
-          options={{ theme, size: "flexible", appearance: "interaction-only" }}
+          // We deliberately do NOT override the widget `appearance`. Passing
+          // `appearance: "interaction-only"` from the client overrides the
+          // site-level "Invisible" mode set in the Cloudflare dashboard and
+          // forces a visible challenge — which is the exact UX failure we
+          // hit on iOS Safari where the challenge surfaces "No internet
+          // connection" instead of a working widget. Letting the dashboard
+          // setting win lets operators flip widget modes without a code
+          // deploy.
+          options={{ theme, size: "flexible" }}
         />
       </Suspense>
     </div>
