@@ -189,11 +189,15 @@ jobs:
 
       - name: Apply preview migrations
         run: |
-          supabase db push --db-url "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" || true
+          # Session-mode pooler (port 5432) avoids pgbouncer prepared-statement
+          # leaks that block supabase db push on the transaction pooler (6543).
+          SESSION_DB_URL=$(echo "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
+          supabase db push --db-url "$SESSION_DB_URL" || true
 
       - name: Validate type sync
         run: |
-          npx supabase gen types typescript --db-url "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" > /tmp/generated-types.ts
+          SESSION_DB_URL=$(echo "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
+          npx supabase gen types typescript --db-url "$SESSION_DB_URL" > /tmp/generated-types.ts 2>/dev/null
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
             echo "[FAIL] types/supabase.ts is out of sync with the current schema."
             echo "Run 'supabase gen types typescript > types/supabase.ts' locally and commit the result."
