@@ -4,13 +4,13 @@ test.describe("Authentication", () => {
   test("should display login page", async ({ page }) => {
     await page.goto("/login");
     await expect(page).toHaveTitle(/AgentFlow/);
-    await expect(page.locator("h1")).toContainText("AgentFlow");
-    await expect(page.locator("text=Sign in to your account")).toBeVisible();
+    await expect(page.locator("h1")).toContainText("Welcome back");
+    await expect(page.locator("text=Sign in to your AgentFlow account")).toBeVisible();
   });
 
   test("should display signup page", async ({ page }) => {
     await page.goto("/signup");
-    await expect(page.locator("h1")).toContainText("AgentFlow");
+    await expect(page.locator("h1")).toContainText("Create your account");
     await expect(page.locator("text=Create your account")).toBeVisible();
   });
 
