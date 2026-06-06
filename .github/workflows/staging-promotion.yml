@@ -74,10 +74,16 @@ jobs:
           MAX_RETRIES=3
           RETRY_DELAY=30
 
+          # Rewrite to session-mode pooler (port 5432) to avoid pgbouncer
+          # prepared-statement leaks on port 6543. The transaction pooler
+          # reuses pooled connections and can leave orphaned prepared
+          # statements (e.g. "lrupsc_1_0") that block supabase db push.
+          SESSION_DB_URL=$(echo "${{ secrets.STAGING_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
+
           for i in $(seq 1 $MAX_RETRIES); do
             echo "=== Attempt $i of $MAX_RETRIES ==="
 
-            if supabase db push --db-url "${{ secrets.STAGING_SUPABASE_DB_URL }}"; then
+            if supabase db push --db-url "$SESSION_DB_URL"; then
               echo "[OK] Staging migrations applied successfully"
               exit 0
             fi
@@ -117,7 +123,9 @@ jobs:
 
       - name: Validate type sync
         run: |
-          npx supabase gen types typescript --db-url "${{ secrets.STAGING_SUPABASE_DB_URL }}" > /tmp/generated-types.ts
+          # Session-mode pooler (see apply-staging-migrations for rationale)
+          SESSION_DB_URL=$(echo "${{ secrets.STAGING_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
+          npx supabase gen types typescript --db-url "$SESSION_DB_URL" > /tmp/generated-types.ts 2>/dev/null
 
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
             echo "[FAIL] types/supabase.ts is out of sync with staging schema"
