@@ -233,9 +233,17 @@ function LoginContent() {
   // The submit buttons stay disabled until the widget has loaded, the user
   // has interacted with the challenge, and captchaToken is non-empty.
   const [captchaReady, setCaptchaReady] = useState(false);
+  // Emergency kill switch — when the env var is set, the widget returns
+  // null and we treat the form as captcha-verified so users are not
+  // blocked. MUST be paired with disabling `security_captcha_enabled` in
+  // the Supabase dashboard, otherwise Supabase will reject the auth call
+  // with a captcha-token-missing error.
+  const captchaDisabled =
+    process.env.NEXT_PUBLIC_TURNSTILE_DISABLED === "true";
   // True when the user has actually completed the Turnstile challenge
-  // (i.e. we have a token to send to Supabase).
-  const captchaVerified = captchaToken !== "";
+  // (i.e. we have a token to send to Supabase), or when captcha is fully
+  // disabled via the env var.
+  const captchaVerified = captchaDisabled || captchaToken !== "";
 
   const getSupabase = useCallback(() => createClient(), []);
 
@@ -632,37 +640,39 @@ function LoginContent() {
               )}
 
               {/* ── Turnstile CAPTCHA ── */}
-              <div className="mb-4">
-                <TurnstileWidget
-                  onLoad={() => setCaptchaReady(true)}
-                  onSuccess={(token) => setCaptchaToken(token)}
-                  onExpire={() => setCaptchaToken("")}
-                  onError={() => setCaptchaToken("")}
-                />
-                <p
-                  id="captcha-hint"
-                  className={`mt-2 flex items-center justify-center gap-1.5 text-[12px] ${
-                    captchaVerified ? "text-success-600" : "text-surface-500"
-                  }`}
-                  aria-live="polite"
-                >
-                  {captchaVerified ? (
-                    <>
-                      <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span>Verification complete</span>
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span>
-                        {captchaReady
-                          ? "Complete the verification above to continue"
-                          : "Loading security check..."}
-                      </span>
-                    </>
-                  )}
-                </p>
-              </div>
+              {!captchaDisabled && (
+                <div className="mb-4">
+                  <TurnstileWidget
+                    onLoad={() => setCaptchaReady(true)}
+                    onSuccess={(token) => setCaptchaToken(token)}
+                    onExpire={() => setCaptchaToken("")}
+                    onError={() => setCaptchaToken("")}
+                  />
+                  <p
+                    id="captcha-hint"
+                    className={`mt-2 flex items-center justify-center gap-1.5 text-[12px] ${
+                      captchaVerified ? "text-success-600" : "text-surface-500"
+                    }`}
+                    aria-live="polite"
+                  >
+                    {captchaVerified ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>Verification complete</span>
+                      </>
+                    ) : (
+                      <>
+                        <Shield className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>
+                          {captchaReady
+                            ? "Complete the verification above to continue"
+                            : "Loading security check..."}
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              )}
 
               {/* ── Magic link form ── */}
               {activeView === "magic-link" && !magicLinkSent && (
