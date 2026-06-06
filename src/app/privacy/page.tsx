@@ -29,166 +29,146 @@ export default function PrivacyPage() {
           Privacy Policy
         </h1>
         <p className="text-sm text-surface-500 mb-8">
-          Simple CRM for Solo Real Estate Agents
+          Effective Date: June 6, 2026
         </p>
 
         <div className="prose prose-surface max-w-none">
           <p className="text-surface-600 leading-relaxed">
-            At AgentFlow, keeping your data and your clients&apos; data safe is a top priority.
-            This policy explains exactly what we collect, why we need it, and how you stay in
-            control. By creating an account, you agree to these simple practices.
+            This Privacy Policy explains how AgentFlow (&quot;we,&quot; &quot;us,&quot; or
+            &quot;our&quot;) collects, uses, discloses, and safeguards your information when
+            you use our CRM platform. By creating an account, you consent to the practices
+            described in this policy.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            1. The Information We Collect
+            1. Information We Collect
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">What you give us directly:</strong> We collect
-            your name, email address, and the name of your brokerage when you sign up.
+            <strong className="text-surface-800">Account Information:</strong> Name, email
+            address, and brokerage name collected upon registration.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">Your client data:</strong> This includes the
-            names, phone numbers, emails, notes, and pipeline stages of your leads. This data
-            belongs entirely to you.
+            <strong className="text-surface-800">Client Data:</strong> Lead information
+            (names, phone numbers, emails, notes, pipeline stages) entered into the CRM. You
+            retain full ownership of this data.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">Payment details:</strong> If you subscribe to a
-            paid plan, Stripe processes your payments. We never store your full credit card
-            number — only the last four digits and basic billing details.
+            <strong className="text-surface-800">Payment Information:</strong> Processed
+            via Stripe. We do not store full credit card numbers; we retain only the last
+            four digits and basic billing details.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">Background data:</strong> We automatically log
-            basic usage details like your IP address, browser type, and how long you use the app
-            to keep things running smoothly.
+            <strong className="text-surface-800">Usage Data:</strong> Automatically
+            collected metrics, including IP address, browser type, and session duration.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">Optional integrations:</strong> If you choose to
-            connect Google Contacts, we only request read-only access while syncing and do not
-            store ongoing access tokens once your session is done.
+            <strong className="text-surface-800">Third-Party Integrations:</strong>{" "}
+            Read-only access requested during Google Contacts synchronization. We do not
+            store persistent access tokens post-session.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            2. How We Use Your Data
+            2. Use of Information
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            We only use your information to make AgentFlow work well for you. Specifically, we
-            use it to:
+            We use collected information solely to provide and improve AgentFlow services,
+            specifically to:
           </p>
           <ul className="list-disc list-inside text-surface-600 space-y-1.5 mb-3 ml-4">
-            <li>Run the platform and process your subscription payments.</li>
-            <li>Send you your daily follow-up digest emails and SMS reminders.</li>
-            <li>Help you out when you contact support.</li>
-            <li>Keep the platform secure, monitor for errors, and fix bugs.</li>
+            <li>Operate and maintain the platform.</li>
+            <li>Process subscription payments.</li>
+            <li>Transmit automated follow-up digests and SMS reminders.</li>
+            <li>Provide customer support.</li>
+            <li>Monitor platform security and resolve technical issues.</li>
           </ul>
           <p className="text-surface-600 leading-relaxed">
-            We will never send you promotional or marketing emails without your explicit
-            permission.
+            Note: We do not send promotional communications without explicit consent.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            3. Who We Share Data With (And Who We Don&apos;t)
+            3. Information Sharing and Disclosure
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            We never sell, rent, or trade your personal data or your clients&apos; data.
+            We do not sell, rent, or trade your personal or client data. We disclose
+            information only under the following circumstances:
           </p>
+          <ul className="list-disc list-inside text-surface-600 space-y-1.5 mb-3 ml-4">
+            <li>
+              <strong className="text-surface-800">Service Providers:</strong> Shared with
+              trusted partners to facilitate our service delivery (Stripe for payments,
+              Resend for email, Supabase for database hosting, and Cloudflare for security).
+            </li>
+            <li>
+              <strong className="text-surface-800">Legal Obligations:</strong> Disclosed if
+              required by subpoena, court order, or similar legal mandate.
+            </li>
+            <li>
+              <strong className="text-surface-800">Business Transfers:</strong> Transferred
+              in connection with a merger, acquisition, or sale of assets.
+            </li>
+          </ul>
+
+          <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
+            4. Data Security
+          </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            We only share data with trusted partners who help us run the app, such as Stripe for
-            payments, Resend for sending emails, Supabase for database hosting, and Cloudflare
-            for bot protection on our sign-in and sign-up pages.
-          </p>
-          <p className="text-surface-600 leading-relaxed">
-            We may also disclose information if legally required to do so by a court order, or if
-            our company undergoes a business transfer like a merger or sale.
+            We implement industry-standard encryption for data in transit and at rest.
+            Authentication requires email magic links or Google single sign-on (SSO).
+            However, no electronic transmission or storage system is entirely secure; we
+            cannot guarantee absolute data security against unauthorized access.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            4. Keeping Your Data Safe
+            5. Data Retention and User Rights
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            We protect your data using industry-standard encryption, both while it is traveling
-            over the internet and while it is stored in our databases.
+            <strong className="text-surface-800">Retention:</strong> Data is retained while
+            your account remains active.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            Access to the app is secured via email magic links or Google logins.
-          </p>
-          <p className="text-surface-600 leading-relaxed">
-            While we work hard to protect your information, no electronic system is 100% perfect,
-            so we cannot guarantee absolute security against unauthorized access.
-          </p>
-
-          <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            5. Data Retention &amp; Your Rights
-          </h2>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">Keeping your data:</strong> We hold onto your
-            account data and contacts for as long as you are actively using AgentFlow.
+            <strong className="text-surface-800">Deletion:</strong> Upon account
+            cancellation, personal data is erased or irreversibly anonymized within 30 days.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">Leaving us:</strong> If you choose to delete
-            your account, we will erase or irreversibly anonymize your personal data within 30
-            days.
-          </p>
-          <p className="text-surface-600 leading-relaxed">
-            <strong className="text-surface-800">Your control:</strong> You can always access,
-            correct, or request deletion of your data, and you can export all your contacts as a
-            CSV file at any time right from the app.
+            <strong className="text-surface-800">User Rights:</strong> You may access,
+            correct, or request deletion of your data at any time. You may also export your
+            client data in CSV format directly via the application.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
             6. Cookies and Tracking
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            We only use &quot;essential&quot; cookies that keep you logged in and save your
-            simple preferences, like whether you prefer a list or kanban view.
+            We utilize only strictly necessary cookies to maintain session state and basic
+            interface preferences. We do not use advertising cookies, tracking pixels, or
+            behavioral profiling.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">Bot protection cookie:</strong> When you
-            visit our sign-in or sign-up page, Cloudflare sets a single cookie
-            called <code className="bg-surface-100 px-1 rounded text-[13px]">__cf_bm</code> to
-            help tell humans and automated traffic apart. It expires after 30 minutes of
-            inactivity, contains no personally identifying information, and is required for
-            the security of the form. See the next section for the full details.
-          </p>
-          <p className="text-surface-600 leading-relaxed">
-            We absolutely do not use advertising cookies, tracking pixels, or behavioral
-            profiling tools.
+            <strong className="text-surface-800">Security Cookies:</strong> Cloudflare sets
+            a{" "}
+            <code className="bg-surface-100 px-1 rounded text-[13px]">__cf_bm</code> cookie
+            on authentication pages to distinguish between human and automated traffic. It
+            expires after 30 minutes of inactivity, contains no personally identifiable
+            information, and is mandatory for form security.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            7. Security &amp; Bot Protection (Cloudflare Turnstile)
+            7. Third-Party Security Services (Cloudflare Turnstile)
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            To keep AgentFlow safe from automated abuse (bots, fake signups, brute-force
-            password attempts, and credential stuffing), our sign-in and sign-up pages use{" "}
-            <strong className="text-surface-800">Cloudflare Turnstile</strong> — a
-            privacy-friendly CAPTCHA alternative that runs invisibly in the background on
-            most modern browsers. You will not see a &quot;prove you are human&quot; puzzle.
+            Our authentication pages utilize Cloudflare Turnstile to prevent automated abuse
+            (e.g., bot traffic, credential stuffing).
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            When you load a page protected by Turnstile, Cloudflare automatically receives:
-          </p>
-          <ul className="list-disc list-inside text-surface-600 space-y-1.5 mb-3 ml-4">
-            <li>Your IP address</li>
-            <li>Your browser type, operating system, and language</li>
-            <li>Some basic browser configuration (cookies enabled, screen size, plugins)</li>
-            <li>Behavior signals — only if a challenge is rendered, and never used to build a fingerprint of you</li>
-            <li>A timestamp of the request</li>
-          </ul>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            Cloudflare uses these signals to decide whether the visitor looks human or
-            automated, and returns a short-lived pass/fail token to us. We never see or store
-            the raw signals above — only the pass/fail result, and only for the few seconds it
-            takes to complete your sign-in or sign-up.
+            <strong className="text-surface-800">Data Processed:</strong> Cloudflare
+            automatically receives your IP address, browser/OS metadata, basic configuration
+            settings, and a request timestamp. Behavior signals are processed only if a
+            challenge renders and are not used for user fingerprinting.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            The <code className="bg-surface-100 px-1 rounded text-[13px]">__cf_bm</code> cookie
-            described in Section 6 is set by Cloudflare to keep its bot-detection consistent
-            across page loads. We do not have access to its contents and we do not use it for
-            analytics, advertising, or anything else.
-          </p>
-          <p className="text-surface-600 leading-relaxed">
-            Cloudflare processes the data above under its own privacy policy, which we do
-            not control. You can read it at{" "}
+            <strong className="text-surface-800">Data Handling:</strong> Cloudflare issues
+            a temporary pass/fail token. AgentFlow does not access or store raw signals.
+            Cloudflare processes this data under its own privacy policy (
             <a
               href="https://www.cloudflare.com/privacypolicy/"
               target="_blank"
@@ -197,33 +177,41 @@ export default function PrivacyPage() {
             >
               cloudflare.com/privacypolicy
             </a>
-            . If you would rather not be evaluated by Turnstile, please email us at{" "}
+            ).
+          </p>
+          <p className="text-surface-600 leading-relaxed">
+            <strong className="text-surface-800">Opt-Out:</strong> Users opting out of
+            Turnstile evaluation must contact{" "}
             <a
               href="mailto:privacy@agent-flow.app"
               className="text-primary hover:underline"
             >
               privacy@agent-flow.app
             </a>{" "}
-            and we will work with you on an alternative sign-in path.
+            to establish alternative authentication.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            8. International Users &amp; Age Limits
+            8. International Data Transfers
           </h2>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            AgentFlow operates out of the United States, meaning your data is processed there.
-          </p>
           <p className="text-surface-600 leading-relaxed">
-            Our app is built exclusively for adult professionals; you must be 18 or older to use
-            it.
+            AgentFlow operates in the United States. Information collected is processed and
+            stored on U.S. servers.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            9. Get In Touch
+            9. Age Restrictions
+          </h2>
+          <p className="text-surface-600 leading-relaxed">
+            AgentFlow is intended exclusively for adult professionals. Users must be at
+            least 18 years of age.
+          </p>
+
+          <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
+            10. Contact Information
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            If you have any questions, concerns, or want to exercise your privacy rights, our
-            team is always here to help:
+            For privacy-related inquiries or to exercise data rights, contact us at:
           </p>
           <p className="text-surface-600 leading-relaxed">
             <strong className="text-surface-800">Email:</strong>{" "}
