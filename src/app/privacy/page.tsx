@@ -93,7 +93,8 @@ export default function PrivacyPage() {
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
             We only share data with trusted partners who help us run the app, such as Stripe for
-            payments, Resend for sending emails, and Supabase for database hosting.
+            payments, Resend for sending emails, Supabase for database hosting, and Cloudflare
+            for bot protection on our sign-in and sign-up pages.
           </p>
           <p className="text-surface-600 leading-relaxed">
             We may also disclose information if legally required to do so by a court order, or if
@@ -140,13 +141,74 @@ export default function PrivacyPage() {
             We only use &quot;essential&quot; cookies that keep you logged in and save your
             simple preferences, like whether you prefer a list or kanban view.
           </p>
+          <p className="text-surface-600 leading-relaxed mb-3">
+            <strong className="text-surface-800">Bot protection cookie:</strong> When you
+            visit our sign-in or sign-up page, Cloudflare sets a single cookie
+            called <code className="bg-surface-100 px-1 rounded text-[13px]">__cf_bm</code> to
+            help tell humans and automated traffic apart. It expires after 30 minutes of
+            inactivity, contains no personally identifying information, and is required for
+            the security of the form. See the next section for the full details.
+          </p>
           <p className="text-surface-600 leading-relaxed">
             We absolutely do not use advertising cookies, tracking pixels, or behavioral
             profiling tools.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            7. International Users &amp; Age Limits
+            7. Security &amp; Bot Protection (Cloudflare Turnstile)
+          </h2>
+          <p className="text-surface-600 leading-relaxed mb-3">
+            To keep AgentFlow safe from automated abuse (bots, fake signups, brute-force
+            password attempts, and credential stuffing), our sign-in and sign-up pages use{" "}
+            <strong className="text-surface-800">Cloudflare Turnstile</strong> — a
+            privacy-friendly CAPTCHA alternative that runs invisibly in the background on
+            most modern browsers. You will not see a &quot;prove you are human&quot; puzzle.
+          </p>
+          <p className="text-surface-600 leading-relaxed mb-3">
+            When you load a page protected by Turnstile, Cloudflare automatically receives:
+          </p>
+          <ul className="list-disc list-inside text-surface-600 space-y-1.5 mb-3 ml-4">
+            <li>Your IP address</li>
+            <li>Your browser type, operating system, and language</li>
+            <li>Some basic browser configuration (cookies enabled, screen size, plugins)</li>
+            <li>Behavior signals — only if a challenge is rendered, and never used to build a fingerprint of you</li>
+            <li>A timestamp of the request</li>
+          </ul>
+          <p className="text-surface-600 leading-relaxed mb-3">
+            Cloudflare uses these signals to decide whether the visitor looks human or
+            automated, and returns a short-lived pass/fail token to us. We never see or store
+            the raw signals above — only the pass/fail result, and only for the few seconds it
+            takes to complete your sign-in or sign-up.
+          </p>
+          <p className="text-surface-600 leading-relaxed mb-3">
+            The <code className="bg-surface-100 px-1 rounded text-[13px]">__cf_bm</code> cookie
+            described in Section 6 is set by Cloudflare to keep its bot-detection consistent
+            across page loads. We do not have access to its contents and we do not use it for
+            analytics, advertising, or anything else.
+          </p>
+          <p className="text-surface-600 leading-relaxed">
+            Cloudflare processes the data above under its own privacy policy, which we do
+            not control. You can read it at{" "}
+            <a
+              href="https://www.cloudflare.com/privacypolicy/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              cloudflare.com/privacypolicy
+            </a>
+            . If you would rather not be evaluated by Turnstile, please email us at{" "}
+            <a
+              href="mailto:privacy@agent-flow.app"
+              className="text-primary hover:underline"
+            >
+              privacy@agent-flow.app
+            </a>{" "}
+            and we will work with you on an alternative sign-in path.
+          </p>
+
+          <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
+            8. International Users &amp; Age Limits
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
             AgentFlow operates out of the United States, meaning your data is processed there.
@@ -157,7 +219,7 @@ export default function PrivacyPage() {
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            8. Get In Touch
+            9. Get In Touch
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
             If you have any questions, concerns, or want to exercise your privacy rights, our

@@ -9,7 +9,6 @@ import { TurnstileWidget } from "@/components/turnstile-widget";
 import {
   Mail,
   Home,
-  CheckCircle2,
   Loader2,
   Eye,
   EyeOff,
@@ -650,26 +649,17 @@ function LoginContent() {
                   />
                   <p
                     id="captcha-hint"
-                    className={`mt-2 flex items-center justify-center gap-1.5 text-[12px] ${
-                      captchaVerified ? "text-success-600" : "text-surface-500"
-                    }`}
+                    className="mt-2 flex items-center justify-center gap-1.5 text-[12px] text-surface-500"
                     aria-live="polite"
                   >
-                    {captchaVerified ? (
-                      <>
-                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>Verification complete</span>
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>
-                          {captchaReady
-                            ? "Complete the verification above to continue"
-                            : "Loading security check..."}
-                        </span>
-                      </>
-                    )}
+                    <Shield className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>
+                      {captchaVerified
+                        ? "Verified — protected by Cloudflare"
+                        : captchaReady
+                          ? "Verifying with Cloudflare…"
+                          : "Protected by Cloudflare Turnstile"}
+                    </span>
                   </p>
                 </div>
               )}
