@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant P as /pipeline (client)
+    participant DB as DndBoard (dynamic chunk)
+    participant H as useLeads.updateLead
+    participant SB as Supabase
+    participant RLS as Postgres RLS
+
+    U->>P: GET /pipeline
+    P->>H: fetchLeads()
+    H->>SB: SELECT * FROM leads WHERE user_id = me
+    SB->>RLS: enforce user_id = auth.uid()
+    SB-->>P: leads[] grouped by stage
+
+    U->>DB: drag card from "New" -> "Contacted"
+    DB-->>P: onDragEnd(DropResult)
+    P->>P: setLeads(optimistic merge)
+    P->>H: updateLead(id, { pipeline_stage: "contacted" })
+    H->>SB: UPDATE leads SET pipeline_stage, updated_at
+    SB->>RLS: enforce user_id = auth.uid()
+
+    alt update succeeds
+        SB-->>H: row
+        H-->>P: { data, error: null }
+    else update fails
+        H-->>P: { error }
+        P->>P: revert optimistic state + show error toast
+    end

@@ -1,0 +1,54 @@
+flowchart TD
+    subgraph routes["App routes (src/app)"]
+        Login["login/page.tsx"]
+        Signup["signup/page.tsx"]
+        CB["auth/callback/route.ts"]
+        Leads["(dashboard)/leads/page.tsx"]
+        Pipeline["(dashboard)/pipeline/page.tsx"]
+        Billing["(dashboard)/settings/billing/page.tsx"]
+        ApiLeads["/api/leads/route.ts"]
+        ApiStripe["/api/stripe/checkout"]
+        ApiWH["/api/stripe/webhook"]
+        ApiCron["/api/cron/daily-digest"]
+    end
+
+    subgraph shared["Shared modules (src/lib)"]
+        Auth[auth.ts]
+        Valid[validations.ts]
+        RL[rate-limiter.ts]
+        StripeLib[stripe.ts]
+        ResendLib[resend.ts]
+        Constants[constants.ts<br/>PLAN_LIMITS]
+        PlanLimit[plan-limit.ts]
+    end
+
+    subgraph supa["Supabase wrappers"]
+        SBC[client.ts]
+        SBS[server.ts]
+        SBM[middleware.ts]
+    end
+
+    Login --> SBM
+    Login --> Auth
+    Login --> SBC
+    Signup --> SBC
+    CB --> SBS
+    Leads --> SBC
+    Leads --> Valid
+    Pipeline --> SBC
+    Pipeline -.->|dynamic import| DndBoard[pipeline/dnd-board.tsx]
+
+    ApiLeads --> SBS
+    ApiLeads --> Valid
+    ApiLeads --> RL
+    ApiLeads --> Constants
+
+    Billing --> ApiStripe
+    ApiStripe --> SBS
+    ApiStripe --> StripeLib
+    ApiWH --> StripeLib
+    ApiCron --> SBS
+    ApiCron --> ResendLib
+
+    PlanLimit --> Constants
+    Login -.->|client check| PlanLimit

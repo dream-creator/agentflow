@@ -1,0 +1,14 @@
+flowchart TD
+    Req([Incoming request]) --> Mw[middleware.ts<br/>updateSession]
+    Mw -->|read cookies| SB[Supabase auth.getUser]
+    SB -->|user or null| Decide{Path match?}
+
+    Decide -->|/dashboard, /pipeline,<br/>/leads, /follow-ups,<br/>/settings, /api/leads| Prot[Protected]
+    Decide -->|/login, /signup| Auth[Auth pages]
+    Decide -->|other| Pass[allow through]
+
+    Prot -->|no user| Login[Redirect -> /login?redirect=&lt;path&gt;]
+    Prot -->|has user| Allow[allow]
+
+    Auth -->|has user| Dash[Redirect -> /dashboard]
+    Auth -->|no user| Allow2[allow]
