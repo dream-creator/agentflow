@@ -200,12 +200,12 @@ export default function StatsBar() {
       <div className="flex justify-center mb-5">
         <span
           aria-label="Live statistics, updating in real time"
-          className="inline-flex items-center gap-[5px] bg-green-50 border border-green-200 rounded-full px-2.5 py-[3px] text-[11px] font-semibold text-green-600 tracking-wide"
+          className="inline-flex items-center gap-[5px] bg-success-50 border border-success-100 rounded-full px-2.5 py-[3px] text-[11px] font-semibold text-success tracking-wide"
         >
           {/* Pulse dot */}
           <span
             aria-hidden="true"
-            className="stats-pulse-dot relative inline-block w-[7px] h-[7px] bg-green-500 rounded-full shrink-0"
+            className="stats-pulse-dot relative inline-block w-[7px] h-[7px] bg-success-500 rounded-full shrink-0"
           />
           LIVE STATS
         </span>

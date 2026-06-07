@@ -57,15 +57,15 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
 
   const icons = {
-    success: <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />,
-    error: <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />,
-    info: <Info className="h-4 w-4 text-blue-500 shrink-0" />,
+    success: <CheckCircle className="h-4 w-4 text-success-500 shrink-0" />,
+    error: <AlertCircle className="h-4 w-4 text-destructive shrink-0" />,
+    info: <Info className="h-4 w-4 text-accent-500 shrink-0" />,
   };
 
   const bgColors = {
-    success: "bg-green-50 border-green-200",
-    error: "bg-red-50 border-red-200",
-    info: "bg-blue-50 border-blue-200",
+    success: "bg-success-50 border-success-100",
+    error: "bg-destructive-50 border-destructive-100",
+    info: "bg-accent-50 border-accent-100",
   };
 
   return (
