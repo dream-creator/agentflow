@@ -1,0 +1,11 @@
+flowchart LR
+    B[Browser request] -->|1| Edge[Vercel Edge]
+    Edge -->|2| Mw[middleware.ts<br/>auth gate]
+    Mw -->|3| RSC[Server Component / route handler]
+    RSC -->|4| SB[Supabase<br/>Postgres + RLS]
+    SB -->|5| RSC2[render HTML / JSON]
+    RSC2 -->|6| Edge2[Vercel Edge cache]
+    Edge2 -->|7| B
+
+    style Edge fill:#f0fdfa,stroke:#0f766e
+    style Edge2 fill:#f0fdfa,stroke:#0f766e

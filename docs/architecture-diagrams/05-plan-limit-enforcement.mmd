@@ -1,0 +1,22 @@
+flowchart TD
+    U([User clicks Add Lead]) --> Form[/leads/new form/]
+    Form --> C1{checkPlanLimit<br/>client-side<br/>src/lib/plan-limit.ts}
+    C1 -->|at limit| Toast[showToast with upgrade CTA -> /settings/billing]
+    C1 -->|ok| API
+
+    API[/api/leads POST/] --> Auth1{getUser}
+    Auth1 -->|no| R401[401 Unauthorized]
+    Auth1 -->|yes| RL1[rateLimit: 30 / min / user]
+
+    RL1 --> Zod[leadSchema.safeParse]
+    Zod -->|fail| R400[400 Validation]
+    Zod -->|ok| C2[query profiles.plan]
+
+    C2 --> C3[count active leads<br/>is_active = true]
+    C3 --> C4{activeLeadCount<br/>>= limits.maxActiveLeads?}
+    C4 -->|yes| R403[403 Free plan limited to N]
+    C4 -->|no| Insert
+
+    Insert[INSERT into leads] --> Trigger[Postgres trigger<br/>check_free_tier_lead_limit]
+    Trigger -->|fail| R500[500]
+    Trigger -->|ok| OK[201 Created]
