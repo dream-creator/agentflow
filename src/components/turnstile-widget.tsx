@@ -54,6 +54,47 @@ const TURNSTILE_DISABLED =
   process.env.NEXT_PUBLIC_TURNSTILE_DISABLED === "true";
 
 /**
+ * Captured site key. Read once at module load so the empty-key guard
+ * below can short-circuit before <Turnstile> mounts (the lib would
+ * otherwise silently render a broken iframe and we'd see the "submit
+ * button greyed out with no error" failure mode).
+ *
+ * June 7 2026 incident: Vercel CLI silently accepted `vercel env add`
+ * calls but stored empty strings. Next inlined `siteKey: ""` into the
+ * JS bundle, the Cloudflare widget never initialized, and the form
+ * submit button stayed disabled with no visible error. The guard below
+ * turns the silent failure into a clear "Captcha is misconfigured"
+ * error so the regression is loud instead of invisible.
+ */
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+/**
+ * Dev-only assertion: if the env var is missing AND we're not in a
+ * sanctioned bypass/disabled mode, the build is misconfigured. We only
+ * throw in development — in production we render a visible error UI
+ * (see the `if (!SITE_KEY) ...` branch in the component) so users see
+ * a clear message instead of a permanently-disabled submit button.
+ *
+ * The throw exists so a developer running `npm run dev` notices the
+ * misconfig immediately rather than discovering it from a production
+ * incident report.
+ */
+if (
+  !SITE_KEY &&
+  !TEST_BYPASS_ENABLED &&
+  !TURNSTILE_DISABLED &&
+  process.env.NODE_ENV !== "production"
+) {
+  throw new Error(
+    "[TurnstileWidget] NEXT_PUBLIC_TURNSTILE_SITE_KEY is not set. " +
+      "Add it to .env.local for local dev, or set " +
+      "NEXT_PUBLIC_TURNSTILE_TEST_BYPASS=true / " +
+      "NEXT_PUBLIC_TURNSTILE_DISABLED=true if you intentionally want " +
+      "to skip captcha in this environment.",
+  );
+}
+
+/**
  * Visual stand-in rendered when the test bypass is active. Shows a clearly
  * labeled "Test mode" badge so anyone running tests can see at a glance that
  * captcha is not real. Auto-fires onSuccess once on mount so the form
@@ -165,6 +206,34 @@ export function TurnstileWidget({
     return null;
   }
 
+  // Empty-siteKey guard for production. The dev throw above catches the
+  // regression class for `npm run dev`; this branch catches it in
+  // production where we cannot throw (it would crash the page). Without
+  // this, the user sees a submit button that's greyed out with no
+  // explanation — a silent failure that was the root cause of the June
+  // 7 2026 production outage. The error message names the env var so
+  // anyone reading the page knows what to tell the team.
+  if (!SITE_KEY) {
+    return (
+      <div
+        role="alert"
+        aria-live="assertive"
+        data-testid="turnstile-widget-misconfigured"
+        className="flex items-start gap-2 rounded-lg border border-destructive-100 bg-destructive-50 px-3 py-2"
+      >
+        <AlertCircle
+          className="h-4 w-4 text-destructive mt-0.5 shrink-0"
+          aria-hidden="true"
+        />
+        <p className="text-[13px] text-destructive leading-snug">
+          Captcha is misconfigured. The site key (
+          <code className="font-mono text-[12px]">NEXT_PUBLIC_TURNSTILE_SITE_KEY</code>
+          ) is missing from this deployment. Please contact support.
+        </p>
+      </div>
+    );
+  }
+
   const handleRetry = () => {
     setLoadError(null);
     setHasLoaded(false);
@@ -224,7 +293,7 @@ export function TurnstileWidget({
       >
         <Turnstile
           key={retryKey}
-          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+          siteKey={SITE_KEY}
           onSuccess={(token: string) => {
             setLoadError(null);
             setHasSucceeded(true);
