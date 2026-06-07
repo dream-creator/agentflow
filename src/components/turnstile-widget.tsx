@@ -269,7 +269,17 @@ export function TurnstileWidget({
           // connection" instead of a working widget. Letting the dashboard
           // setting win lets operators flip widget modes without a code
           // deploy.
-          options={{ theme, size: "flexible" }}
+          //
+          // `size: "invisible"` applies `{ width: 0, height: 0,
+          // overflow: "hidden" }` to the lib's container so the iframe fits
+          // inside the 1×1 off-screen wrapper that the auth pages render
+          // (see src/app/(auth)/login/page.tsx + signup/page.tsx). The
+          // default "flexible" size is 300×65, which the off-screen wrapper
+          // clips — preventing the iframe from loading, the `onLoad`
+          // callback from firing, and leaving the form submit button
+          // disabled. See tests/unit/components/turnstile-widget.test.ts for
+          // the regression guard.
+          options={{ theme, size: "invisible" }}
         />
       </Suspense>
     </div>
