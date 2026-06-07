@@ -59,3 +59,12 @@ supabase/.temp/
 
 # local debug scripts (do not commit)
 scripts/debug-*.ts
+
+# vercel env pull output (no --file argument defaults to bare filename
+# in cwd; commonly written as `production` or `preview` next to .env.local).
+# These contain real service-role / anon keys and MUST NEVER be committed.
+/production
+/preview
+/development
+vercel-env-*.env
+*.vercel.env
