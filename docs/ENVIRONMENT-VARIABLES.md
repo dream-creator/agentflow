@@ -29,6 +29,10 @@ variable.
 | `PREVIEW_SUPABASE_DB_URL` | no | n/a | GitHub Actions only |
 | `VERCEL_TOKEN` | no | n/a | GitHub Actions only |
 | `PRODUCTION_APP_URL` | no | n/a | GitHub Actions (production release smoke) |
+| `NEXT_PUBLIC_MAINTENANCE_BANNER` | yes | no | Vercel (fail-closed kill switch — see [FEATURE-FLAGS.md](./FEATURE-FLAGS.md)) |
+| `NEXT_PUBLIC_FEATURE_CSV_IMPORT` | yes | no | Vercel + local (fail-open kill switch) |
+| `NEXT_PUBLIC_FEATURE_PIPELINE` | yes | no | Vercel + local (fail-open kill switch) |
+| `NEXT_PUBLIC_FEATURE_BULK_ACTIONS` | yes | no | Vercel + local (fail-open kill switch) |
 
 > **Public variables** have the `NEXT_PUBLIC_` prefix and are
 > inlined into the browser bundle. Treat them as public — never
@@ -192,6 +196,72 @@ Cloudflare is having an outage and Supabase is rejecting all
 auth requests due to missing/invalid captcha tokens. Never set
 in production unless you're OK with no bot protection on the
 auth pages.
+
+## Feature flags
+
+The env-var feature flag system is described in detail in
+[FEATURE-FLAGS.md](./FEATURE-FLAGS.md) (operational reference) and
+[ADR-0001](./adr/0001-env-var-feature-flags.md) (the decision and
+alternatives). This section is a quick lookup.
+
+**All four vars are fail-OPEN by default** (a missing var, an
+unknown value, or `""` falls through to the code default) — **except
+the maintenance banner**, which is fail-CLOSED (must be the literal
+`"true"` to show).
+
+### `NEXT_PUBLIC_MAINTENANCE_BANNER`
+
+**Where:** `src/components/maintenance-banner.tsx` (via
+`isMaintenanceBannerVisible()`).
+
+**Required:** no.
+
+**Values:**
+- `"true"` — banner is visible on all dashboard pages
+- anything else (including missing) — banner is hidden
+
+**Default:** hidden. Set this to `"true"` when you want users to
+see "AgentFlow is in active development" + a link to `/changelog`.
+
+### `NEXT_PUBLIC_FEATURE_CSV_IMPORT`
+
+**Where:** `src/app/(dashboard)/leads/page.tsx` (gates the "Import"
+button).
+
+**Required:** no.
+
+**Values:**
+- `"false"` — CSV Import button is hidden
+- anything else (including missing) — button is shown
+
+**Default:** shown. Set to `"false"` to hide the button without
+removing the underlying import page.
+
+### `NEXT_PUBLIC_FEATURE_PIPELINE`
+
+**Where:** reserved — no consumer yet. Adding the pipeline view's
+gating is the natural next step.
+
+**Required:** no.
+
+**Values:**
+- `"false"` — pipeline view is hidden
+- anything else (including missing) — pipeline is shown
+
+**Default:** shown.
+
+### `NEXT_PUBLIC_FEATURE_BULK_ACTIONS`
+
+**Where:** reserved — no consumer yet. Bulk select / bulk delete on
+the leads list is the natural next step.
+
+**Required:** no.
+
+**Values:**
+- `"false"` — bulk-actions UI is hidden
+- anything else (including missing) — bulk actions are shown
+
+**Default:** shown.
 
 ## Sentry
 
