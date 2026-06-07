@@ -4,7 +4,8 @@ import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Terms of Service — AgentFlow",
-  description: "AgentFlow terms of service. Read the ground rules for using our app.",
+  description:
+    "AgentFlow terms of service. The ground rules for using our CRM platform.",
 };
 
 export default function TermsPage() {
@@ -29,192 +30,164 @@ export default function TermsPage() {
           Terms of Service
         </h1>
         <p className="text-sm text-surface-500 mb-8">
-          Simple CRM for Solo Real Estate Agents
+          Effective Date: June 6, 2026
         </p>
 
         <div className="prose prose-surface max-w-none">
           <p className="text-surface-600 leading-relaxed">
-            Welcome to AgentFlow! By creating an account and using our app, you agree to these
-            simple ground rules. If you do not agree with them, please do not use the service.
+            These Terms of Service (&quot;Terms&quot;) govern your access to and use of
+            AgentFlow (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), a CRM
+            platform for solo real estate agents. By creating an account, you agree
+            to be bound by these Terms.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            1. What AgentFlow Is (And Isn&apos;t)
+            1. Service Description and Disclaimer
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            AgentFlow is a software tool built to help solo real estate agents stay organized.
-          </p>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            We provide tools for contact management, visual pipeline tracking, and follow-up
-            reminders.
-          </p>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            We are simply a productivity tool.
+            AgentFlow is a productivity tool designed to help solo real estate
+            agents manage leads, track pipelines, and schedule follow-ups.
           </p>
           <p className="text-surface-600 leading-relaxed mb-3">
             We do not provide real estate, legal, or financial advice.
           </p>
           <p className="text-surface-600 leading-relaxed">
-            You are fully responsible for the business decisions you make while using our app.
+            You are solely responsible for the business decisions you make while
+            using our service.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            2. Your Account
+            2. Account Requirements
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            To use AgentFlow, you need to set up an account.
+            To use AgentFlow, you must:
           </p>
           <ul className="list-disc list-inside text-surface-600 space-y-1.5 mb-3 ml-4">
-            <li>You must be a real person who is at least 18 years old.</li>
-            <li>You must provide accurate information when signing up.</li>
+            <li>Be a real person who is at least 18 years of age.</li>
+            <li>Provide accurate and current account information.</li>
             <li>
-              You are responsible for keeping your password safe and for anything that happens
-              under your account.
-            </li>
-            <li>Please do not share your login details or use bots to create accounts.</li>
-          </ul>
-
-          <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            3. Simple Pricing
-          </h2>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            We offer two straightforward plans:
-          </p>
-
-          {/* Pricing Table */}
-          <div className="my-6 overflow-x-auto">
-            <table className="w-full text-sm border border-surface-200 rounded-lg">
-              <thead>
-                <tr className="bg-surface-50">
-                  <th className="text-left px-4 py-2.5 font-heading font-semibold text-surface-900 border-b border-surface-200">
-                    Plan
-                  </th>
-                  <th className="text-left px-4 py-2.5 font-heading font-semibold text-surface-900 border-b border-surface-200">
-                    Price
-                  </th>
-                  <th className="text-left px-4 py-2.5 font-heading font-semibold text-surface-900 border-b border-surface-200">
-                    What&apos;s Included
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-surface-100">
-                  <td className="px-4 py-2.5 text-surface-700">Free</td>
-                  <td className="px-4 py-2.5 text-surface-700">$0 / mo</td>
-                  <td className="px-4 py-2.5 text-surface-600">
-                    10 active leads, 10 pipelines, daily email digest, AgentFlow branding.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-2.5 text-surface-700">Pro</td>
-                  <td className="px-4 py-2.5 text-surface-700">$5 / mo</td>
-                  <td className="px-4 py-2.5 text-surface-600">
-                    Unlimited contacts &amp; pipelines, SMS reminders, custom branding,
-                    priority support.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p className="text-surface-600 leading-relaxed mb-3">
-            <strong className="text-surface-800">Billing &amp; Cancellations:</strong>
-          </p>
-          <ul className="list-disc list-inside text-surface-600 space-y-1.5 mb-3 ml-4">
-            <li>
-              You can cancel your Pro subscription at any time right from your settings.
+              Keep your login credentials secure and confidential.
             </li>
             <li>
-              If you cancel, you will keep your Pro features until the end of your current
-              billing month.
-            </li>
-            <li>
-              After that, your account will simply drop down to the Free plan.
+              Accept responsibility for all activity that occurs under your
+              account.
             </li>
           </ul>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            4. Playing by the Rules
+            3. Subscription and Billing
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            We want AgentFlow to be a safe, effective tool for your business. When using our
-            app, you must not:
+            AgentFlow is offered as a subscription-based service. We provide a
+            Free tier with limited features and a Pro tier with extended
+            capabilities.
+          </p>
+          <p className="text-surface-600 leading-relaxed mb-3">
+            Paid subscriptions are billed monthly in advance and may be
+            cancelled at any time from your account settings.
+          </p>
+          <p className="text-surface-600 leading-relaxed">
+            Refunds are not prorated; cancellation takes effect at the end of
+            the current billing period.
+          </p>
+
+          <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
+            4. Acceptable Use
+          </h2>
+          <p className="text-surface-600 leading-relaxed mb-3">
+            You agree not to use AgentFlow to:
           </p>
           <ul className="list-disc list-inside text-surface-600 space-y-1.5 mb-3 ml-4">
             <li>
-              Break any privacy or anti-spam laws (like sending unsolicited spam emails).
+              Violate any applicable law, including real estate, fair housing,
+              anti-spam (such as CAN-SPAM and TCPA), or consumer protection
+              regulations.
             </li>
-            <li>Harass anyone or try to hack our systems.</li>
-            <li>Use the app for anything illegal.</li>
+            <li>Send unsolicited communications or spam.</li>
+            <li>Harass, threaten, defame, or defraud any person or entity.</li>
+            <li>
+              Attempt to hack, reverse-engineer, disrupt, or otherwise interfere
+              with the security or operation of the service.
+            </li>
+            <li>Engage in any activity that is illegal or harmful.</li>
           </ul>
+
+          <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
+            5. IP and Data Ownership
+          </h2>
+          <p className="text-surface-600 leading-relaxed mb-3">
+            You retain full ownership of all contacts, notes, pipeline data,
+            and other content you upload or create in AgentFlow. You may export
+            your data at any time.
+          </p>
           <p className="text-surface-600 leading-relaxed">
-            You are also completely responsible for making sure your use of AgentFlow complies
-            with your local real estate regulations and fair housing laws.
+            <strong className="text-surface-800">Our Platform:</strong> We
+            retain all rights, title, and interest in and to the AgentFlow
+            software, design, trademarks, logos, and underlying technology. You
+            may not copy, resell, or create derivative works of the platform.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            5. Your Data
+            6. Disclaimer of Warranties
           </h2>
-          <p className="text-surface-600 leading-relaxed mb-3">Your data is yours.</p>
           <p className="text-surface-600 leading-relaxed mb-3">
-            You maintain full ownership of all the contacts, notes, and pipeline data you put
-            into AgentFlow.
-          </p>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            We only access or store your data so that the app works for you.
+            THE SERVICE IS PROVIDED ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS.
           </p>
           <p className="text-surface-600 leading-relaxed">
-            You can easily export your data as a CSV file at any time.
+            TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, WE DISCLAIM ALL
+            WARRANTIES, EXPRESS OR IMPLIED, INCLUDING THE IMPLIED WARRANTIES OF
+            MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+            NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE
+            UNINTERRUPTED, ERROR-FREE, OR SECURE.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            6. Our Stuff
+            7. Limitation of Liability
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            While you own your data, we own AgentFlow.
-          </p>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            The design, code, logos, and features of the app belong to us.
+            TO THE MAXIMUM EXTENT PERMITTED BY LAW, AGENTFLOW AND ITS
+            AFFILIATES, OFFICERS, EMPLOYEES, AGENTS, AND PARTNERS WILL NOT BE
+            LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
+            PUNITIVE DAMAGES.
           </p>
           <p className="text-surface-600 leading-relaxed">
-            Please do not try to copy, steal, or resell our software.
+            This includes, without limitation, damages for lost commissions,
+            lost profits, lost data, business interruption, or any other
+            commercial loss arising out of or related to your use of (or
+            inability to use) the service.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            7. Service Limits (The &quot;As-Is&quot; Clause)
+            8. Termination
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            We work hard to make AgentFlow reliable, but software is never perfect.
-          </p>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            We provide the app &quot;as is&quot; and cannot guarantee it will be 100% error-free
-            or uninterrupted all the time.
+            You may delete your account and terminate these Terms at any time
+            from your account settings.
           </p>
           <p className="text-surface-600 leading-relaxed">
-            We are not legally or financially liable if a glitch causes you to lose a real estate
-            lead, deal, or commission.
+            We may suspend or terminate your account at any time, with or
+            without notice, if we reasonably believe you have breached these
+            Terms, failed to pay applicable fees, or remained inactive for
+            twelve (12) months or more.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            8. Leaving Us
+            9. Governing Law
           </h2>
-          <p className="text-surface-600 leading-relaxed mb-3">
-            You can permanently delete your account and data at any time from your settings.
-          </p>
           <p className="text-surface-600 leading-relaxed">
-            On our end, we reserve the right to suspend or close your account if you break these
-            rules, refuse to pay for a premium plan, or abandon a free account for over a year.
+            These Terms are governed by and construed in accordance with the
+            laws of <strong className="text-surface-800">[Insert State/Country]</strong>,
+            without regard to its conflict of law principles.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
-            9. Contact Us
+            10. Contact
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            If you have any questions, need help, or want to report an issue, we are always here
-            for you.
+            If you have any questions about these Terms, please contact us:
           </p>
           <p className="text-surface-600 leading-relaxed">
-            <strong className="text-surface-800">Support:</strong>{" "}
+            <strong className="text-surface-800">Email:</strong>{" "}
             <a
               href="mailto:support@agent-flow.app"
               className="text-primary hover:underline"
