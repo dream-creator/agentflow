@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { UserPlus, Phone, Mail, MessageSquare, Search, Upload } from "lucide-react";
 import Link from "next/link";
 import { formatStage, getStageVariant } from "@/lib/utils";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import type { Database } from "@/types";
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -61,12 +62,14 @@ export default function LeadsPage() {
           <p className="text-surface-500 text-sm mt-1">{leads.length} total leads</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/leads/import">
-            <Button variant="secondary" size="sm">
-              <Upload className="h-4 w-4 mr-1" />
-              Import
-            </Button>
-          </Link>
+          {isFeatureEnabled("csv_import") && (
+            <Link href="/leads/import">
+              <Button variant="secondary" size="sm">
+                <Upload className="h-4 w-4 mr-1" />
+                Import
+              </Button>
+            </Link>
+          )}
           <Link href="/leads/new">
             <Button size="sm">
               <UserPlus className="h-4 w-4 mr-1" />

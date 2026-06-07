@@ -3,6 +3,7 @@
 import { BottomNav } from "./bottom-nav";
 import { Sidebar } from "./sidebar";
 import { ToastContainer } from "@/components/ui/toast";
+import { MaintenanceBanner } from "@/components/maintenance-banner";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="min-h-dvh bg-primary-50">
       <Sidebar />
       <div className="md:pl-64">
+        <MaintenanceBanner />
         <main className="pb-20 md:pb-0">
           {children}
         </main>
