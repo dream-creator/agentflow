@@ -131,9 +131,10 @@ describe("/terms page (source assertions)", () => {
 
   it("disclaims warranties with the standard 'as is' / 'as available' language", () => {
     // JSX convention in this project (see privacy/page.tsx line 37) uses &quot;
-    // in text content. React renders these to literal " in the DOM.
-    expect(source).toMatch(/AS IS/);
-    expect(source).toMatch(/AS AVAILABLE/);
+    // in text content. React renders these to literal " in the DOM. Sentence
+    // case is used throughout the document (no all-caps legal shouting).
+    expect(source).toMatch(/as is/i);
+    expect(source).toMatch(/as available/i);
   });
 
   it("disclaims indirect, incidental, special, or consequential damages", () => {
@@ -142,6 +143,31 @@ describe("/terms page (source assertions)", () => {
     expect(source).toMatch(/consequential/i);
     expect(source).toMatch(/lost commissions/i);
     expect(source).toMatch(/lost data/i);
+  });
+
+  it("uses sentence case throughout (no all-caps legal shouting)", () => {
+    // Regression check: the document is a uniform corporate tone, with
+    // sentence-case prose and inline <strong> labels for emphasis. None of
+    // the paragraphs should shout in all caps. Catches re-introduction of
+    // the "TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW" style.
+    const allCapsPhrases = [
+      "THE SERVICE IS PROVIDED",
+      "AS IS\" AND \"AS AVAILABLE",
+      "TO THE FULLEST EXTENT",
+      "WE DISCLAIM ALL WARRANTIES",
+      "MERCHANTABILITY, FITNESS FOR A PARTICULAR",
+      "WE DO NOT WARRANT",
+      "TO THE MAXIMUM EXTENT",
+      "AGENTFLOW AND ITS AFFILIATES",
+      "WILL NOT BE LIABLE",
+      "ANY INDIRECT, INCIDENTAL, SPECIAL",
+    ];
+    for (const phrase of allCapsPhrases) {
+      expect(
+        source,
+        `all-caps phrase re-introduced: "${phrase}"`
+      ).not.toContain(phrase);
+    }
   });
 
   it("states user can cancel / terminate anytime", () => {

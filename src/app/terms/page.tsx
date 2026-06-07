@@ -131,24 +131,24 @@ export default function TermsPage() {
             6. Disclaimer of Warranties
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            THE SERVICE IS PROVIDED ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS.
+            The service is provided on an &quot;as is&quot; and &quot;as available&quot; basis.
           </p>
           <p className="text-surface-600 leading-relaxed">
-            TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, WE DISCLAIM ALL
-            WARRANTIES, EXPRESS OR IMPLIED, INCLUDING THE IMPLIED WARRANTIES OF
-            MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-            NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE
-            UNINTERRUPTED, ERROR-FREE, OR SECURE.
+            To the fullest extent permitted by applicable law, we disclaim all
+            warranties, express or implied, including the implied warranties of
+            merchantability, fitness for a particular purpose, and
+            non-infringement. We do not warrant that the service will be
+            uninterrupted, error-free, or secure.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
             7. Limitation of Liability
           </h2>
           <p className="text-surface-600 leading-relaxed mb-3">
-            TO THE MAXIMUM EXTENT PERMITTED BY LAW, AGENTFLOW AND ITS
-            AFFILIATES, OFFICERS, EMPLOYEES, AGENTS, AND PARTNERS WILL NOT BE
-            LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
-            PUNITIVE DAMAGES.
+            To the maximum extent permitted by law, AgentFlow and its
+            affiliates, officers, employees, agents, and partners will not be
+            liable for any indirect, incidental, special, consequential, or
+            punitive damages.
           </p>
           <p className="text-surface-600 leading-relaxed">
             This includes, without limitation, damages for lost commissions,
