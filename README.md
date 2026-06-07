@@ -75,6 +75,28 @@ AgentFlow is designed with a security-first approach. User data is strictly isol
 
 ---
 
+## Documentation
+
+Comprehensive developer documentation lives in [`docs/`](./docs/README.md):
+
+- [**Architecture**](./docs/ARCHITECTURE.md) — high-level overview, stack, request lifecycle
+- [**Authentication**](./docs/AUTHENTICATION.md) — Supabase + middleware + Turnstile flow
+- [**Database**](./docs/DATABASE.md) — schema, RLS, plan enforcement, migrations
+- [**API Reference**](./docs/API-REFERENCE.md) — every route handler, error envelope, rate limiting
+- [**Components & Hooks**](./docs/COMPONENTS-AND-HOOKS.md) — UI primitive and hook catalog
+- [**Environment Variables**](./docs/ENVIRONMENT-VARIABLES.md) — full env matrix and per-runtime topology
+- [**Security**](./docs/SECURITY.md) — defense-in-depth, CSP, headers, captcha, secret rotation
+- [**Deployment**](./docs/DEPLOYMENT.md) — CI/CD, Vercel, Supabase, Stripe, Resend, Sentry
+- [**PWA**](./docs/PWA.md) — manifest, service worker, install prompt
+- [**Testing**](./docs/TESTING.md) — Vitest + Playwright patterns, auth fixture
+- [**Onboarding**](./docs/ONBOARDING.md) — first-time dev setup, common tasks, troubleshooting
+
+For new developers, start with [**Onboarding**](./docs/ONBOARDING.md). For the big picture, read [**Architecture**](./docs/ARCHITECTURE.md).
+
+A Mermaid-based runtime flow diagram is in [`docs/ARCHITECTURE-FLOW.md`](./docs/ARCHITECTURE-FLOW.md).
+
+---
+
 ## Support
 
 Have a question, found a bug, or want to request a feature?

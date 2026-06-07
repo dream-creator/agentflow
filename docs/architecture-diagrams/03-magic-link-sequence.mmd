@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant L as /login (client)
+    participant TW as TurnstileWidget
+    participant SB as Supabase Auth
+    participant EM as Email
+    participant CB as /auth/callback (route)
+    participant DB as Postgres
+
+    U->>L: enter email + click "Send magic link"
+    L->>TW: onSuccess(captchaToken)
+    L->>SB: signInWithOtp({ email, options: { captchaToken, emailRedirectTo: getAuthCallbackUrl() } })
+    SB-->>L: { data: {}, error: null }
+    L-->>U: "Check your email" toast
+
+    SB->>EM: send magic link
+    EM-->>U: email arrives
+    U->>CB: GET /auth/callback?code=XYZ
+
+    CB->>SB: exchangeCodeForSession(code)
+    SB->>DB: write session row + set cookies
+    SB-->>CB: { session }
+    CB-->>U: 302 -> /dashboard (or /leads if ?next=)
+
+    alt exchange fails
+        CB-->>U: 302 -> /login?error=auth_callback_failed
+        L->>L: humanizeAuthError() renders banner
+    end

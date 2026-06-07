@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    participant Cron as Vercel Cron
+    participant H as /api/cron/daily-digest
+    participant SB as Supabase
+    participant R as Resend
+    participant U as User mailbox
+
+    Cron->>H: GET /api/cron/daily-digest<br/>Authorization: Bearer $CRON_SECRET
+    H->>H: verify auth header == CRON_SECRET
+    H->>SB: SELECT user_id, full_name, next_action, next_action_date, profiles!inner(email, full_name) FROM leads WHERE is_active AND next_action_date <= today
+    SB-->>H: leads[]
+
+    H->>H: group by user_id -> { email, name, leads[] }
+    loop per user
+        H->>R: emails.send({ to, subject, html: digest template })
+        R-->>U: deliver email
+    end
+    H-->>Cron: { sent: N, failed: M }

@@ -1,0 +1,42 @@
+erDiagram
+    PROFILES ||--o{ LEADS : owns
+    PROFILES ||--o{ ACTIONS : owns
+    LEADS ||--o{ ACTIONS : "has actions"
+
+    PROFILES {
+        uuid id PK "= auth.uid()"
+        text email
+        text full_name
+        text plan "free|pro|team"
+        text stripe_customer_id
+        text stripe_subscription_id
+        text subscription_status
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    LEADS {
+        uuid id PK
+        uuid user_id FK
+        text full_name
+        text email
+        text phone
+        text source
+        text pipeline_stage "new|contacted|qualified|proposal|won|lost"
+        text next_action
+        date next_action_date
+        text notes
+        boolean is_active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    ACTIONS {
+        uuid id PK
+        uuid user_id FK
+        uuid lead_id FK
+        text type "call|email|meeting|note|task"
+        text description
+        timestamptz occurred_at
+        timestamptz created_at
+    }
