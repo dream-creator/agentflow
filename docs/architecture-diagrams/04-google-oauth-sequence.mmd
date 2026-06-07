@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant L as /login
+    participant SB as Supabase Auth
+    participant G as Google
+    participant CB as /auth/callback
+    participant DB as Postgres
+
+    U->>L: click "Continue with Google"
+    L->>SB: signInWithOAuth({ provider: "google", options: { captchaToken, redirectTo: getAuthCallbackUrl() } })
+    SB-->>L: { data: { url }, error: null }
+    L-->>U: 302 -> Supabase-hosted /auth/v1/authorize
+
+    U->>G: consent screen
+    G-->>SB: code + state
+    SB-->>CB: 302 -> /auth/callback?code=...
+
+    CB->>SB: exchangeCodeForSession(code)
+    SB->>DB: persist session
+    CB-->>U: 302 -> /dashboard

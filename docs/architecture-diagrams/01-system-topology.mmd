@@ -1,0 +1,15 @@
+flowchart LR
+    User([User -- browser])
+    CF[Cloudflare Turnstile]
+    Supabase[(Supabase<br/>Postgres + Auth)]
+    Stripe[Stripe]
+    Resend[Resend Email]
+    Vercel[Vercel<br/>hosting + cron]
+
+    User <-->|HTTPS| Vercel
+    Vercel -->|API routes| CF
+    Vercel <-->|cookies + RLS| Supabase
+    Vercel -->|Checkout Sessions| Stripe
+    Stripe -.->|webhook| Vercel
+    Vercel -->|daily cron GET| Resend
+    Resend -.->|digest email| User
