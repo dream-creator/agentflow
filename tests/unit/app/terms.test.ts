@@ -91,8 +91,30 @@ describe("/terms page (source assertions)", () => {
     expect(source).toMatch(/href="https:\/\/agent-flow\.app"[^>]*rel="noopener noreferrer"/);
   });
 
-  it("preserves the Governing Law placeholder for operator to fill in", () => {
-    expect(source).toContain("[Insert State/Country]");
+  it("specifies a USA governing jurisdiction (State of California, United States of America)", () => {
+    // Professional, standard SaaS terms-of-service phrasing for a US-based
+    // company. The full, formal country name is used (no abbreviations).
+    expect(source).toContain("State of California, United States of America");
+  });
+
+  it("includes a 'no conflict of laws' qualifier in §9", () => {
+    // Standard legal phrasing that prevents parties from invoking conflict-of-laws
+    // doctrines to escape the governing jurisdiction's rules.
+    expect(source).toMatch(/conflict of laws/i);
+  });
+
+  it("includes an exclusive-jurisdiction / venue clause in §9", () => {
+    // Professional SaaS terms typically assert that disputes must be brought
+    // in the courts of the governing state. Catches regressions where the
+    // venue clause is dropped during edits.
+    expect(source).toMatch(/jurisdiction|venue|courts located in/i);
+  });
+
+  it("does NOT contain the literal [Insert State/Country] placeholder anymore", () => {
+    // Regression check: once the operator fills in a real jurisdiction, the
+    // literal placeholder should be removed. A stray placeholder in production
+    // copy is a launch-blocker.
+    expect(source).not.toContain("[Insert State/Country]");
   });
 
   it("does NOT contain any of the removed old 9-section headings", () => {

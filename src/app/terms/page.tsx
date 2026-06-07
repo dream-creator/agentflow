@@ -174,10 +174,16 @@ export default function TermsPage() {
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
             9. Governing Law
           </h2>
-          <p className="text-surface-600 leading-relaxed">
+          <p className="text-surface-600 leading-relaxed mb-3">
             These Terms are governed by and construed in accordance with the
-            laws of <strong className="text-surface-800">[Insert State/Country]</strong>,
-            without regard to its conflict of law principles.
+            laws of the <strong className="text-surface-800">State of California, United States of America</strong>,
+            without regard to its conflict of laws principles.
+          </p>
+          <p className="text-surface-600 leading-relaxed">
+            You agree to submit to the exclusive jurisdiction of the state and
+            federal courts located in California for the resolution of any
+            dispute arising out of or relating to these Terms or your use of
+            the Service.
           </p>
 
           <h2 className="font-heading text-xl font-semibold text-surface-900 mt-10 mb-3">
