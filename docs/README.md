@@ -25,6 +25,14 @@ codebase-level reference for the project.
 | [PWA.md](./PWA.md) | `manifest.json`, service worker, install prompt, icon assets, off-screen Turnstile iframe |
 | [TESTING.md](./TESTING.md) | Vitest unit + Playwright e2e patterns, project setup, auth fixture, captcha bypass, Lighthouse CI |
 | [ONBOARDING.md](./ONBOARDING.md) | New-developer setup: install, env, dev workflow, common tasks, troubleshooting |
+| [FEATURE-FLAGS.md](./FEATURE-FLAGS.md) | Per-flag status, env-var matrix, how to add a new flag (operational reference) |
+
+### Architecture decision records
+
+When a decision is significant enough to shape future code, it lives in
+[`adr/`](./adr/). Each record captures the context, the decision, the
+alternatives considered, and the consequences. See
+[`adr/README.md`](./adr/README.md) for the conventions.
 
 ## Reading order
 
@@ -95,7 +103,9 @@ docs/
 ├── PWA.md
 ├── TESTING.md
 ├── ONBOARDING.md
+├── FEATURE-FLAGS.md
 ├── ARCHITECTURE-FLOW.md              (existing, Mermaid runtime flow)
+├── adr/                              (architecture decision records)
 └── architecture-diagrams/            (existing, rendered PNG/SVG)
 ```
 
