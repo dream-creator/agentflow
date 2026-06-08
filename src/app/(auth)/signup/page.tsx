@@ -73,20 +73,20 @@ export default function SignupPage() {
           </div>
 
           {/* Brand statement */}
-          <h2 className="text-[32px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-4">
+          <h2 className="text-[34px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-4">
             The only thing on your screen should be who to call today.
           </h2>
 
           {/* Supporting line */}
-          <p className="text-[15px] text-surface-500 leading-[1.6] mt-4">
+          <p className="text-[16px] text-surface-500 leading-[1.6] mt-4">
             AgentFlow removes everything a solo agent doesn&apos;t need.
           </p>
 
           {/* Three plain text lines */}
           <div className="mt-[36px]" style={{ gap: "10px", display: "flex", flexDirection: "column" }}>
-            <p className="text-[14px] text-surface-600">Open the app. See who to call.</p>
-            <p className="text-[14px] text-surface-600">Track every lead without the noise.</p>
-            <p className="text-[14px] text-surface-600">Set up in minutes, not hours.</p>
+            <p className="text-[15px] text-surface-600">Open the app. See who to call.</p>
+            <p className="text-[15px] text-surface-600">Track every lead without the noise.</p>
+            <p className="text-[15px] text-surface-600">Set up in minutes, not hours.</p>
           </div>
         </div>
       </div>
@@ -107,10 +107,10 @@ export default function SignupPage() {
       <div className="flex-1 flex flex-col justify-center items-center min-h-screen px-4 sm:px-6 py-12 lg:py-0 bg-surface">
         <div className="w-full max-w-sm">
           <div className="text-center mb-1.5">
-            <h1 className="font-heading text-2xl font-bold text-surface-900">
+            <h1 className="text-[26px] font-semibold text-surface-900 tracking-[-0.02em] leading-[1.2]">
               Create your account
             </h1>
-            <p className="text-surface-500 text-sm">
+            <p className="text-[15px] text-surface-500 mt-1.5">
               Start managing leads in 30 seconds
             </p>
           </div>

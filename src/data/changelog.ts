@@ -19,6 +19,23 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "login-signup-redesign",
+    date: "2026-06-08",
+    version: "0.20.0",
+    title: "Login & signup page redesign",
+    summary:
+      "A cleaner, more focused sign-in experience. The left panel is now a calm brand statement with centered typography, and the right panel is streamlined with better heading consistency.",
+    items: [
+      "Left panel redesigned with clean light background and centered content",
+      "New brand headline: 'The only thing on your screen should be who to call today.'",
+      "Supporting line and three feature lines for quick value communication",
+      "Trust badge removed from login right panel for a cleaner form",
+      "Headings ('Welcome back' / 'Create your account') centered on both pages",
+      "Font sizes bumped on left panel for better readability",
+      "Right panel heading sizes aligned between login and signup",
+    ],
+  },
+  {
     id: "shipping-status-bar",
     date: "2026-06-07",
     version: "0.19.0",
