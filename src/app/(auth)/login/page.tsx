@@ -355,20 +355,20 @@ function LoginContent() {
           </div>
 
           {/* Brand statement */}
-          <h2 className="text-[32px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-4">
+          <h2 className="text-[34px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-4">
             The only thing on your screen should be who to call today.
           </h2>
 
           {/* Supporting line */}
-          <p className="text-[15px] text-surface-500 leading-[1.6] mt-4">
+          <p className="text-[16px] text-surface-500 leading-[1.6] mt-4">
             AgentFlow removes everything a solo agent doesn&apos;t need.
           </p>
 
           {/* Three plain text lines */}
           <div className="mt-[36px]" style={{ gap: "10px", display: "flex", flexDirection: "column" }}>
-            <p className="text-[14px] text-surface-600">Open the app. See who to call.</p>
-            <p className="text-[14px] text-surface-600">Track every lead without the noise.</p>
-            <p className="text-[14px] text-surface-600">Set up in minutes, not hours.</p>
+            <p className="text-[15px] text-surface-600">Open the app. See who to call.</p>
+            <p className="text-[15px] text-surface-600">Track every lead without the noise.</p>
+            <p className="text-[15px] text-surface-600">Set up in minutes, not hours.</p>
           </div>
         </div>
       </div>
