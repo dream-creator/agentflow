@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { CaptchaStatusPill } from "@/components/auth/captcha-status-pill";
-import { Mail, Loader2, Home, CheckCircle2 } from "lucide-react";
+import { Mail, Loader2, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
@@ -58,44 +58,35 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left: Value Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-center px-12 xl:px-20">
-        <div className="max-w-md">
-          <Link href="/" className="inline-flex items-center gap-2.5 mb-12 group">
-            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center group-hover:bg-white/25 transition-colors">
-              <Home className="h-5 w-5 text-white" />
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-start px-16 xl:px-20">
+        <div className="w-full max-w-[420px]">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5" style={{ marginTop: "48px" }}>
+            <div className="w-6 h-6 flex items-center justify-center">
+              <Home className="w-6 h-6 text-primary" />
             </div>
-            <span className="font-heading text-xl font-bold text-white">
+            <span className="text-lg font-semibold text-surface-900 tracking-tight">
               AgentFlow
             </span>
-          </Link>
-          <h2 className="font-heading text-3xl font-bold text-white mb-6 leading-tight">
-            The CRM for agents who hate CRMs
-          </h2>
-          <p className="text-white/80 text-lg mb-10 leading-relaxed">
-            Start managing your leads in 30 seconds. No credit card required.
-          </p>
-          <div className="space-y-5">
-            {[
-              "10 free leads included",
-              "Set up in 3 minutes, not 3 hours",
-              "See who to call today — instantly",
-              "No credit card required",
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-primary-200 shrink-0" />
-                <span className="text-white/90 text-sm">{item}</span>
-              </div>
-            ))}
           </div>
-          <div className="mt-16 p-5 bg-white/10 rounded-xl border border-white/20">
-            <p className="text-sm text-white/90 italic">
-              &ldquo;I deleted my Follow Up Boss account after a week with AgentFlow. It&apos;s exactly what I needed.&rdquo;
-            </p>
-            <p className="text-xs text-white/65 mt-2">
-              — Solo agent, Austin TX
-            </p>
+
+          {/* Brand statement */}
+          <h2 className="text-[32px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-4">
+            The only thing on your screen should be who to call today.
+          </h2>
+
+          {/* Supporting line */}
+          <p className="text-[15px] text-surface-500 leading-[1.6] mt-4">
+            AgentFlow removes everything a solo agent doesn&apos;t need.
+          </p>
+
+          {/* Three plain text lines */}
+          <div className="mt-[36px]" style={{ gap: "10px", display: "flex", flexDirection: "column" }}>
+            <p className="text-[14px] text-surface-600">Open the app. See who to call.</p>
+            <p className="text-[14px] text-surface-600">Track every lead without the noise.</p>
+            <p className="text-[14px] text-surface-600">Set up in minutes, not hours.</p>
           </div>
         </div>
       </div>
@@ -113,14 +104,16 @@ export default function SignupPage() {
       </div>
 
       {/* Right: Signup Form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-12 lg:py-0 bg-surface">
+      <div className="flex-1 flex flex-col justify-center items-center min-h-screen px-4 sm:px-6 py-12 lg:py-0 bg-surface">
         <div className="w-full max-w-sm">
-          <h1 className="font-heading text-2xl font-bold text-surface-900 mb-2">
-            Create your account
-          </h1>
-          <p className="text-surface-500 text-sm mb-8">
-            Start managing leads in 30 seconds
-          </p>
+          <div className="text-center mb-1.5">
+            <h1 className="font-heading text-2xl font-bold text-surface-900">
+              Create your account
+            </h1>
+            <p className="text-surface-500 text-sm">
+              Start managing leads in 30 seconds
+            </p>
+          </div>
 
           <form onSubmit={handleSignup} className="relative space-y-3">
             <div>
