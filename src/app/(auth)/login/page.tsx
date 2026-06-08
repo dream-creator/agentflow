@@ -61,9 +61,9 @@ function suggestCorrection(email: string): string | null {
 function LoginSkeleton() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center px-16">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16">
         <div className="max-w-[420px]">
-          <div className="flex items-center gap-2.5" style={{ marginTop: "48px" }}>
+          <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 flex items-center justify-center">
               <Home className="w-6 h-6 text-primary" />
             </div>
@@ -342,10 +342,10 @@ function LoginContent() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* ─── Left Panel ─── */}
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-start px-16">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16">
         <div className="w-full max-w-[420px]">
           {/* Logo */}
-          <div className="flex items-center gap-2.5" style={{ marginTop: "48px" }}>
+          <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 flex items-center justify-center">
               <Home className="w-6 h-6 text-primary" />
             </div>
