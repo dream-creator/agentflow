@@ -14,8 +14,6 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  Shield,
-  Star,
   ArrowRight,
   Lock,
 } from "lucide-react";
@@ -59,141 +57,34 @@ function suggestCorrection(email: string): string | null {
   return null;
 }
 
-/* ── Product mockup SVG (dashboard preview) ──────────────── */
-function ProductMockup() {
-  return (
-    <div className="relative w-full max-w-[420px] mb-10 rounded-xl overflow-hidden border border-white/20">
-      <svg viewBox="0 0 420 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-        {/* Browser chrome */}
-        <rect width="420" height="260" rx="12" fill="white" fillOpacity="0.08" />
-        <rect x="0" y="0" width="420" height="32" rx="12" fill="white" fillOpacity="0.12" />
-        <circle cx="16" cy="16" r="5" fill="#FF605C" fillOpacity="0.8" />
-        <circle cx="32" cy="16" r="5" fill="#FFBD44" fillOpacity="0.8" />
-        <circle cx="48" cy="16" r="5" fill="#00CA4E" fillOpacity="0.8" />
-        <rect x="80" y="10" width="120" height="12" rx="6" fill="white" fillOpacity="0.15" />
-
-        {/* Sidebar */}
-        <rect x="0" y="32" width="72" height="228" fill="white" fillOpacity="0.06" />
-        <rect x="12" y="48" width="48" height="8" rx="4" fill="white" fillOpacity="0.18" />
-        <rect x="12" y="68" width="48" height="8" rx="4" fill="#0F766E" fillOpacity="0.6" />
-        <rect x="12" y="88" width="48" height="8" rx="4" fill="white" fillOpacity="0.12" />
-        <rect x="12" y="108" width="48" height="8" rx="4" fill="white" fillOpacity="0.12" />
-        <rect x="12" y="128" width="48" height="8" rx="4" fill="white" fillOpacity="0.12" />
-
-        {/* Stats cards row */}
-        <rect x="88" y="44" width="105" height="52" rx="8" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.15" strokeWidth="1" />
-        <rect x="96" y="52" width="36" height="6" rx="3" fill="#0F766E" fillOpacity="0.7" />
-        <rect x="96" y="64" width="60" height="12" rx="4" fill="white" fillOpacity="0.3" />
-        <rect x="96" y="82" width="28" height="5" rx="2.5" fill="#00CA4E" fillOpacity="0.5" />
-
-        <rect x="203" y="44" width="105" height="52" rx="8" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.15" strokeWidth="1" />
-        <rect x="211" y="52" width="36" height="6" rx="3" fill="#F97316" fillOpacity="0.7" />
-        <rect x="211" y="64" width="60" height="12" rx="4" fill="white" fillOpacity="0.3" />
-        <rect x="211" y="82" width="28" height="5" rx="2.5" fill="#00CA4E" fillOpacity="0.5" />
-
-        <rect x="318" y="44" width="90" height="52" rx="8" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.15" strokeWidth="1" />
-        <rect x="326" y="52" width="30" height="6" rx="3" fill="#0369A1" fillOpacity="0.7" />
-        <rect x="326" y="64" width="50" height="12" rx="4" fill="white" fillOpacity="0.3" />
-        <rect x="326" y="82" width="24" height="5" rx="2.5" fill="#00CA4E" fillOpacity="0.5" />
-
-        {/* Pipeline columns */}
-        <rect x="88" y="108" width="105" height="140" rx="8" fill="white" fillOpacity="0.06" stroke="white" strokeOpacity="0.1" strokeWidth="1" />
-        <rect x="96" y="116" width="40" height="6" rx="3" fill="white" fillOpacity="0.25" />
-        <rect x="96" y="132" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
-        <rect x="102" y="138" width="50" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
-        <rect x="102" y="147" width="30" height="4" rx="2" fill="white" fillOpacity="0.12" />
-        <rect x="96" y="164" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
-        <rect x="102" y="170" width="45" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
-        <rect x="102" y="179" width="35" height="4" rx="2" fill="white" fillOpacity="0.12" />
-        <rect x="96" y="196" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
-        <rect x="102" y="202" width="40" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
-        <rect x="102" y="211" width="25" height="4" rx="2" fill="white" fillOpacity="0.12" />
-
-        <rect x="203" y="108" width="105" height="140" rx="8" fill="white" fillOpacity="0.06" stroke="white" strokeOpacity="0.1" strokeWidth="1" />
-        <rect x="211" y="116" width="40" height="6" rx="3" fill="white" fillOpacity="0.25" />
-        <rect x="211" y="132" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
-        <rect x="217" y="138" width="50" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
-        <rect x="217" y="147" width="30" height="4" rx="2" fill="white" fillOpacity="0.12" />
-        <rect x="211" y="164" width="89" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
-        <rect x="217" y="170" width="45" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
-        <rect x="217" y="179" width="35" height="4" rx="2" fill="white" fillOpacity="0.12" />
-
-        <rect x="318" y="108" width="90" height="140" rx="8" fill="white" fillOpacity="0.06" stroke="white" strokeOpacity="0.1" strokeWidth="1" />
-        <rect x="326" y="116" width="40" height="6" rx="3" fill="white" fillOpacity="0.25" />
-        <rect x="326" y="132" width="74" height="24" rx="6" fill="white" fillOpacity="0.1" stroke="white" strokeOpacity="0.1" strokeWidth="0.5" />
-        <rect x="332" y="138" width="40" height="5" rx="2.5" fill="white" fillOpacity="0.2" />
-        <rect x="332" y="147" width="28" height="4" rx="2" fill="white" fillOpacity="0.12" />
-      </svg>
-    </div>
-  );
-}
-
-/* ── Stats bar ───────────────────────────────────────────── */
-const STATS = [
-  { value: "47+", label: "Agents" },
-  { value: "2.4K", label: "Leads managed" },
-  { value: "98%", label: "Uptime" },
-  { value: "3 min", label: "Setup time" },
-];
-
-function StatsBar() {
-  return (
-    <div className="grid grid-cols-4 gap-3 w-full max-w-[420px]">
-      {STATS.map((stat) => (
-        <div
-          key={stat.label}
-          className="text-center rounded-lg bg-white/10 border border-white/15 px-2 py-2.5"
-        >
-          <div className="text-[18px] font-bold text-white leading-tight">
-            {stat.value}
-          </div>
-          <div className="text-[11px] text-white/60 mt-0.5 leading-tight">
-            {stat.label}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ── Star rating ─────────────────────────────────────────── */
-function StarRating() {
-  return (
-    <div className="flex gap-0.5 mb-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          className="w-3.5 h-3.5 text-warning-500 fill-warning-500"
-        />
-      ))}
-    </div>
-  );
-}
-
 /* ── Loading skeleton ────────────────────────────────────── */
 function LoginSkeleton() {
   return (
-    <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
-      <div className="hidden lg:flex lg:w-[55%] bg-primary flex-col justify-center px-16">
-        <div className="max-w-[340px]">
-          <div className="flex items-center gap-2.5 mb-14">
-            <div className="w-7 h-7 flex items-center justify-center">
-              <Home className="w-7 h-7 text-white" />
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center px-16">
+        <div className="max-w-[420px]">
+          <div className="flex items-center gap-2.5" style={{ marginTop: "48px" }}>
+            <div className="w-6 h-6 flex items-center justify-center">
+              <Home className="w-6 h-6 text-primary" />
             </div>
-            <span className="text-xl font-semibold text-white tracking-tight">
+            <span className="text-lg font-semibold text-surface-900 tracking-tight">
               AgentFlow
             </span>
           </div>
-          <div className="h-8 w-[280px] bg-white/20 rounded-md mb-4 animate-pulse" />
-          <div className="h-4 w-[320px] bg-white/15 rounded mb-2 animate-pulse" />
-          <div className="h-4 w-[240px] bg-white/15 rounded mb-8 animate-pulse" />
+          <div className="h-8 w-[340px] bg-surface-200 rounded-md mt-4 mb-4 animate-pulse" />
+          <div className="h-4 w-[280px] bg-surface-200 rounded mt-4 mb-8 animate-pulse" />
+          <div className="flex flex-col" style={{ gap: "10px" }}>
+            <div className="h-4 w-[260px] bg-surface-200 rounded animate-pulse" />
+            <div className="h-4 w-[220px] bg-surface-200 rounded animate-pulse" />
+            <div className="h-4 w-[200px] bg-surface-200 rounded animate-pulse" />
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-6 py-12 lg:py-0 bg-surface">
-        <div className="w-full max-w-[380px] mx-auto">
-          <div className="h-7 w-[220px] bg-surface-100 rounded-md mb-2 animate-pulse" />
-          <div className="h-4 w-[180px] bg-surface-100 rounded mb-7 animate-pulse" />
+      <div className="flex-1 flex flex-col justify-center items-center min-h-screen px-6 py-12 lg:py-0 bg-surface">
+        <div className="w-full max-w-[380px] mx-auto text-center">
+          <div className="h-7 w-[220px] bg-surface-100 rounded-md mb-2 animate-pulse mx-auto" />
+          <div className="h-4 w-[180px] bg-surface-100 rounded mb-7 animate-pulse mx-auto" />
           <div className="h-11 w-full bg-surface-100 rounded-lg mb-3 animate-pulse" />
           <div className="h-11 w-full bg-surface-200 rounded-lg animate-pulse" />
         </div>
@@ -449,57 +340,35 @@ function LoginContent() {
   if (authLoading) return <LoginSkeleton />;
 
   return (
-    <div className="min-h-dvh lg:h-dvh flex flex-col lg:flex-row lg:overflow-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* ─── Left Panel ─── */}
-      <div className="hidden lg:flex lg:w-[55%] bg-primary flex-col justify-center items-center px-12">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-start px-16">
         <div className="w-full max-w-[420px]">
-          {/* Brand */}
-          <div className="flex items-center gap-2.5 mb-10">
-            <div className="w-7 h-7 flex items-center justify-center">
-              <Home className="w-7 h-7 text-white" />
+          {/* Logo */}
+          <div className="flex items-center gap-2.5" style={{ marginTop: "48px" }}>
+            <div className="w-6 h-6 flex items-center justify-center">
+              <Home className="w-6 h-6 text-primary" />
             </div>
-            <span className="text-xl font-semibold text-white tracking-tight">
+            <span className="text-lg font-semibold text-surface-900 tracking-tight">
               AgentFlow
             </span>
           </div>
 
-          {/* Headline */}
-          <h2 className="text-[32px] font-semibold text-white leading-[1.15] tracking-[-0.02em] mb-3">
-            Welcome back to your
-            <br />
-            daily follow-up tool
+          {/* Brand statement */}
+          <h2 className="text-[32px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-4">
+            The only thing on your screen should be who to call today.
           </h2>
-          <p className="text-[15px] text-white/70 leading-[1.6] mb-8 max-w-[340px]">
-            The only CRM designed for solo agents who want to close more deals
-            without the complexity.
+
+          {/* Supporting line */}
+          <p className="text-[15px] text-surface-500 leading-[1.6] mt-4">
+            AgentFlow removes everything a solo agent doesn&apos;t need.
           </p>
 
-          {/* Product mockup */}
-          <ProductMockup />
-
-          {/* Stats bar */}
-          <StatsBar />
-
-          {/* Testimonial */}
-          <div className="mt-10 bg-white/10 border border-white/20 rounded-xl p-5">
-            <StarRating />
-            <p className="text-[14px] text-white/90 italic leading-[1.5] mb-3">
-              &ldquo;I tried 4 CRMs. This is the only one I actually open every
-              day.&rdquo;
-            </p>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold text-white">
-                MT
-              </div>
-              <div>
-                <span className="text-[13px] font-medium text-white">
-                  Marcus T.
-                </span>
-                <span className="text-[12px] text-white/65 ml-1.5">
-                  · Solo agent, Austin TX
-                </span>
-              </div>
-            </div>
+          {/* Three plain text lines */}
+          <div className="mt-[36px]" style={{ gap: "10px", display: "flex", flexDirection: "column" }}>
+            <p className="text-[14px] text-surface-600">Open the app. See who to call.</p>
+            <p className="text-[14px] text-surface-600">Track every lead without the noise.</p>
+            <p className="text-[14px] text-surface-600">Set up in minutes, not hours.</p>
           </div>
         </div>
       </div>
@@ -519,7 +388,7 @@ function LoginContent() {
       {/* ─── Right Panel - Auth ─── */}
       <div
         role="main"
-        className="flex-1 flex flex-col justify-center items-center px-6 sm:px-12 py-12 lg:py-0 bg-surface"
+        className="flex-1 flex flex-col justify-center items-center min-h-screen px-6 sm:px-12 py-12 lg:py-0 bg-surface"
       >
         <div className="w-full max-w-[380px]">
           {/* ── Success states ── */}
@@ -582,16 +451,18 @@ function LoginContent() {
           ) : (
             <>
               {/* ── Header ── */}
-              <h1 className="text-[26px] font-semibold text-surface-900 tracking-[-0.02em] leading-[1.2] mb-1.5">
-                {activeView === "forgot-password"
-                  ? "Reset your password"
-                  : "Welcome back"}
-              </h1>
-              <p className="text-[15px] text-surface-500 mb-6">
-                {activeView === "forgot-password"
-                  ? "Enter your email and we'll send you a reset link."
-                  : "Sign in to your AgentFlow account"}
-              </p>
+              <div className="text-center mb-1.5">
+                <h1 className="text-[26px] font-semibold text-surface-900 tracking-[-0.02em] leading-[1.2]">
+                  {activeView === "forgot-password"
+                    ? "Reset your password"
+                    : "Welcome back"}
+                </h1>
+                <p className="text-[15px] text-surface-500 mt-1.5">
+                  {activeView === "forgot-password"
+                    ? "Enter your email and we'll send you a reset link."
+                    : "Sign in to your AgentFlow account"}
+                </p>
+              </div>
 
               {activeView === "forgot-password" && (
                 <button
@@ -982,12 +853,8 @@ function LoginContent() {
                     Sign in with password
                   </button>
 
-                  {/* Trust badge + sign up link, tightened to one block */}
-                  <div className="mt-6 pt-4 border-t border-surface-100 flex flex-col items-center gap-3">
-                    <div className="flex items-center justify-center gap-1.5 text-[12px] text-surface-500">
-                      <Shield className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>256-bit encryption · SOC 2 compliant</span>
-                    </div>
+                  {/* Sign up link */}
+                  <div className="mt-6 pt-4 border-t border-surface-100">
                     <p className="text-center text-[14px] text-surface-500">
                       Don&apos;t have an account?{" "}
                       <Link
