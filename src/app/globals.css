@@ -163,11 +163,45 @@
     animation: count-flash 0.4s ease-out;
   }
 
+  /* Feature card micro-animations */
+  @keyframes phone-fade-in {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes pipeline-slide {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+  }
+
+  @keyframes phone-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  .feature-card-hover:hover .feature-phone-action {
+    animation: phone-fade-in 0.2s ease-out forwards;
+  }
+
+  .feature-card-hover:hover .feature-pipeline-active {
+    animation: pipeline-slide 0.6s ease-in-out;
+  }
+
+  .feature-card-hover:hover .feature-phone-pulse {
+    animation: phone-pulse 1s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .stats-pulse-dot::before {
       animation: none !important;
     }
     .stats-flash {
+      animation: none !important;
+    }
+    .feature-card-hover:hover .feature-phone-action,
+    .feature-card-hover:hover .feature-pipeline-active,
+    .feature-card-hover:hover .feature-phone-pulse {
       animation: none !important;
     }
   }
