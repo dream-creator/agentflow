@@ -113,14 +113,15 @@ export const CHANGELOG: ChangelogEntry[] = [
   },
   {
     id: "pricing-update",
-    date: "2026-06-04",
-    title: "Pricing: Pro is now $5/month",
+    date: "2026-06-09",
+    title: "Pricing: Pro is now $8/month",
     summary:
-      "Lowered the Pro tier from $19 to $5/month and bumped the free tier from 1 lead to 10 active leads and 10 pipelines. Same features, lower price.",
+      "Pro tier updated from $5 to $8/month ($80/year, save 17%). The original $5 was a launch-intro price. With production-grade security (Cloudflare Turnstile), a redesigned UI, and priority support, AgentFlow delivers the same features as $69-100/mo competitors at a fraction of the cost.",
     items: [
-      "Existing Pro subscribers automatically pay the new price on next billing cycle",
-      "Free tier enforcement on the API, the database, and the client UI",
-      "Upgrade CTA on the toast that appears when you hit the free limit",
+      "Annual plan now $80/year (save 2 months vs monthly billing)",
+      "Still 88% cheaper than Follow Up Boss ($69/mo) and kvCORE ($100/mo)",
+      "Launch-intro pricing has ended — reflects the true cost of the product",
+      "Existing Pro subscribers keep their current rate until next billing cycle",
     ],
   },
   {

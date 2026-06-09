@@ -44,7 +44,7 @@ Passwordless sign-in via Magic Link or Google OAuth — no passwords to manage o
 | Plan | Price | Leads |
 |---|---|---|
 | **Free** | $0 / month | 10 active leads |
-| **Pro** | $5 / month | Unlimited leads, pipelines & custom branding |
+| **Pro** | $8 / month | Unlimited leads, pipelines & custom branding |
 
 [→ Get started at agent-flow.app](https://agent-flow.app)
 
