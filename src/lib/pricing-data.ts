@@ -27,8 +27,8 @@ export const pricingPlans: PricingPlan[] = [
   },
   {
     name: "Pro",
-    monthlyPrice: 5,
-    annualPrice: 50,
+    monthlyPrice: 8,
+    annualPrice: 80,
     description: "For serious solo agents",
     features: [
       "Unlimited leads",
