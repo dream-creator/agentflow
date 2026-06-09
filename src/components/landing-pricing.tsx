@@ -50,11 +50,15 @@ export function LandingPricing() {
                 : "bg-white border border-surface-200"
             }`}
           >
-            {plan.highlighted && (
-              <div className="text-xs font-semibold text-primary bg-primary-50 px-2.5 py-1 rounded-full inline-block mb-4">
-                Most popular
-              </div>
-            )}
+            <div className="mb-4">
+              {plan.highlighted ? (
+                <div className="text-xs font-semibold text-primary bg-primary-50 px-2.5 py-1 rounded-full inline-block">
+                  Most popular
+                </div>
+              ) : (
+                <div className="h-5" />
+              )}
+            </div>
             <h3 className="font-heading text-lg font-semibold text-surface-900 mb-1">
               {plan.name}
             </h3>

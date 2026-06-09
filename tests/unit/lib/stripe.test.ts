@@ -55,7 +55,7 @@ describe("Stripe Module", () => {
 
   it("exports STRIPE_CONFIG with correct values", async () => {
     const { STRIPE_CONFIG } = await import("@/lib/stripe");
-    expect(STRIPE_CONFIG.price).toBe(500);
+    expect(STRIPE_CONFIG.price).toBe(800);
     expect(STRIPE_CONFIG.currency).toBe("usd");
     expect(STRIPE_CONFIG.productName).toBe("AgentFlow Pro");
     expect(STRIPE_CONFIG.interval).toBe("month");

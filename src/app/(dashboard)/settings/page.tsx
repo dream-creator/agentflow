@@ -106,7 +106,7 @@ export default function SettingsPage() {
             {profile?.plan === "free" && (
               <div className="pt-2">
                 <Button className="w-full" onClick={() => router.push("/settings/billing")}>
-                  Upgrade to Pro — $5/mo
+                  Upgrade to Pro — $8/mo
                 </Button>
                 <p className="text-xs text-surface-500 text-center mt-2">
                   Unlimited leads, unlimited pipelines, custom branding
