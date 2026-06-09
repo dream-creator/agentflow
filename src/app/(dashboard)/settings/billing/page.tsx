@@ -84,7 +84,7 @@ function BillingContent() {
                 {plan === "pro" ? "Pro" : "Free"} Plan
               </span>
               <Badge variant={plan === "pro" ? "primary" : "default"}>
-                {plan === "pro" ? "$5/mo" : "$0/mo"}
+                {plan === "pro" ? "$8/mo" : "$0/mo"}
               </Badge>
             </div>
             {plan === "free" && (
@@ -112,7 +112,7 @@ function BillingContent() {
                   ) : (
                     <ExternalLink className="h-4 w-4 mr-2" />
                   )}
-                  Upgrade to Pro — $5/mo
+                  Upgrade to Pro — $8/mo
                 </Button>
                 {error && (
                   <p className="text-sm text-destructive mt-2 text-center">{error}</p>

@@ -14,12 +14,12 @@ describe("pricingPlans", () => {
     expect(free?.annualPrice).toBe(0);
   });
 
-  it("Pro plan has $5/mo and $50/yr", async () => {
+  it("Pro plan has $8/mo and $80/yr", async () => {
     const { pricingPlans } = await import("@/lib/pricing-data");
     const pro = pricingPlans.find((p) => p.name === "Pro");
     expect(pro).toBeDefined();
-    expect(pro?.monthlyPrice).toBe(5);
-    expect(pro?.annualPrice).toBe(50);
+    expect(pro?.monthlyPrice).toBe(8);
+    expect(pro?.annualPrice).toBe(80);
   });
 
   it("Pro plan is highlighted", async () => {
