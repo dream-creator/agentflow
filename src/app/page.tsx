@@ -36,7 +36,7 @@ import {
 export const metadata: Metadata = {
   title: "AgentFlow — The CRM for agents who hate CRMs",
   description:
-    "Dead-simple contact management and follow-up for solo real estate agents. No automations. No dashboards. Just who to call today.",
+    "Dead-simple contact management and follow-up for solo real estate agents. No bloat. No learning curve. Just who to call today.",
 };
 
 export default function LandingPage() {
@@ -58,7 +58,7 @@ export default function LandingPage() {
               </h1>
               <p className="text-lg sm:text-xl text-surface-500 mb-8 max-w-xl leading-relaxed">
                 Dead-simple contact management and follow-up for solo real estate
-                agents. No automations. No dashboards. Just who to call today.
+                agents. No bloat. No learning curve. Just who to call today.
               </p>
 
               {/* Dual CTA */}
