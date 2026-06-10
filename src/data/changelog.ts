@@ -19,6 +19,23 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "landing-page-polish",
+    date: "2026-06-10",
+    version: "0.21.0",
+    title: "Landing page polish and design consistency",
+    summary:
+      "The landing page gets a real integration showcase, a unified teal color system, and better visual hierarchy with subtle shadows. Small cleanup across the codebase for consistency.",
+    items: [
+      "Replaced StatsBar with Integration Ecosystem Grid showing real tools (Zillow, Realtor.com, Google Calendar, Phone & SMS, Email, MLS)",
+      "Unified button color: all CTAs now use teal instead of orange",
+      "Card border-radius standardized to 10px across all components",
+      "Added subtle shadows back to cards for better visual depth",
+      "Removed em-dashes from body copy for a more natural tone",
+      "Cleaned up dead CSS (unused CTA variables, unused button variant)",
+      "Scaled up integration grid cards for better readability",
+    ],
+  },
+  {
     id: "login-signup-redesign",
     date: "2026-06-08",
     version: "0.20.0",

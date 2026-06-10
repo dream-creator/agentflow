@@ -37,7 +37,7 @@ export default function ContactPage() {
           {/* Email Card */}
           <a
             href="mailto:support@agent-flow.app"
-            className="group block p-6 rounded-xl border border-surface-200 hover:border-primary hover:shadow-md transition-all"
+            className="group block p-6 rounded-card border border-surface-200 hover:border-primary hover:shadow-md transition-all"
           >
             <div className="w-12 h-12 rounded-lg bg-primary-50 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
               <Mail className="h-6 w-6" />
@@ -58,7 +58,7 @@ export default function ContactPage() {
             href="https://agent-flow.app"
             target="_blank"
             rel="noopener noreferrer"
-            className="group block p-6 rounded-xl border border-surface-200 hover:border-primary hover:shadow-md transition-all"
+            className="group block p-6 rounded-card border border-surface-200 hover:border-primary hover:shadow-md transition-all"
           >
             <div className="w-12 h-12 rounded-lg bg-primary-50 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
               <Globe className="h-6 w-6" />
@@ -76,7 +76,7 @@ export default function ContactPage() {
         </div>
 
         {/* Privacy Contact */}
-        <div className="mt-8 p-6 rounded-xl bg-surface-50 border border-surface-100">
+        <div className="mt-8 p-6 rounded-card bg-surface-50 border border-surface-100">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-lg bg-surface-100 text-surface-600 flex items-center justify-center shrink-0">
               <MessageSquare className="h-5 w-5" />
