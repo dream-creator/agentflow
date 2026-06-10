@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { CaptchaStatusPill } from "@/components/auth/captcha-status-pill";
+import { DotPattern } from "@/components/ui/dot-pattern";
 import {
   Mail,
   Home,
@@ -16,6 +17,7 @@ import {
   AlertCircle,
   ArrowRight,
   Lock,
+  Check,
 } from "lucide-react";
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
@@ -61,8 +63,14 @@ function suggestCorrection(email: string): string | null {
 function LoginSkeleton() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16">
-        <div className="max-w-[420px]">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16 relative overflow-hidden">
+        <DotPattern
+          className="text-surface-300"
+          cr={1}
+          width={24}
+          height={24}
+        />
+        <div className="max-w-[420px] relative z-10">
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 flex items-center justify-center">
               <Home className="w-6 h-6 text-primary" />
@@ -71,12 +79,21 @@ function LoginSkeleton() {
               AgentFlow
             </span>
           </div>
-          <div className="h-8 w-[340px] bg-surface-200 rounded-md mt-4 mb-4 animate-pulse" />
+          <div className="h-8 w-[340px] bg-surface-200 rounded-md mt-6 mb-4 animate-pulse" />
           <div className="h-4 w-[280px] bg-surface-200 rounded mt-4 mb-8 animate-pulse" />
-          <div className="flex flex-col" style={{ gap: "10px" }}>
-            <div className="h-4 w-[260px] bg-surface-200 rounded animate-pulse" />
-            <div className="h-4 w-[220px] bg-surface-200 rounded animate-pulse" />
-            <div className="h-4 w-[200px] bg-surface-200 rounded animate-pulse" />
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-4 h-4 rounded-full bg-surface-200 animate-pulse" />
+              <div className="h-4 w-[260px] bg-surface-200 rounded animate-pulse" />
+            </div>
+            <div className="flex items-center gap-2.5">
+              <div className="w-4 h-4 rounded-full bg-surface-200 animate-pulse" />
+              <div className="h-4 w-[220px] bg-surface-200 rounded animate-pulse" />
+            </div>
+            <div className="flex items-center gap-2.5">
+              <div className="w-4 h-4 rounded-full bg-surface-200 animate-pulse" />
+              <div className="h-4 w-[200px] bg-surface-200 rounded animate-pulse" />
+            </div>
           </div>
         </div>
       </div>
@@ -342,8 +359,14 @@ function LoginContent() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* ─── Left Panel ─── */}
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16">
-        <div className="w-full max-w-[420px]">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16 relative overflow-hidden">
+        <DotPattern
+          className="text-surface-300"
+          cr={1}
+          width={24}
+          height={24}
+        />
+        <div className="w-full max-w-[420px] relative z-10">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 flex items-center justify-center">
@@ -355,7 +378,7 @@ function LoginContent() {
           </div>
 
           {/* Brand statement */}
-          <h2 className="text-[34px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-4">
+          <h2 className="text-[34px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-6">
             The only thing on your screen should be who to call today.
           </h2>
 
@@ -364,11 +387,20 @@ function LoginContent() {
             AgentFlow removes everything a solo agent doesn&apos;t need.
           </p>
 
-          {/* Three plain text lines */}
-          <div className="mt-[36px]" style={{ gap: "10px", display: "flex", flexDirection: "column" }}>
-            <p className="text-[15px] text-surface-600">Open the app. See who to call.</p>
-            <p className="text-[15px] text-surface-600">Track every lead without the noise.</p>
-            <p className="text-[15px] text-surface-600">Set up in minutes, not hours.</p>
+          {/* Feature lines */}
+          <div className="flex flex-col gap-3 mt-8">
+            <div className="flex items-center gap-2.5">
+              <Check className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-[16px] text-surface-600">Open the app. See who to call.</p>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <Check className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-[16px] text-surface-600">Track every lead without the noise.</p>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <Check className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-[16px] text-surface-600">Set up in minutes, not hours.</p>
+            </div>
           </div>
         </div>
       </div>
