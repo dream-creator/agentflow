@@ -1,20 +1,48 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { fetchLeads } from "@/hooks/useLeads";
 import { LayoutDashboard, Users, UserPlus, Phone, Settings } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Today", icon: LayoutDashboard },
-  { href: "/pipeline", label: "Pipeline", icon: Users },
-  { href: "/leads/new", label: "Add Lead", icon: UserPlus },
-  { href: "/follow-ups", label: "Follow-ups", icon: Phone },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard", label: "Today", icon: LayoutDashboard, badge: "overdue" as const },
+  { href: "/pipeline", label: "Pipeline", icon: Users, badge: null },
+  { href: "/leads/new", label: "Add Lead", icon: UserPlus, badge: null },
+  { href: "/follow-ups", label: "Follow-ups", icon: Phone, badge: "followups" as const },
+  { href: "/settings", label: "Settings", icon: Settings, badge: null },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
+  const [overdueCount, setOverdueCount] = useState(0);
+  const [followUpCount, setFollowUpCount] = useState(0);
+
+  useEffect(() => {
+    async function loadCounts() {
+      const { data } = await fetchLeads();
+      if (data) {
+        const today = new Date().toISOString().split("T")[0];
+        const overdue = data.filter(
+          (l) => l.next_action_date && l.next_action_date < today
+        ).length;
+        const followups = data.filter(
+          (l) => l.next_action_date && l.next_action_date >= today
+        ).length;
+        setOverdueCount(overdue);
+        setFollowUpCount(followups);
+      }
+    }
+    loadCounts();
+  }, []);
+
+  function getBadgeCount(badge: "overdue" | "followups" | null): number | null {
+    if (badge === "overdue") return overdueCount > 0 ? overdueCount : null;
+    if (badge === "followups") return followUpCount > 0 ? followUpCount : null;
+    return null;
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-surface-200 safe-bottom z-40 md:hidden">
@@ -24,18 +52,33 @@ export function BottomNav() {
             item.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
+          const badgeCount = getBadgeCount(item.badge);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 w-16 h-14 min-h-touch rounded-lg transition-colors",
+                "flex flex-col items-center justify-center gap-0.5 w-16 h-14 min-h-touch rounded-lg transition-colors relative",
                 isActive
                   ? "text-primary"
                   : "text-surface-500 hover:text-surface-600"
               )}
             >
-              <item.icon className="h-5 w-5" />
+              <div className="relative">
+                <item.icon className="h-5 w-5" />
+                {badgeCount !== null && (
+                  <span
+                    className={cn(
+                      "absolute -top-1.5 -right-2 text-[9px] font-bold px-1 py-0.5 rounded-full min-w-[16px] text-center leading-none",
+                      item.badge === "overdue"
+                        ? "bg-destructive text-white"
+                        : "bg-primary-100 text-primary-700"
+                    )}
+                  >
+                    {badgeCount}
+                  </span>
+                )}
+              </div>
               <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
