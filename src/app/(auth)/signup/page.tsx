@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { CaptchaStatusPill } from "@/components/auth/captcha-status-pill";
-import { Mail, Loader2, Home } from "lucide-react";
+import { DotPattern } from "@/components/ui/dot-pattern";
+import { Mail, Loader2, Home, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
@@ -60,8 +61,14 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left: Value Panel */}
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16 xl:px-20">
-        <div className="w-full max-w-[420px]">
+      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16 xl:px-20 relative overflow-hidden">
+        <DotPattern
+          className="text-surface-300"
+          cr={1}
+          width={24}
+          height={24}
+        />
+        <div className="w-full max-w-[420px] relative z-10">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 flex items-center justify-center">
@@ -73,7 +80,7 @@ export default function SignupPage() {
           </div>
 
           {/* Brand statement */}
-          <h2 className="text-[34px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-4">
+          <h2 className="text-[34px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-6">
             The only thing on your screen should be who to call today.
           </h2>
 
@@ -82,11 +89,20 @@ export default function SignupPage() {
             AgentFlow removes everything a solo agent doesn&apos;t need.
           </p>
 
-          {/* Three plain text lines */}
-          <div className="mt-[36px]" style={{ gap: "10px", display: "flex", flexDirection: "column" }}>
-            <p className="text-[15px] text-surface-600">Open the app. See who to call.</p>
-            <p className="text-[15px] text-surface-600">Track every lead without the noise.</p>
-            <p className="text-[15px] text-surface-600">Set up in minutes, not hours.</p>
+          {/* Feature lines */}
+          <div className="flex flex-col gap-3 mt-8">
+            <div className="flex items-center gap-2.5">
+              <Check className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-[16px] text-surface-600">Open the app. See who to call.</p>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <Check className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-[16px] text-surface-600">Track every lead without the noise.</p>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <Check className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-[16px] text-surface-600">Set up in minutes, not hours.</p>
+            </div>
           </div>
         </div>
       </div>
