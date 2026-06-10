@@ -1,24 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Users, UserPlus, Phone, Settings } from "lucide-react";
+import { fetchLeads } from "@/hooks/useLeads";
+import {
+  LayoutDashboard,
+  Users,
+  UserPlus,
+  Phone,
+  Settings,
+  Calendar,
+  ExternalLink,
+} from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Today", icon: LayoutDashboard },
-  { href: "/pipeline", label: "Pipeline", icon: Users },
-  { href: "/leads/new", label: "Add Lead", icon: UserPlus },
-  { href: "/follow-ups", label: "Follow-ups", icon: Phone },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard", label: "Today", icon: LayoutDashboard, badge: "overdue" as const },
+  { href: "/pipeline", label: "Pipeline", icon: Users, badge: null },
+  { href: "/leads/new", label: "Add Lead", icon: UserPlus, badge: null },
+  { href: "/follow-ups", label: "Follow-ups", icon: Phone, badge: "followups" as const },
+  { href: "/settings", label: "Settings", icon: Settings, badge: null },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const [userName, setUserName] = useState("User");
   const [userPlan, setUserPlan] = useState("Free Plan");
+  const [overdueCount, setOverdueCount] = useState(0);
+  const [followUpCount, setFollowUpCount] = useState(0);
   const supabase = createClient();
 
   useEffect(() => {
@@ -39,8 +50,33 @@ export function Sidebar() {
     fetchProfile();
   }, [supabase]);
 
+  useEffect(() => {
+    async function loadCounts() {
+      const { data } = await fetchLeads();
+      if (data) {
+        const today = new Date().toISOString().split("T")[0];
+        const overdue = data.filter(
+          (l) => l.next_action_date && l.next_action_date < today
+        ).length;
+        const followups = data.filter(
+          (l) => l.next_action_date && l.next_action_date >= today
+        ).length;
+        setOverdueCount(overdue);
+        setFollowUpCount(followups);
+      }
+    }
+    loadCounts();
+  }, []);
+
+  function getBadgeCount(badge: "overdue" | "followups" | null): number | null {
+    if (badge === "overdue") return overdueCount > 0 ? overdueCount : null;
+    if (badge === "followups") return followUpCount > 0 ? followUpCount : null;
+    return null;
+  }
+
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-surface border-r border-surface-200">
+      {/* Logo */}
       <div className="flex items-center h-16 px-6 border-b border-surface-200">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
@@ -50,34 +86,66 @@ export function Sidebar() {
         </Link>
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
           const isActive =
             item.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
+          const badgeCount = getBadgeCount(item.badge);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-touch",
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all min-h-touch relative",
                 isActive
-                  ? "bg-primary-50 text-primary"
-                  : "text-surface-600 hover:bg-surface-50 hover:text-surface-900"
+                  ? "bg-primary-50 text-primary border-l-2 border-primary ml-0 pl-[10px]"
+                  : "text-surface-600 hover:bg-surface-50 hover:text-surface-900 border-l-2 border-transparent ml-0 pl-[10px]"
               )}
             >
-              <item.icon className="h-5 w-5" />
-              {item.label}
+              <item.icon className="h-5 w-5 shrink-0" />
+              <span className="flex-1">{item.label}</span>
+              {badgeCount !== null && (
+                <span
+                  className={cn(
+                    "text-xs font-semibold px-1.5 py-0.5 rounded-full min-w-[20px] text-center",
+                    item.badge === "overdue"
+                      ? "bg-destructive text-white"
+                      : "bg-primary-100 text-primary-700"
+                  )}
+                >
+                  {badgeCount}
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
 
+      {/* Google Calendar Link */}
+      <div className="px-3 pb-2">
+        <a
+          href="https://calendar.google.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-surface-600 hover:bg-surface-50 hover:text-surface-900 transition-colors min-h-touch"
+        >
+          <Calendar className="h-5 w-5 shrink-0" />
+          <span className="flex-1">Google Calendar</span>
+          <ExternalLink className="h-3.5 w-3.5 text-surface-400" />
+        </a>
+      </div>
+
+      {/* User Profile */}
       <div className="p-4 border-t border-surface-200">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-            <span className="text-primary-700 font-medium text-sm">
+        <Link
+          href="/settings"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-50 transition-colors"
+        >
+          <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
+            <span className="text-primary-700 font-semibold text-sm">
               {userName.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -85,7 +153,7 @@ export function Sidebar() {
             <p className="text-sm font-medium text-surface-900 truncate">{userName}</p>
             <p className="text-xs text-surface-500 truncate">{userPlan}</p>
           </div>
-        </div>
+        </Link>
       </div>
     </aside>
   );
