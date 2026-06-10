@@ -16,7 +16,7 @@ const AuthCallbackRescue = dynamic(
 );
 import { Footer } from "@/components/footer";
 import { LandingPricing } from "@/components/landing-pricing";
-import StatsBar from "@/components/landing/StatsBar";
+import IntegrationGrid from "@/components/landing/integration-grid";
 import {
   Phone,
   Users,
@@ -98,9 +98,9 @@ export default function LandingPage() {
 
             {/* Right: Product Mockup */}
             <div className="relative">
-              <div className="bg-surface-50 rounded-2xl border border-surface-200 p-1 shadow-elevated">
+              <div className="bg-surface-50 rounded-2xl border border-surface-200 p-1 shadow-xl">
                 {/* Browser chrome */}
-                <div className="bg-white rounded-xl overflow-hidden">
+                <div className="bg-white rounded-card overflow-hidden">
                   <div className="flex items-center gap-2 px-4 py-3 border-b border-surface-100">
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-surface-200" />
@@ -133,7 +133,7 @@ export default function LandingPage() {
                         { name: "Marcus Johnson", stage: "New Lead", time: "2:30 PM", color: "bg-accent" },
                         { name: "Emily Rodriguez", stage: "Offer", time: "4:00 PM", color: "bg-warning-500" },
                       ].map((contact, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-white rounded-xl border border-surface-100 hover:border-primary-200 transition-colors">
+                        <div key={i} className="flex items-center justify-between p-4 bg-white rounded-card border border-surface-100 hover:border-primary-200 transition-colors">
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-full ${contact.color} bg-opacity-10 flex items-center justify-center`}>
                               <span className={`text-sm font-semibold ${contact.color === "bg-primary" ? "text-primary" : contact.color === "bg-accent" ? "text-accent" : contact.color === "bg-warning-500" ? "text-warning-600" : "text-primary"}`}>
@@ -159,7 +159,7 @@ export default function LandingPage() {
               </div>
 
               {/* Floating badge */}
-                <div className="absolute -bottom-4 -left-4 bg-white rounded-xl border border-surface-200 px-4 py-3 flex items-center gap-3">
+                <div className="absolute -bottom-4 -left-4 bg-white rounded-card border border-surface-200 shadow-lg px-4 py-3 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-success-50 flex items-center justify-center">
                   <CheckCircle2 className="h-5 w-5 text-success" />
                 </div>
@@ -173,8 +173,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Animated Stats Bar */}
-      <StatsBar />
+      {/* Integration Ecosystem Grid */}
+      <IntegrationGrid />
 
       {/* Problem Section */}
       <section className="py-20 sm:py-24 px-4 sm:px-6">
@@ -196,7 +196,7 @@ export default function LandingPage() {
               {
                 icon: <UsersRound className="h-5 w-5" />,
                 title: "Built for teams",
-                desc: "Complex automations, lead routing, ISA management — none of which you need.",
+                desc: "Complex automations, lead routing, ISA management, none of which you need.",
               },
               {
                 icon: <Smartphone className="h-5 w-5" />,
