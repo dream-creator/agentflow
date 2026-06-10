@@ -401,8 +401,8 @@ function LoginContent() {
                 Check your email
               </h2>
               <p className="text-[15px] text-surface-500 leading-[1.6] mb-7 max-w-[320px] mx-auto">
-                We sent a magic link to {sentEmail}. Click the link to sign in
-                — it expires in 10 minutes.
+                We sent a magic link to {sentEmail}. Click the link to sign in.
+                It expires in 10 minutes.
               </p>
               <p className="text-[14px] text-surface-500">
                 Didn&apos;t get it?{" "}
@@ -635,7 +635,7 @@ function LoginContent() {
 
                   <p className="text-center text-[13px] text-surface-500 mt-2.5 flex items-center justify-center gap-1.5">
                     <Lock className="w-3 h-3" />
-                    No password required — instant sign-in
+                    No password required, instant sign-in
                   </p>
                 </form>
               )}

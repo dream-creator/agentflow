@@ -44,7 +44,7 @@ export function LandingPricing() {
         {pricingPlans.map((plan) => (
           <div
             key={plan.name}
-            className={`rounded-2xl p-6 sm:p-8 transition-all ${
+            className={`rounded-card p-6 sm:p-8 transition-all ${
               plan.highlighted
                 ? "bg-white border-2 border-primary shadow-elevated"
                 : "bg-white border border-surface-200"
@@ -72,7 +72,7 @@ export function LandingPricing() {
               </span>
               {annual && plan.annualPrice > 0 && (
                 <p className="text-xs text-surface-500 mt-1">
-                  Billed ${plan.annualPrice}/year — save 2 months
+                  Billed ${plan.annualPrice}/year, save 2 months
                 </p>
               )}
             </div>

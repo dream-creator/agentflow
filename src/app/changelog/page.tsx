@@ -71,7 +71,7 @@ export default function ChangelogPage() {
         )}
 
         {months.length === 0 && pinned.length === 0 ? (
-          <p className="text-surface-500">No releases yet — check back soon.</p>
+          <p className="text-surface-500">No releases yet, check back soon.</p>
         ) : (
           <div className="space-y-12">
             {months.map((group) => (
