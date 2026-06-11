@@ -19,7 +19,7 @@ function getResendClient(): Resend {
 }
 
 export const EMAIL_CONFIG = {
-  from: "AgentFlow <daily@agentflow.app>",
+  from: "AgentFlow <hello@agent-flow.app>",
   appName: "AgentFlow",
   appUrl: process.env.NEXT_PUBLIC_APP_URL,
 };
