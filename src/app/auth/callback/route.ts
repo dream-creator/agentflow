@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { sendWelcomeEmail } from "@/lib/resend";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -30,6 +31,28 @@ export async function GET(request: Request) {
       const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       if (!exchangeError) {
         console.log("[auth/callback] Exchange success, redirecting to:", next);
+
+        // Fire-and-forget: send welcome email to new users (profile created in last 5 min)
+        if (data.user) {
+          const userId = data.user.id;
+          const userEmail = data.user.email;
+          const userCreated = new Date(data.user.created_at);
+          const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+          if (userEmail && userCreated > fiveMinAgo) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("id", userId)
+              .single();
+
+            const name = profile?.full_name || userEmail.split("@")[0];
+            sendWelcomeEmail(userEmail, name).catch((err) =>
+              console.error("[auth/callback] Welcome email failed:", err)
+            );
+          }
+        }
+
         const redirectUrl = next.startsWith("/") && !next.startsWith("//") ? next : "/";
         return NextResponse.redirect(`${origin}${redirectUrl}`);
       }
