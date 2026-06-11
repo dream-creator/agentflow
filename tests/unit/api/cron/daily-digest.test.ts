@@ -5,8 +5,8 @@ const { mockFrom, mockSendDailyDigest } = vi.hoisted(() => ({
   mockSendDailyDigest: vi.fn(),
 }));
 
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(() => ({ from: mockFrom })),
+vi.mock("@/lib/supabase/service", () => ({
+  createServiceClient: vi.fn(() => ({ from: mockFrom })),
 }));
 
 vi.mock("@/lib/resend", () => ({
