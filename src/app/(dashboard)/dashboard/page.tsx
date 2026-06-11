@@ -27,6 +27,14 @@ import type { Database } from "@/types";
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
 
+const STAGES = [
+  { key: "new_lead", label: "New", color: "bg-primary" },
+  { key: "contacted", label: "Contacted", color: "bg-accent" },
+  { key: "showing", label: "Showing", color: "bg-warning-500" },
+  { key: "offer", label: "Offer", color: "bg-surface-400" },
+  { key: "closed_won", label: "Won", color: "bg-success" },
+] as const;
+
 function getGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
@@ -85,6 +93,20 @@ export default function DashboardPage() {
     };
   }, [leads]);
 
+  const stageCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const stage of STAGES) {
+      counts[stage.key] = leads.filter(
+        (l) => l.pipeline_stage === stage.key
+      ).length;
+    }
+    return counts;
+  }, [leads]);
+
+  const maxStageCount = useMemo(() => {
+    return Math.max(...Object.values(stageCounts), 1);
+  }, [stageCounts]);
+
   if (loading) {
     return (
       <div className="p-4 md:p-8 space-y-6">
@@ -139,6 +161,43 @@ export default function DashboardPage() {
           href="/pipeline"
         />
       </div>
+
+      {/* Pipeline Snapshot */}
+      <Card className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-heading text-sm font-semibold text-surface-900">
+            Pipeline Snapshot
+          </h2>
+          <Link
+            href="/pipeline"
+            className="text-xs text-primary hover:text-primary-700 font-medium flex items-center gap-1"
+          >
+            View all <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+        <div className="space-y-3">
+          {STAGES.map((stage) => {
+            const count = stageCounts[stage.key] || 0;
+            const pct = maxStageCount > 0 ? (count / maxStageCount) * 100 : 0;
+            return (
+              <div key={stage.key} className="flex items-center gap-3">
+                <span className="text-xs text-surface-500 w-20 truncate">
+                  {stage.label}
+                </span>
+                <div className="flex-1 h-2 bg-surface-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${stage.color} transition-all duration-500`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <span className="text-xs font-medium text-surface-700 w-8 text-right">
+                  {count}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">

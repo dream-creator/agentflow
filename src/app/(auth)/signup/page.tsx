@@ -31,21 +31,19 @@ export default function SignupPage() {
     setLoading(true);
     setMessage("");
 
-    try {
-      const res = await fetch("/api/auth/magic-link", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, fullName, captchaToken }),
-      });
-      const data = await res.json();
+    const { error } = await getSupabase().auth.signInWithOtp({
+      email,
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: getOAuthRedirectTo(),
+        captchaToken,
+      },
+    });
 
-      if (!res.ok) {
-        setMessage(data.error || "Failed to send magic link. Please try again.");
-      } else {
-        setMessage("Check your email for the login link!");
-      }
-    } catch {
-      setMessage("Network error. Please check your connection and try again.");
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setMessage("Check your email for the login link!");
     }
     setLoading(false);
   };
