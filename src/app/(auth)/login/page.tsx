@@ -246,17 +246,23 @@ function LoginContent() {
     if (!validateEmail(email, true)) return;
     setMagicLinkLoading(true);
 
-    const { error } = await getSupabase().auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: getOAuthRedirectTo(), captchaToken },
-    });
+    try {
+      const res = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, captchaToken }),
+      });
+      const data = await res.json();
 
-    if (error) {
-      setAuthError(error.message);
-    } else {
-      setMagicLinkSent(true);
-      setSentEmail(email);
-      setResendCooldown(30);
+      if (!res.ok) {
+        setAuthError(data.error || "Failed to send magic link. Please try again.");
+      } else {
+        setMagicLinkSent(true);
+        setSentEmail(email);
+        setResendCooldown(30);
+      }
+    } catch {
+      setAuthError("Network error. Please check your connection and try again.");
     }
     setMagicLinkLoading(false);
   };
@@ -322,12 +328,17 @@ function LoginContent() {
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     setMagicLinkLoading(true);
-    const { error } = await getSupabase().auth.signInWithOtp({
-      email: sentEmail,
-      options: { emailRedirectTo: getOAuthRedirectTo(), captchaToken },
-    });
-    if (!error) {
-      setResendCooldown(30);
+    try {
+      const res = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: sentEmail, captchaToken }),
+      });
+      if (res.ok) {
+        setResendCooldown(30);
+      }
+    } catch {
+      // Silently fail on resend — user can try again
     }
     setMagicLinkLoading(false);
   };
