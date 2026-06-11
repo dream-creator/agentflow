@@ -19,7 +19,7 @@ describe("Resend Module", () => {
 
   it("exports EMAIL_CONFIG with correct values", async () => {
     const { EMAIL_CONFIG } = await import("@/lib/resend");
-    expect(EMAIL_CONFIG.from).toBe("AgentFlow <hello@agent-flow.app>");
+    expect(EMAIL_CONFIG.from).toBe("AgentFlow <daily@agentflow.app>");
     expect(EMAIL_CONFIG.appName).toBe("AgentFlow");
   });
 
