@@ -42,6 +42,7 @@ export default function ImportPage() {
     email: "",
     phone: "",
   });
+  const [detectedFields, setDetectedFields] = useState<{ name: string; email: string; phone: string }>({ name: "", email: "", phone: "" });
   const [step, setStep] = useState<"upload" | "map" | "review" | "done">("upload");
   const [loading, setLoading] = useState(false);
   const [imported, setImported] = useState(0);
@@ -115,10 +116,20 @@ export default function ImportPage() {
             ["first name", "first_name", "firstname"].includes(h)
           )] : null;
 
+          const detectedName = nameCol || lastNameCol || originalHeaders[0] || "";
+          const detectedEmail = emailCol || "";
+          const detectedPhone = phoneCol || "";
+
           setColumnMapping({
-            name: nameCol || lastNameCol || originalHeaders[0] || "",
-            email: emailCol || "",
-            phone: phoneCol || "",
+            name: detectedName,
+            email: detectedEmail,
+            phone: detectedPhone,
+          });
+
+          setDetectedFields({
+            name: detectedName,
+            email: detectedEmail,
+            phone: detectedPhone,
           });
 
           setParsedLeads(
@@ -140,7 +151,9 @@ export default function ImportPage() {
             })
           );
 
-          setStep("map");
+          const hasConfidentDetection = nameCol || (lastNameCol && firstNameCol);
+
+          setStep(hasConfidentDetection ? "review" : "map");
         },
       });
     };
@@ -388,6 +401,78 @@ export default function ImportPage() {
           <div className="flex gap-3 mt-6">
             <Button variant="secondary" onClick={() => setStep("upload")} className="flex-1">
               Back
+            </Button>
+            <Button
+              onClick={handleImport}
+              disabled={!columnMapping.name}
+              loading={loading}
+              className="flex-1"
+            >
+              Import {parsedLeads.length} leads
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {/* Review Step — auto-detected columns, skip mapping */}
+      {step === "review" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Ready to Import
+            </CardTitle>
+          </CardHeader>
+          <p className="text-sm text-surface-500 mb-4">
+            Found {parsedLeads.length} leads. Columns auto-detected:
+          </p>
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium text-surface-700 w-16">Name:</span>
+              <span className="text-primary">{detectedFields.name}</span>
+            </div>
+            {detectedFields.email && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium text-surface-700 w-16">Email:</span>
+                <span className="text-primary">{detectedFields.email}</span>
+              </div>
+            )}
+            {detectedFields.phone && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium text-surface-700 w-16">Phone:</span>
+                <span className="text-primary">{detectedFields.phone}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Preview */}
+          <div className="mt-4">
+            <h3 className="text-sm font-medium text-surface-700 mb-2">Preview (first 3 rows)</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-surface-200">
+                    <th className="text-left py-2 text-surface-500">Name</th>
+                    {detectedFields.email && <th className="text-left py-2 text-surface-500">Email</th>}
+                    {detectedFields.phone && <th className="text-left py-2 text-surface-500">Phone</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {parsedLeads.slice(0, 3).map((lead, i) => (
+                    <tr key={i} className="border-b border-surface-100">
+                      <td className="py-2">{lead.full_name}</td>
+                      {detectedFields.email && <td className="py-2 text-surface-500">{lead.email || "-"}</td>}
+                      {detectedFields.phone && <td className="py-2 text-surface-500">{lead.phone || "-"}</td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <Button variant="secondary" onClick={() => setStep("map")} className="flex-1">
+              Change mapping
             </Button>
             <Button
               onClick={handleImport}
