@@ -5,20 +5,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { fetchLeads } from "@/hooks/useLeads";
-import { LayoutDashboard, Users, UserPlus, Phone, Settings } from "lucide-react";
+import { LayoutDashboard, Users, UserPlus, Contact, Settings } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Today", icon: LayoutDashboard, badge: "overdue" as const },
+  { href: "/leads", label: "Leads", icon: Contact, badge: null },
   { href: "/pipeline", label: "Pipeline", icon: Users, badge: null },
   { href: "/leads/new", label: "Add Lead", icon: UserPlus, badge: null },
-  { href: "/follow-ups", label: "Follow-ups", icon: Phone, badge: "followups" as const },
   { href: "/settings", label: "Settings", icon: Settings, badge: null },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
   const [overdueCount, setOverdueCount] = useState(0);
-  const [followUpCount, setFollowUpCount] = useState(0);
 
   useEffect(() => {
     async function loadCounts() {
@@ -28,19 +27,14 @@ export function BottomNav() {
         const overdue = data.filter(
           (l) => l.next_action_date && l.next_action_date < today
         ).length;
-        const followups = data.filter(
-          (l) => l.next_action_date && l.next_action_date >= today
-        ).length;
         setOverdueCount(overdue);
-        setFollowUpCount(followups);
       }
     }
     loadCounts();
   }, []);
 
-  function getBadgeCount(badge: "overdue" | "followups" | null): number | null {
+  function getBadgeCount(badge: "overdue" | null): number | null {
     if (badge === "overdue") return overdueCount > 0 ? overdueCount : null;
-    if (badge === "followups") return followUpCount > 0 ? followUpCount : null;
     return null;
   }
 
