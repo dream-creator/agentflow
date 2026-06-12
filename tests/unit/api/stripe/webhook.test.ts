@@ -9,6 +9,10 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(() => ({ from: mockFrom })),
 }));
 
+vi.mock("@/lib/supabase/service", () => ({
+  createServiceClient: vi.fn(() => ({ from: mockFrom })),
+}));
+
 vi.mock("stripe", () => {
   return {
     default: vi.fn(function MockStripe(this: Record<string, unknown>) {

@@ -9,12 +9,29 @@ import { showToast } from "@/components/ui/toast";
 import { checkPlanLimit } from "@/lib/plan-limit";
 import { ArrowLeft, Upload, FileText, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import Papa from "papaparse";
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_ROWS = 1000;
 
 interface ParsedLead {
   full_name: string;
   email: string | null;
   phone: string | null;
   source: string;
+}
+
+function sanitizeCSVValue(value: string): string {
+  if (!value) return value;
+  if (/^[=+\-@\t\r]/.test(value)) {
+    return "'" + value;
+  }
+  return value;
+}
+
+function isBinaryContent(text: string): boolean {
+  const nullCount = (text.match(/\0/g) || []).length;
+  return nullCount > 0 || text.length > 0 && nullCount / text.length > 0.01;
 }
 
 export default function ImportPage() {
@@ -37,53 +54,71 @@ export default function ImportPage() {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      setErrors([`File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`]);
+      return;
+    }
+
     setFile(selectedFile);
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
-      const lines = text.split("\n").filter((l) => l.trim());
-      if (lines.length < 2) {
-        setErrors(["CSV file is empty or has no data rows"]);
+
+      if (isBinaryContent(text)) {
+        setErrors(["File appears to be binary, not a CSV. Please upload a valid CSV file."]);
         return;
       }
 
-      const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
-      const rows = lines.slice(1).map((line) => {
-        const values = line.split(",").map((v) => v.trim());
-        const row: Record<string, string> = {};
-        headers.forEach((h, i) => {
-          row[h] = values[i] || "";
-        });
-        return row;
+      Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          if (results.errors.length > 0) {
+            setErrors([`CSV parsing error: ${results.errors[0].message}`]);
+            return;
+          }
+
+          const data = results.data as Record<string, string>[];
+          if (data.length === 0) {
+            setErrors(["CSV file is empty or has no data rows"]);
+            return;
+          }
+
+          if (data.length > MAX_ROWS) {
+            setErrors([`File too large. Maximum ${MAX_ROWS} rows allowed. Found ${data.length} rows.`]);
+            return;
+          }
+
+          const headers = Object.keys(data[0]).map((h) => h.trim().toLowerCase());
+
+          const nameCol = headers.find((h) =>
+            ["name", "full_name", "fullname", "contact", "lead"].includes(h)
+          );
+          const emailCol = headers.find((h) =>
+            ["email", "email_address", "emailaddress"].includes(h)
+          );
+          const phoneCol = headers.find((h) =>
+            ["phone", "phone_number", "phonenumber", "mobile", "cell"].includes(h)
+          );
+
+          setColumnMapping({
+            name: nameCol || headers[0] || "",
+            email: emailCol || "",
+            phone: phoneCol || "",
+          });
+
+          setParsedLeads(
+            data.map((row) => ({
+              full_name: sanitizeCSVValue(nameCol ? row[nameCol] || "" : ""),
+              email: emailCol ? sanitizeCSVValue(row[emailCol] || "") || null : null,
+              phone: phoneCol ? sanitizeCSVValue(row[phoneCol] || "") || null : null,
+              source: "csv_import",
+            }))
+          );
+
+          setStep("map");
+        },
       });
-
-      // Auto-detect columns
-      const nameCol = headers.find((h) =>
-        ["name", "full_name", "fullname", "contact", "lead"].includes(h)
-      );
-      const emailCol = headers.find((h) =>
-        ["email", "email_address", "emailaddress"].includes(h)
-      );
-      const phoneCol = headers.find((h) =>
-        ["phone", "phone_number", "phonenumber", "mobile", "cell"].includes(h)
-      );
-
-      setColumnMapping({
-        name: nameCol || headers[0] || "",
-        email: emailCol || "",
-        phone: phoneCol || "",
-      });
-
-      setParsedLeads(
-        rows.map((row) => ({
-          full_name: nameCol ? row[nameCol] : "",
-          email: emailCol ? row[emailCol] || null : null,
-          phone: phoneCol ? row[phoneCol] || null : null,
-          source: "csv_import",
-        }))
-      );
-
-      setStep("map");
     };
     reader.readAsText(selectedFile);
   }
@@ -102,7 +137,6 @@ export default function ImportPage() {
       return;
     }
 
-    // Check plan limit before importing
     const limit = await checkPlanLimit();
     if (!limit.allowed) {
       showToast(
@@ -114,7 +148,6 @@ export default function ImportPage() {
       return;
     }
 
-    // Warn if import would exceed limit
     const remaining = limit.maxAllowed - limit.currentCount;
     if (parsedLeads.length > remaining) {
       showToast(
@@ -133,7 +166,6 @@ export default function ImportPage() {
         continue;
       }
 
-      // Stop importing if limit reached
       if (successCount >= remaining) {
         newErrors.push(`Skipped "${lead.full_name}": free plan limit reached`);
         continue;
@@ -211,14 +243,24 @@ export default function ImportPage() {
             <p className="text-sm text-surface-500">
               Or drag and drop your file here
             </p>
+            <p className="text-xs text-surface-400 mt-2">
+              Max {MAX_FILE_SIZE / 1024 / 1024}MB, {MAX_ROWS} rows
+            </p>
           </div>
           <input
             ref={fileRef}
             type="file"
-            accept=".csv"
+            accept=".csv,text/csv"
             onChange={handleFileSelect}
             className="hidden"
           />
+          {errors.length > 0 && (
+            <div className="p-3 mx-4 mb-4 rounded-lg bg-destructive-50 text-destructive text-sm">
+              {errors.map((err, i) => (
+                <p key={i}>{err}</p>
+              ))}
+            </div>
+          )}
         </Card>
       )}
 
