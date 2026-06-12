@@ -15,7 +15,6 @@ export async function GET(request: Request) {
     hasRedirect: !!searchParams.get("redirect"),
     error,
     errorDescription,
-    url: request.url,
   });
 
   if (error) {

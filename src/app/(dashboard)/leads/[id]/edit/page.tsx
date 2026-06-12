@@ -91,6 +91,13 @@ export default function EditLeadPage() {
     setSaving(true);
     setError("");
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError("Not authenticated");
+      setSaving(false);
+      return;
+    }
+
     const { error: updateError } = await supabase
       .from("leads")
       .update({
@@ -104,7 +111,8 @@ export default function EditLeadPage() {
         notes: notes || null,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", params.id as string);
+      .eq("id", params.id as string)
+      .eq("user_id", user.id);
 
     if (updateError) {
       setError(updateError.message);

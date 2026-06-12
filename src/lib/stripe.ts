@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 let _stripe: Stripe | null = null;
 
@@ -99,7 +100,7 @@ export async function handleCheckoutCompleted(
   const userId = session.metadata?.user_id;
   if (!userId) return;
 
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   await supabase
     .from("profiles")
     .update({
@@ -114,7 +115,7 @@ export async function handleCheckoutCompleted(
 export async function handleSubscriptionDeleted(
   subscription: Stripe.Subscription
 ): Promise<void> {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -139,7 +140,7 @@ export async function handlePaymentFailed(
   invoice: Stripe.Invoice
 ): Promise<void> {
   const customerId = invoice.customer as string;
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   const { data: profile } = await supabase
     .from("profiles")

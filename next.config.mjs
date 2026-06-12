@@ -3,7 +3,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://browser.sentry-cdn.com https://challenges.cloudflare.com",
+      "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://browser.sentry-cdn.com https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' https://challenges.cloudflare.com",
@@ -29,8 +29,8 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), payment=()",
   },
-  { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
-  { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
 ];
 
 const nextConfig = {
