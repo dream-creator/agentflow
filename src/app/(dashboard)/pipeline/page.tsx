@@ -7,34 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
+import { PipelineBoard } from "@/components/pipeline/pipeline-board";
 import type { Database } from "@/types";
-
-// DnD DropResult shape — avoids importing @hello-pangea/dnd in this file
-// which would pull the 191KB library into the webpack chunk graph for auth pages
-interface DropResult {
-  draggableId: string;
-  type: string;
-  source: { index: number; droppableId: string };
-  destination: { index: number; droppableId: string } | null;
-}
-
-const DndBoard = dynamic(
-  () => import("@/components/pipeline/dnd-board").then((mod) => mod.DndBoard),
-  {
-    loading: () => (
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="flex-shrink-0 w-72">
-            <Skeleton className="h-6 w-24 mb-3" />
-            <Skeleton className="h-64 w-full" />
-          </div>
-        ))}
-      </div>
-    ),
-    ssr: false,
-  }
-);
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
 
@@ -53,40 +27,29 @@ export default function PipelinePage() {
     loadLeads();
   }, []);
 
-  const onDragEnd = useCallback(
-    async (result: DropResult) => {
-      const { destination, source, draggableId } = result;
-
-      if (!destination) return;
-      if (
-        destination.droppableId === source.droppableId &&
-        destination.index === source.index
-      )
-        return;
-
-      const newStage = destination.droppableId as Lead["pipeline_stage"];
-      const lead = leads.find((l) => l.id === draggableId);
-
+  const onStageChange = useCallback(
+    async (leadId: string, newStage: string) => {
+      const lead = leads.find((l) => l.id === leadId);
       if (!lead || lead.pipeline_stage === newStage) return;
 
-      setUpdating(draggableId);
+      setUpdating(leadId);
 
       setLeads((prev) =>
         prev.map((l) =>
-          l.id === draggableId
-            ? { ...l, pipeline_stage: newStage }
+          l.id === leadId
+            ? { ...l, pipeline_stage: newStage as Lead["pipeline_stage"] }
             : l
         )
       );
 
-      const { error } = await updateLead(draggableId, {
-        pipeline_stage: newStage,
+      const { error } = await updateLead(leadId, {
+        pipeline_stage: newStage as Lead["pipeline_stage"],
       });
 
       if (error) {
         setLeads((prev) =>
           prev.map((l) =>
-            l.id === draggableId
+            l.id === leadId
               ? { ...l, pipeline_stage: lead.pipeline_stage }
               : l
           )
@@ -102,9 +65,9 @@ export default function PipelinePage() {
     return (
       <div className="p-4 md:p-8">
         <Skeleton className="h-8 w-48 mb-6" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-64 w-full" />
+            <Skeleton key={i} className="h-16 w-full" />
           ))}
         </div>
       </div>
@@ -142,10 +105,10 @@ export default function PipelinePage() {
           }
         />
       ) : (
-        <DndBoard
+        <PipelineBoard
           leads={leads}
           updating={updating}
-          onDragEnd={onDragEnd}
+          onStageChange={onStageChange}
         />
       )}
     </div>
