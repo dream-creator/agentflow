@@ -89,25 +89,34 @@ export default function ImportPage() {
             return;
           }
 
-          const headers = Object.keys(data[0]).map((h) => h.trim().toLowerCase());
+          const originalHeaders = Object.keys(data[0]);
+          const headers = originalHeaders.map((h) => h.trim().toLowerCase());
 
-          const nameCol = headers.find((h) =>
+          const nameIdx = headers.findIndex((h) =>
             ["name", "full_name", "fullname", "contact", "lead", "first name", "first_name", "firstname"].includes(h)
           );
-          const lastNameCol = headers.find((h) =>
+          const lastNameIdx = headers.findIndex((h) =>
             ["last name", "last_name", "lastname", "surname"].includes(h)
           );
-          const emailCol = headers.find((h) =>
+          const emailIdx = headers.findIndex((h) =>
             ["email", "email_address", "emailaddress", "e-mail"].includes(h)
           );
-          const phoneCol = headers.find((h) =>
+          const phoneIdx = headers.findIndex((h) =>
             ["phone", "phone_number", "phonenumber", "mobile", "cell", "telephone", "tel"].includes(h)
           );
 
-          const hasSeparateNames = !nameCol && lastNameCol;
+          const nameCol = nameIdx >= 0 ? originalHeaders[nameIdx] : null;
+          const lastNameCol = lastNameIdx >= 0 ? originalHeaders[lastNameIdx] : null;
+          const emailCol = emailIdx >= 0 ? originalHeaders[emailIdx] : null;
+          const phoneCol = phoneIdx >= 0 ? originalHeaders[phoneIdx] : null;
+          const firstNameCol = headers.find((h) =>
+            ["first name", "first_name", "firstname"].includes(h)
+          ) ? originalHeaders[headers.findIndex((h) =>
+            ["first name", "first_name", "firstname"].includes(h)
+          )] : null;
 
           setColumnMapping({
-            name: nameCol || lastNameCol || headers[0] || "",
+            name: nameCol || lastNameCol || originalHeaders[0] || "",
             email: emailCol || "",
             phone: phoneCol || "",
           });
@@ -118,11 +127,8 @@ export default function ImportPage() {
               if (nameCol) {
                 fullName = row[nameCol] || "";
               } else if (lastNameCol) {
-                const firstName = headers.find((h) =>
-                  ["first name", "first_name", "firstname"].includes(h)
-                );
-                fullName = firstName
-                  ? `${row[firstName] || ""} ${row[lastNameCol] || ""}`.trim()
+                fullName = firstNameCol
+                  ? `${row[firstNameCol] || ""} ${row[lastNameCol] || ""}`.trim()
                   : row[lastNameCol] || "";
               }
               return {
