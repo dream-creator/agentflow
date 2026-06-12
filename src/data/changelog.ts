@@ -19,6 +19,30 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "pipeline-redesign",
+    date: "2026-06-12",
+    version: "0.22.0",
+    title: "Pipeline redesign + security hardening + CSV import fixes",
+    summary:
+      "The pipeline is now mobile-friendly with collapsible accordion sections and one-tap action buttons. We also completed a full security audit, fixed the CSV importer to handle real-world CRM exports, and streamlined the sidebar.",
+    items: [
+      "Pipeline: replaced drag-and-drop with accordion sections + stage dropdown (one-tap moves)",
+      "Pipeline: added quick action buttons (call, email, text) on every lead card",
+      "Pipeline: lead scoring indicators (hot/warm/cold) and overdue highlighting",
+      "Pipeline: collapsible stages — tap header to expand/collapse",
+      "CSV import: now reads First Name + Last Name columns from CRM exports",
+      "CSV import: auto-detects columns and skips the mapping step when confident",
+      "CSV import: 5MB file size limit, 1000 row limit, formula injection sanitization",
+      "CSV import: replaced naive parser with papaparse (handles quotes, commas, semicolons)",
+      "Sidebar: replaced Follow-ups with Leads (better search, sort, filter, bulk actions)",
+      "Sidebar: Settings removed from nav (accessible via profile link at bottom)",
+      "Security: Stripe webhook handlers fixed (was using anon key, now uses service role)",
+      "Security: edit lead page now filters by user_id (was IDOR-vulnerable)",
+      "Security: removed unsafe-eval from CSP in production, fixed COOP/CORP headers",
+      "Security: auth callback no longer logs full URL (PII leak fixed)",
+    ],
+  },
+  {
     id: "landing-page-polish",
     date: "2026-06-10",
     version: "0.21.0",
@@ -180,9 +204,9 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     id: "drag-drop-pipeline",
     date: "2026-05-30",
-    title: "Drag-and-drop pipeline",
+    title: "Drag-and-drop pipeline (replaced)",
     summary:
-      "Move leads between pipeline stages by dragging them. Optimistic updates with rollback on error, so the UI feels instant.",
+      "The original drag-and-drop pipeline. Replaced in v0.22.0 with accordion sections + action buttons for better mobile support.",
     items: [
       "4-stage pipeline: New → Contacted → Qualified → Won",
       "Touch-friendly on mobile (long-press to start a drag)",
