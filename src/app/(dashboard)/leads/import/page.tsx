@@ -92,28 +92,46 @@ export default function ImportPage() {
           const headers = Object.keys(data[0]).map((h) => h.trim().toLowerCase());
 
           const nameCol = headers.find((h) =>
-            ["name", "full_name", "fullname", "contact", "lead"].includes(h)
+            ["name", "full_name", "fullname", "contact", "lead", "first name", "first_name", "firstname"].includes(h)
+          );
+          const lastNameCol = headers.find((h) =>
+            ["last name", "last_name", "lastname", "surname"].includes(h)
           );
           const emailCol = headers.find((h) =>
-            ["email", "email_address", "emailaddress"].includes(h)
+            ["email", "email_address", "emailaddress", "e-mail"].includes(h)
           );
           const phoneCol = headers.find((h) =>
-            ["phone", "phone_number", "phonenumber", "mobile", "cell"].includes(h)
+            ["phone", "phone_number", "phonenumber", "mobile", "cell", "telephone", "tel"].includes(h)
           );
 
+          const hasSeparateNames = !nameCol && lastNameCol;
+
           setColumnMapping({
-            name: nameCol || headers[0] || "",
+            name: nameCol || lastNameCol || headers[0] || "",
             email: emailCol || "",
             phone: phoneCol || "",
           });
 
           setParsedLeads(
-            data.map((row) => ({
-              full_name: sanitizeCSVValue(nameCol ? row[nameCol] || "" : ""),
-              email: emailCol ? sanitizeCSVValue(row[emailCol] || "") || null : null,
-              phone: phoneCol ? sanitizeCSVValue(row[phoneCol] || "") || null : null,
-              source: "csv_import",
-            }))
+            data.map((row) => {
+              let fullName = "";
+              if (nameCol) {
+                fullName = row[nameCol] || "";
+              } else if (lastNameCol) {
+                const firstName = headers.find((h) =>
+                  ["first name", "first_name", "firstname"].includes(h)
+                );
+                fullName = firstName
+                  ? `${row[firstName] || ""} ${row[lastNameCol] || ""}`.trim()
+                  : row[lastNameCol] || "";
+              }
+              return {
+                full_name: sanitizeCSVValue(fullName),
+                email: emailCol ? sanitizeCSVValue(row[emailCol] || "") || null : null,
+                phone: phoneCol ? sanitizeCSVValue(row[phoneCol] || "") || null : null,
+                source: "csv_import",
+              };
+            })
           );
 
           setStep("map");
