@@ -75,5 +75,31 @@ describe("CSV Import Utilities", () => {
       expect(result.data).toHaveLength(1);
       expect((result.data[0] as Record<string, string>).name).toBe("John");
     });
+
+    it("detects First Name + Last Name columns", () => {
+      const csv = "First Name,Last Name,Email,Phone\nShelby,Terrell,elijah57@example.net,555-0123";
+      const result = Papa.parse(csv, { header: true, skipEmptyLines: true });
+      const originalHeaders = Object.keys(result.data[0] as Record<string, string>);
+      const headers = originalHeaders.map((h) => h.trim().toLowerCase());
+
+      const nameIdx = headers.findIndex((h) =>
+        ["name", "full_name", "fullname", "contact", "lead", "first name", "first_name", "firstname"].includes(h)
+      );
+      const lastNameIdx = headers.findIndex((h) =>
+        ["last name", "last_name", "lastname", "surname"].includes(h)
+      );
+      const emailIdx = headers.findIndex((h) =>
+        ["email", "email_address", "emailaddress", "e-mail"].includes(h)
+      );
+
+      expect(headers[nameIdx]).toBe("first name");
+      expect(headers[lastNameIdx]).toBe("last name");
+      expect(headers[emailIdx]).toBe("email");
+
+      const row = result.data[0] as Record<string, string>;
+      const firstName = row[originalHeaders[nameIdx]];
+      const lastName = row[originalHeaders[lastNameIdx]];
+      expect(`${firstName} ${lastName}`).toBe("Shelby Terrell");
+    });
   });
 });
