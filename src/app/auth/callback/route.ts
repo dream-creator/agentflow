@@ -9,14 +9,6 @@ export async function GET(request: Request) {
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
 
-  console.log("[auth/callback] Incoming:", {
-    hasCode: !!code,
-    hasNext: !!searchParams.get("next"),
-    hasRedirect: !!searchParams.get("redirect"),
-    error,
-    errorDescription,
-  });
-
   if (error) {
     console.error("[auth/callback] OAuth provider error:", error, errorDescription);
     return NextResponse.redirect(
@@ -29,8 +21,6 @@ export async function GET(request: Request) {
       const supabase = await createClient();
       const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       if (!exchangeError) {
-        console.log("[auth/callback] Exchange success, redirecting to:", next);
-
         // Fire-and-forget: send welcome email to new users (profile created in last 5 min)
         if (data.user) {
           const userId = data.user.id;

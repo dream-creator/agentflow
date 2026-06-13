@@ -16,7 +16,6 @@
     "test:lighthouse": "lhci autorun"
   },
   "dependencies": {
-    "@hello-pangea/dnd": "^18.0.1",
     "@marsidev/react-turnstile": "^1.5.2",
     "@sentry/nextjs": "^10.55.0",
     "@supabase/ssr": "^0.10.3",
