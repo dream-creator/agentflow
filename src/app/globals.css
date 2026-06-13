@@ -205,4 +205,93 @@
       animation: none !important;
     }
   }
+
+  /* ── Scroll reveal: 3 animation families ────────────────────────────
+     Emil Kowalski rule: never animate transform+opacity together.
+     Each family chains two animations: fade (opacity) then move (transform).
+     Spring-like easing via cubic-bezier(0.22, 1, 0.36, 1). */
+
+  /* Phase 1: opacity only — no transform */
+  @keyframes reveal-fade-in {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  /* Phase 2: hero — subtle scale spring (0.98 → 1.003 overshoot → 1) */
+  @keyframes reveal-hero-move {
+    0%   { transform: scale(0.98); }
+    65%  { transform: scale(1.003); }
+    100% { transform: scale(1); }
+  }
+
+  /* Phase 2: content — slide up with spring (10px → -1px overshoot → 0) */
+  @keyframes reveal-content-move {
+    0%   { transform: translateY(10px); }
+    65%  { transform: translateY(-1px); }
+    100% { transform: translateY(0); }
+  }
+
+  /* Phase 2: conversion — heavier scale spring (0.96 → 1.008 overshoot → 1) */
+  @keyframes reveal-conversion-move {
+    0%   { transform: scale(0.96); }
+    65%  { transform: scale(1.008); }
+    100% { transform: scale(1); }
+  }
+
+  /* Floating badge — combines slide + scale (special case, not a general pattern) */
+  @keyframes reveal-badge {
+    0%   { opacity: 0; transform: translate(-8px, 8px) scale(0.9); }
+    65%  { opacity: 1; transform: translate(1px, -1px) scale(1.02); }
+    100% { opacity: 1; transform: translate(0, 0) scale(1); }
+  }
+
+  /* Base: hidden until revealed */
+  .scroll-reveal {
+    opacity: 0;
+  }
+
+  /* Shared fade timing */
+  .scroll-reveal.revealed {
+    animation: reveal-fade-in 0.55s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+
+  /* Hero: fade + subtle scale spring */
+  .scroll-reveal-hero.revealed {
+    animation:
+      reveal-fade-in 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+      reveal-hero-move 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation-delay: var(--reveal-delay, 0ms), calc(var(--reveal-delay, 0ms) + 0.12s);
+  }
+
+  /* Content: fade + slide-up spring */
+  .scroll-reveal-content.revealed {
+    animation:
+      reveal-fade-in 0.55s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+      reveal-content-move 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation-delay: var(--reveal-delay, 0ms), calc(var(--reveal-delay, 0ms) + 0.08s);
+  }
+
+  /* Conversion: fade + heavier scale spring */
+  .scroll-reveal-conversion.revealed {
+    animation:
+      reveal-fade-in 0.55s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+      reveal-conversion-move 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation-delay: var(--reveal-delay, 0ms), calc(var(--reveal-delay, 0ms) + 0.08s);
+  }
+
+  /* Badge: special case (kept as combined per original) */
+  .scroll-reveal.reveal-badge.revealed {
+    animation: reveal-badge 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+
+  /* Reduced motion: instant reveal, no animation */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-reveal {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
 }

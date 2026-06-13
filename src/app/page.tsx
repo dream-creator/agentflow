@@ -17,20 +17,15 @@ const AuthCallbackRescue = dynamic(
 import { Footer } from "@/components/footer";
 import { LandingPricing } from "@/components/landing-pricing";
 import IntegrationGrid from "@/components/landing/integration-grid";
+import { ScrollReveal } from "@/components/landing/scroll-reveal";
 import {
   Phone,
-  Users,
   Clock,
-  Smartphone,
-  Star,
   ArrowRight,
   CheckCircle2,
-  CalendarX,
-  UsersRound,
   Contact,
   GitBranch,
   CalendarCheck,
-  ChevronRight,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -52,123 +47,126 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: Copy */}
             <div>
-              <h1 className="font-heading text-4xl sm:text-5xl lg:text-[56px] font-bold text-surface-900 leading-[1.1] tracking-tight mb-6">
-                The CRM for agents{" "}
-                <span className="text-primary">who hate CRMs</span>
-              </h1>
-              <p className="text-lg sm:text-xl text-surface-500 mb-8 max-w-xl leading-relaxed">
-                Dead-simple contact management and follow-up for solo real estate
-                agents. No bloat. No learning curve. Just who to call today.
-              </p>
+              <ScrollReveal variant="hero">
+                <h1 className="font-heading text-4xl sm:text-5xl lg:text-[56px] font-bold text-surface-900 leading-[1.1] tracking-tight mb-6">
+                  The CRM for agents{" "}
+                  <span className="text-primary">who hate CRMs</span>
+                </h1>
+              </ScrollReveal>
+              <ScrollReveal variant="hero" delay={120}>
+                <p className="text-lg sm:text-xl text-surface-500 mb-8 max-w-xl leading-relaxed">
+                  Dead-simple contact management and follow-up for solo real estate
+                  agents. No bloat. No learning curve. Just who to call today.
+                </p>
+              </ScrollReveal>
 
               {/* Dual CTA */}
-              <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                <Link href="/signup">
-                  <Button size="lg" className="w-full sm:w-auto">
-                    Start for free
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-                <a href="#how-it-works">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                    See how it works
-                  </Button>
-                </a>
-              </div>
-
-              {/* Avatar stack + social proof */}
-              <div className="flex items-center gap-4">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="w-9 h-9 rounded-full border-2 border-white bg-primary-100 flex items-center justify-center"
-                    >
-                      <span className="text-xs font-semibold text-primary-700">
-                        {["S", "M", "J", "A"][i - 1]}
-                      </span>
-                    </div>
-                  ))}
+              <ScrollReveal variant="hero" delay={240}>
+                <div className="flex flex-col sm:flex-row gap-3 mb-8">
+                  <Link href="/signup">
+                    <Button size="lg" className="w-full sm:w-auto">
+                      Start for free
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
+                  <a href="#how-it-works">
+                    <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                      See how it works
+                    </Button>
+                  </a>
                 </div>
+              </ScrollReveal>
+
+              {/* Trust signal */}
+              <ScrollReveal variant="hero" delay={360}>
                 <p className="text-sm text-surface-500">
-                  <span className="font-semibold text-surface-700">47+</span> solo agents already using AgentFlow
+                  Free to start. No credit card required.
                 </p>
-              </div>
+              </ScrollReveal>
             </div>
 
             {/* Right: Product Mockup */}
-            <div className="relative">
-              <div className="bg-surface-50 rounded-2xl border border-surface-200 p-1 shadow-xl">
-                {/* Browser chrome */}
-                <div className="bg-white rounded-card overflow-hidden">
-                  <div className="flex items-center gap-2 px-4 py-3 border-b border-surface-100">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-surface-200" />
-                      <div className="w-3 h-3 rounded-full bg-surface-200" />
-                      <div className="w-3 h-3 rounded-full bg-surface-200" />
-                    </div>
-                    <div className="flex-1 text-center">
-                      <div className="inline-block bg-surface-100 rounded-md px-3 py-1 text-xs text-surface-500">
-                        app.agent-flow.app/dashboard
+            <ScrollReveal variant="hero" delay={180}>
+              <div className="relative">
+                <div className="bg-surface-50 rounded-2xl border border-surface-200 p-1 shadow-xl">
+                  {/* Browser chrome */}
+                  <div className="bg-white rounded-card overflow-hidden">
+                    <div className="flex items-center gap-2 px-4 py-3 border-b border-surface-100">
+                      <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-surface-200" />
+                        <div className="w-3 h-3 rounded-full bg-surface-200" />
+                        <div className="w-3 h-3 rounded-full bg-surface-200" />
                       </div>
-                    </div>
-                  </div>
-
-                  {/* App UI Mockup - Today's Follow-ups */}
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <h3 className="font-heading text-lg font-semibold text-surface-900">Today&apos;s Follow-ups</h3>
-                        <p className="text-sm text-surface-500">3 contacts due today</p>
-                      </div>
-                      <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
-                        <CalendarCheck className="h-5 w-5 text-primary" />
-                      </div>
-                    </div>
-
-                    {/* Contact card mockup */}
-                    <div className="space-y-3">
-                      {[
-                        { name: "Sarah Chen", stage: "Showing", time: "10:00 AM", color: "bg-primary" },
-                        { name: "Marcus Johnson", stage: "New Lead", time: "2:30 PM", color: "bg-accent" },
-                        { name: "Emily Rodriguez", stage: "Offer", time: "4:00 PM", color: "bg-warning-500" },
-                      ].map((contact, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-white rounded-card border border-surface-100 hover:border-primary-200 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full ${contact.color} bg-opacity-10 flex items-center justify-center`}>
-                              <span className={`text-sm font-semibold ${contact.color === "bg-primary" ? "text-primary" : contact.color === "bg-accent" ? "text-accent" : contact.color === "bg-warning-500" ? "text-warning-600" : "text-primary"}`}>
-                                {contact.name.split(" ").map(n => n[0]).join("")}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-surface-900">{contact.name}</p>
-                              <p className="text-xs text-surface-500">{contact.stage}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-surface-500">{contact.time}</span>
-                            <button aria-label="Call" className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary-700 transition-colors">
-                              <Phone className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
+                      <div className="flex-1 text-center">
+                        <div className="inline-block bg-surface-100 rounded-md px-3 py-1 text-xs text-surface-500">
+                          app.agent-flow.app/dashboard
                         </div>
-                      ))}
+                      </div>
+                    </div>
+
+                    {/* App UI Mockup - Today's Follow-ups */}
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <h3 className="font-heading text-lg font-semibold text-surface-900">Today&apos;s Follow-ups</h3>
+                          <p className="text-sm text-surface-500">3 contacts due today</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
+                          <CalendarCheck className="h-5 w-5 text-primary" />
+                        </div>
+                      </div>
+
+                      {/* Contact card mockup */}
+                      <div className="space-y-2">
+                        {[
+                          { name: "Sarah Chen", phone: "(555) 123-4567", stage: "Showing", time: "10:00 AM", color: "bg-primary", overdue: false },
+                          { name: "Mike O'Brien", phone: "(555) 987-6543", stage: "New Lead", time: "2:30 PM", color: "bg-accent", overdue: false },
+                          { name: "Jennifer Rodriguez-Martinez", phone: "(555) 456-7890", stage: "Offer", time: "4:00 PM", color: "bg-warning-500", overdue: true },
+                        ].map((contact, i) => (
+                          <div key={i} className={`flex items-center justify-between p-3 bg-white rounded-lg border ${contact.overdue ? "border-warning-200 bg-warning-50/30" : "border-surface-100"}`}>
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className={`w-8 h-8 rounded-full ${contact.color} bg-opacity-10 flex items-center justify-center shrink-0`}>
+                                <span className={`text-xs font-semibold ${contact.color === "bg-primary" ? "text-primary" : contact.color === "bg-accent" ? "text-accent" : "text-warning-600"}`}>
+                                  {contact.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                                </span>
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-surface-900 truncate">{contact.name}</p>
+                                <p className="text-[11px] text-surface-400 truncate">{contact.phone}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              {contact.overdue && (
+                                <span className="text-[10px] font-medium text-warning-600 bg-warning-100 px-1.5 py-0.5 rounded">
+                                  Overdue
+                                </span>
+                              )}
+                              <span className="text-[11px] text-surface-400">{contact.time}</span>
+                              <button aria-label="Call" className="w-7 h-7 rounded-md bg-primary text-white flex items-center justify-center">
+                                <Phone className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Floating badge */}
-                <div className="absolute -bottom-4 -left-4 bg-white rounded-card border border-surface-200 shadow-lg px-4 py-3 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-success-50 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-surface-900">Follow-up complete</p>
-                  <p className="text-xs text-surface-500">Sarah Chen — 2 min ago</p>
-                </div>
+                {/* Floating badge — reveal-badge for slide-in feel */}
+                <ScrollReveal className="reveal-badge" delay={600}>
+                  <div className="absolute -bottom-3 -left-3 bg-white rounded-lg border border-surface-200 shadow-sm px-3 py-2 flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-md bg-success-50 flex items-center justify-center">
+                      <CheckCircle2 className="h-4 w-4 text-success" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-surface-900">Follow-up complete</p>
+                      <p className="text-[11px] text-surface-400">Sarah Chen — 2 min ago</p>
+                    </div>
+                  </div>
+                </ScrollReveal>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
@@ -179,40 +177,48 @@ export default function LandingPage() {
       {/* Problem Section */}
       <section className="py-20 sm:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="section-heading mb-4">
-            Every CRM you&apos;ve tried is overkill
-          </h2>
-          <p className="section-subheading mb-12">
-            Follow Up Boss at $69/mo. kvCORE at $100/mo. Features for teams of 50 when
-            you&apos;re a solo agent doing 12 deals a year.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+          <ScrollReveal>
+            <h2 className="section-heading mb-4">
+              Every CRM you&apos;ve tried is overkill
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={100}>
+            <p className="section-subheading mb-12">
+              Follow Up Boss at $69/mo. kvCORE at $100/mo. Features for teams of 50 when
+              you&apos;re a solo agent doing 12 deals a year.
+            </p>
+          </ScrollReveal>
+          <div className="space-y-6 text-left max-w-2xl mx-auto">
             {[
               {
-                icon: <CalendarX className="h-5 w-5" />,
+                num: "01",
                 title: "20-minute setup tax",
                 desc: "Every time you open the app after a busy week, you face a mountain of missed tasks.",
               },
               {
-                icon: <UsersRound className="h-5 w-5" />,
+                num: "02",
                 title: "Built for teams",
-                desc: "Complex automations, lead routing, ISA management, none of which you need.",
+                desc: "Complex automations, lead routing, ISA management — none of which you need.",
               },
               {
-                icon: <Smartphone className="h-5 w-5" />,
+                num: "03",
                 title: "Bad mobile experience",
                 desc: "You work from your phone between showings. Your CRM should too.",
               },
             ].map((item, i) => (
-              <div key={i} className="card-elevated text-left">
-                <div className="w-10 h-10 rounded-lg bg-destructive-50 text-destructive flex items-center justify-center mb-4">
-                  {item.icon}
+              <ScrollReveal key={i} delay={180 + i * 70}>
+                <div className="flex gap-4 items-start">
+                  <span className="text-xs font-mono text-surface-300 mt-1 shrink-0">
+                    {item.num}
+                  </span>
+                  <div>
+                    <h3 className="font-heading font-semibold text-surface-900 mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-surface-500 leading-relaxed">{item.desc}</p>
+                  </div>
                 </div>
-                <h3 className="font-heading font-semibold text-surface-900 mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-surface-500 leading-relaxed">{item.desc}</p>
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -221,12 +227,16 @@ export default function LandingPage() {
       {/* Features Section */}
       <section id="features" className="py-20 sm:py-24 px-4 sm:px-6 section-alt">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="section-heading mb-4">
-            Three things. That&apos;s it.
-          </h2>
-          <p className="section-subheading mb-12">
-            AgentFlow does exactly what you need and nothing else.
-          </p>
+          <ScrollReveal>
+            <h2 className="section-heading mb-4">
+              Three things. That&apos;s it.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={100}>
+            <p className="section-subheading mb-12">
+              AgentFlow does exactly what you need and nothing else.
+            </p>
+          </ScrollReveal>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
               {
@@ -302,52 +312,68 @@ export default function LandingPage() {
                 ),
               },
             ].map((item, i) => (
-              <div key={i} className="card-elevated text-left flex flex-col feature-card-hover hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-default">
-                <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary flex items-center justify-center mb-4 shrink-0">
-                  {item.icon}
+              <ScrollReveal key={i} variant="content" delay={200 + i * 120}>
+                <div className="card-elevated text-left flex flex-col feature-card-hover hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-default">
+                  <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary flex items-center justify-center mb-4 shrink-0">
+                    {item.icon}
+                  </div>
+                  <h3 className="font-heading font-semibold text-surface-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-surface-500 leading-relaxed flex-1">{item.desc}</p>
+                  {item.preview}
                 </div>
-                <h3 className="font-heading font-semibold text-surface-900 mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-surface-500 leading-relaxed flex-1">{item.desc}</p>
-                {item.preview}
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <HowItWorks />
+      <ScrollReveal>
+        <HowItWorks />
+      </ScrollReveal>
 
       {/* Pricing */}
       <section id="pricing" className="py-20 sm:py-24 px-4 sm:px-6 section-alt">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="section-heading mb-4">
-            Simple pricing
-          </h2>
-          <p className="section-subheading mb-8">
-            Less than one lunch per month. Zero guilt.
-          </p>
-          <LandingPricing />
+          <ScrollReveal>
+            <h2 className="section-heading mb-4">
+              Simple pricing
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={100}>
+            <p className="section-subheading mb-8">
+              Less than one lunch per month. Zero guilt.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal variant="conversion" delay={200}>
+            <LandingPricing />
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Final CTA */}
       <section className="py-20 sm:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="section-heading mb-4">
-            Stop losing leads to bad tools
-          </h2>
-          <p className="section-subheading mb-8">
-            Join solo agents who actually use their CRM daily.
-          </p>
-          <Link href="/signup">
-            <Button size="lg">
-              Start for free
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </Link>
+          <ScrollReveal>
+            <h2 className="section-heading mb-4">
+              Stop losing leads to bad tools
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={100}>
+            <p className="section-subheading mb-8">
+              Join solo agents who actually use their CRM daily.
+            </p>
+          </ScrollReveal>
+          <ScrollReveal variant="conversion" delay={200}>
+            <Link href="/signup">
+              <Button size="lg">
+                Start for free
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </ScrollReveal>
         </div>
       </section>
 
