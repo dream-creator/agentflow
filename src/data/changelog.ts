@@ -19,6 +19,23 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "landing-scroll-reveal",
+    date: "2026-06-13",
+    version: "0.23.0",
+    title: "Landing page scroll-reveal animations + design fixes",
+    summary:
+      "The landing page now feels alive — sections fade in and slide up as you scroll, with a three-family animation system that respects your motion preferences. We also cleaned up the design with a numbered problem list, a realistic dashboard mockup, and removed the fake social proof.",
+    items: [
+      "Scroll-reveal animations: hero, content, and conversion sections each animate independently as you scroll into view",
+      "Three-family animation system: opacity fade + transform, chained with IntersectionObserver",
+      "Removed fake social proof (avatar stack, '47+ agents' claim) — replaced with a trust signal",
+      "Problem section redesigned as a numbered list (01/02/03) instead of three identical columns",
+      "Dashboard mockup reworked with realistic data (real phone numbers, varied names, overdue items)",
+      "Easing: ease-out-quart for even visual distribution",
+      "Respects prefers-reduced-motion — animations disabled for users who need it",
+    ],
+  },
+  {
     id: "pipeline-redesign",
     date: "2026-06-12",
     version: "0.22.0",
