@@ -57,7 +57,7 @@ export async function sendDailyDigest(
         View Follow-ups
       </a>
     </p>
-    <p style="color:#94A3B8;font-size:12px;margin-top:24px;">
+    <p style="color:#64748B;font-size:12px;margin-top:24px;">
       — ${EMAIL_CONFIG.appName}: The CRM for agents who hate CRMs
     </p>
   `;
@@ -99,7 +99,7 @@ export async function sendWelcomeEmail(
         Go to Dashboard
       </a>
     </p>
-    <p style="color:#94A3B8;font-size:12px;margin-top:24px;">
+    <p style="color:#64748B;font-size:12px;margin-top:24px;">
       — ${EMAIL_CONFIG.appName}: The CRM for agents who hate CRMs
     </p>
   `;
