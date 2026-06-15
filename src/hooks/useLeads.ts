@@ -64,8 +64,26 @@ export async function deleteLead(id: string): Promise<{ success: boolean; error:
 
   const { error } = await supabase
     .from("leads")
-    .delete()
+    .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, error: null };
+}
+
+export async function bulkDeleteLeads(ids: string[]): Promise<{ success: boolean; error: string | null }> {
+  if (ids.length === 0) return { success: true, error: null };
+
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .in("id", ids)
     .eq("user_id", user.id);
 
   if (error) return { success: false, error: error.message };
