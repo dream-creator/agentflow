@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { fetchLeads, updateLead, deleteLead } from "@/hooks/useLeads";
+import { fetchLeads, updateLead, bulkDeleteLeads } from "@/hooks/useLeads";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -111,6 +111,7 @@ export default function LeadsPage() {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   useEffect(() => {
     async function loadLeads() {
@@ -185,11 +186,13 @@ export default function LeadsPage() {
 
   async function bulkDelete() {
     const ids = Array.from(selected);
-    for (const id of ids) {
-      await deleteLead(id);
+    setBulkDeleting(true);
+    const { success } = await bulkDeleteLeads(ids);
+    if (success) {
+      setLeads((prev) => prev.filter((l) => !selected.has(l.id)));
+      setSelected(new Set());
     }
-    setLeads((prev) => prev.filter((l) => !selected.has(l.id)));
-    setSelected(new Set());
+    setBulkDeleting(false);
   }
 
   async function bulkChangeStage(stage: string) {
@@ -362,9 +365,9 @@ export default function LeadsPage() {
                 </option>
               ))}
             </select>
-            <Button variant="destructive" size="sm" onClick={bulkDelete}>
+            <Button variant="destructive" size="sm" onClick={bulkDelete} disabled={bulkDeleting}>
               <Trash2 className="h-3.5 w-3.5 mr-1" />
-              Delete
+              {bulkDeleting ? "Deleting..." : "Delete"}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>
               Cancel
