@@ -13,20 +13,9 @@
     ".opencode/rules/ecc/react/hooks.md",
     ".opencode/rules/ecc/react/patterns.md",
     ".opencode/rules/ecc/react/testing.md",
-    ".opencode/rules/ecc/react/security.md",
-    ".opencode/skills/brainstorming/SKILL.md",
-    ".opencode/skills/systematic-debugging/SKILL.md",
-    ".opencode/skills/verification-before-completion/SKILL.md",
-    ".opencode/skills/emil-design-eng/SKILL.md",
-    ".opencode/skills/hallmark/SKILL.md",
-    ".opencode/skills/impeccable/SKILL.md",
-    ".opencode/skills/taste-skill/SKILL.md",
-    ".opencode/skills/ui-ux-pro-max/SKILL.md",
-    ".opencode/skills/caveman/SKILL.md",
-    ".opencode/skills/zoom-out/SKILL.md",
-    ".opencode/skills/prototype/SKILL.md"
+    ".opencode/rules/ecc/react/security.md"
   ],
   "skills": {
-    "paths": [".opencode/skills", "~/.opencode/skills", "~/.agents/skills"]
+    "paths": [".opencode/skills"]
   }
 }
