@@ -57,7 +57,17 @@ export default function LeadDetailPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    await supabase.from("leads").delete().eq("id", params.id as string).eq("user_id", user.id);
+    const { error } = await supabase
+      .from("leads")
+      .update({ is_active: false, updated_at: new Date().toISOString() })
+      .eq("id", params.id as string)
+      .eq("user_id", user.id);
+
+    if (error) {
+      showToast("Failed to delete lead. Please try again.", "error");
+      return;
+    }
+
     showToast("Lead deleted successfully!", "success");
     router.push("/leads");
     router.refresh();
