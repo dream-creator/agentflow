@@ -1,6 +1,6 @@
 /**
  * Records a hero demo video of the pipeline page.
- * Showcases: lead cards, action buttons (email/call/text), stage changes, and pipeline flow.
+ * Showcases: email composer typing animation, call screen timer, text message typing indicator.
  *
  * Usage: npx tsx scripts/record-hero-video.ts
  *
@@ -8,7 +8,7 @@
  *   - Dev server running on localhost:3000
  *   - playwright browsers installed
  *
- * Output: public/hero-demo.webm (~18s loop)
+ * Output: public/hero-demo.webm (~25s loop)
  */
 
 import { chromium, type Page } from "playwright";
@@ -61,185 +61,138 @@ async function main() {
 
   try {
     // 1. Navigate to demo page
-    console.log("1/12 Navigating to demo pipeline page...");
+    console.log("1/14 Navigating to demo pipeline page...");
     await page.goto(`${BASE_URL}/demo`, { waitUntil: "networkidle" });
     await sleep(1500);
 
-    // Wait for pipeline board
     await page.waitForSelector("h1:has-text('Pipeline')", { timeout: 10000 });
     await sleep(800);
 
-    // 2. Initial static view — let viewer absorb the full pipeline layout
-    console.log("2/12 Holding initial view...");
+    // 2. Initial static view
+    console.log("2/14 Holding initial view...");
     await sleep(2000);
 
-    // 3. Scroll down to reveal "New Lead" and "Contacted" stages with action buttons
-    console.log("3/12 Scrolling to reveal lead cards...");
+    // 3. Scroll to reveal action buttons
+    console.log("3/14 Scrolling to reveal lead cards...");
     await page.evaluate(() => window.scrollTo({ top: 120, behavior: "smooth" }));
     await sleep(1200);
 
-    // 4. Hover over Sarah Chen card — reveal action buttons (email, call, text)
-    console.log("4/12 Hovering over Sarah Chen card to show action buttons...");
+    // ═══════════════════════════════════════════
+    // 4. EMAIL MOCKUP — Click email on Sarah Chen
+    // ═══════════════════════════════════════════
+    console.log("4/14 Hovering over Sarah Chen card...");
     const sarahCard = page.locator("a:has-text('Sarah Chen')").first();
     if (await sarahCard.isVisible()) {
       const box = await sarahCard.boundingBox();
       if (box) {
-        await smoothMove(
-          page,
-          WIDTH / 2,
-          HEIGHT / 2,
-          box.x + box.width / 2,
-          box.y + box.height / 2,
-          600
-        );
-        await sleep(800);
-      }
-    }
-
-    // 5. Click the Email button on Sarah Chen — showcase email interaction
-    console.log("5/12 Clicking email button on Sarah Chen...");
-    const emailBtn = page.locator('a[title="Email"]').first();
-    if (await emailBtn.isVisible()) {
-      const box = await emailBtn.boundingBox();
-      if (box) {
-        await smoothMove(
-          page,
-          box.x - 80,
-          box.y,
-          box.x + box.width / 2,
-          box.y + box.height / 2,
-          300
-        );
-        await sleep(400);
-        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-        await sleep(1200);
-      }
-    }
-
-    // 6. Hover over Marcus Johnson — show call button
-    console.log("6/12 Hovering over Marcus Johnson to show call button...");
-    const marcusCard = page.locator("a:has-text('Marcus Johnson')").first();
-    if (await marcusCard.isVisible()) {
-      const box = await marcusCard.boundingBox();
-      if (box) {
-        await smoothMove(
-          page,
-          box.x + box.width / 2,
-          box.y,
-          box.x + box.width / 2,
-          box.y + box.height / 2,
-          400
-        );
+        await smoothMove(page, WIDTH / 2, HEIGHT / 2, box.x + box.width / 2, box.y + box.height / 2, 600);
         await sleep(600);
       }
     }
 
-    // 7. Click the Call button on Marcus Johnson — showcase calling interaction
-    console.log("7/12 Clicking call button on Marcus Johnson...");
+    console.log("5/14 Clicking email button — showing email composer...");
+    const emailBtn = page.locator('a[title="Email"]').first();
+    if (await emailBtn.isVisible()) {
+      const box = await emailBtn.boundingBox();
+      if (box) {
+        await smoothMove(page, box.x - 80, box.y, box.x + box.width / 2, box.y + box.height / 2, 300);
+        await sleep(300);
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        // Wait for typing animation to play (the email body types out)
+        await sleep(4000);
+      }
+    }
+
+    // Close email popup by clicking backdrop
+    console.log("6/14 Closing email popup...");
+    await page.mouse.click(10, 10);
+    await sleep(600);
+
+    // ═══════════════════════════════════════════
+    // 7. CALL MOCKUP — Click call on Marcus Johnson
+    // ═══════════════════════════════════════════
+    console.log("7/14 Hovering over Marcus Johnson...");
+    const marcusCard = page.locator("a:has-text('Marcus Johnson')").first();
+    if (await marcusCard.isVisible()) {
+      const box = await marcusCard.boundingBox();
+      if (box) {
+        await smoothMove(page, box.x + box.width / 2, box.y - 40, box.x + box.width / 2, box.y + box.height / 2, 400);
+        await sleep(500);
+      }
+    }
+
+    console.log("8/14 Clicking call button — showing call screen...");
     const callBtn = page.locator('a[title="Call"]').first();
     if (await callBtn.isVisible()) {
       const box = await callBtn.boundingBox();
       if (box) {
-        await smoothMove(
-          page,
-          box.x + box.width / 2,
-          box.y - 30,
-          box.x + box.width / 2,
-          box.y + box.height / 2,
-          250
-        );
-        await sleep(400);
+        await smoothMove(page, box.x - 60, box.y, box.x + box.width / 2, box.y + box.height / 2, 250);
+        await sleep(300);
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-        await sleep(1200);
+        // Wait for call timer to tick a few seconds
+        await sleep(4000);
       }
     }
 
-    // 8. Click the Text button on Marcus Johnson — showcase messaging interaction
-    console.log("8/12 Clicking text button on Marcus Johnson...");
+    // Close call popup by clicking the red end-call button
+    console.log("9/14 Ending call...");
+    const endCallBtn = page.locator("button:has(svg)").filter({ has: page.locator("[data-lucide='phone-off']") }).first();
+    // Fallback: click backdrop
+    await page.mouse.click(10, 10);
+    await sleep(600);
+
+    // ═══════════════════════════════════════════
+    // 10. TEXT MOCKUP — Click text on Marcus Johnson
+    // ═══════════════════════════════════════════
+    console.log("10/14 Clicking text button — showing message thread...");
     const textBtn = page.locator('a[title="Text"]').first();
     if (await textBtn.isVisible()) {
       const box = await textBtn.boundingBox();
       if (box) {
-        await smoothMove(
-          page,
-          box.x + box.width / 2,
-          box.y,
-          box.x + box.width / 2,
-          box.y + box.height / 2,
-          250
-        );
-        await sleep(400);
+        await smoothMove(page, box.x + box.width / 2, box.y - 30, box.x + box.width / 2, box.y + box.height / 2, 250);
+        await sleep(300);
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-        await sleep(1200);
+        // Wait for typing indicator to appear
+        await sleep(3000);
       }
     }
 
-    // 9. Click the stage dropdown on Emily Rodriguez — show stage management
-    console.log("9/12 Opening stage dropdown on Emily Rodriguez...");
+    // Close text popup
+    console.log("11/14 Closing text popup...");
+    await page.mouse.click(10, 10);
+    await sleep(600);
+
+    // ═══════════════════════════════════════════
+    // 12. STAGE CHANGE — Move Emily to Showing
+    // ═══════════════════════════════════════════
+    console.log("12/12 Opening stage dropdown on Emily Rodriguez...");
     const dropdown = page.locator("button:has-text('Contacted')").first();
     if (await dropdown.isVisible()) {
       const box = await dropdown.boundingBox();
       if (box) {
-        await smoothMove(
-          page,
-          box.x - 120,
-          box.y,
-          box.x + box.width / 2,
-          box.y + box.height / 2,
-          400
-        );
-        await sleep(500);
+        await smoothMove(page, box.x - 120, box.y, box.x + box.width / 2, box.y + box.height / 2, 400);
+        await sleep(400);
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-        await sleep(800);
+        await sleep(700);
       }
     }
 
-    // 10. Move Emily to "Showing" stage — demonstrate pipeline progression
-    console.log("10/12 Moving Emily Rodriguez to Showing stage...");
+    console.log("13/14 Moving Emily Rodriguez to Showing stage...");
     const showingOption = page.locator("button:has-text('Showing')").last();
     if (await showingOption.isVisible()) {
       const box = await showingOption.boundingBox();
       if (box) {
-        await smoothMove(
-          page,
-          box.x + box.width / 2,
-          box.y - 20,
-          box.x + box.width / 2,
-          box.y + box.height / 2,
-          300
-        );
-        await sleep(400);
+        await smoothMove(page, box.x + box.width / 2, box.y - 20, box.x + box.width / 2, box.y + box.height / 2, 300);
+        await sleep(300);
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
         await sleep(1200);
       }
     }
 
-    // 11. Scroll down to show Offer and Closed Won stages
-    console.log("11/12 Scrolling to show Offer and Closed Won...");
-    await page.evaluate(() => window.scrollTo({ top: 500, behavior: "smooth" }));
-    await sleep(1500);
-
-    // Hover over Alex Martinez (Closed Won)
-    const alexCard = page.locator("a:has-text('Alex Martinez')").first();
-    if (await alexCard.isVisible()) {
-      const box = await alexCard.boundingBox();
-      if (box) {
-        await smoothMove(
-          page,
-          box.x - 50,
-          box.y,
-          box.x + box.width / 2,
-          box.y + box.height / 2,
-          500
-        );
-        await sleep(1000);
-      }
-    }
-
-    // 12. Scroll back to top for final view
-    console.log("12/12 Final view at top...");
+    // 14. Final view
+    console.log("14/14 Final view...");
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
-    await sleep(2000);
+    await sleep(1500);
 
     console.log("Recording complete!");
   } finally {
@@ -256,7 +209,6 @@ async function main() {
       copyFileSync(videoPath, outPath);
       console.log(`Copied to: ${outPath}`);
 
-      // Get file size
       const { statSync } = await import("fs");
       const stats = statSync(outPath);
       console.log(`Size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
