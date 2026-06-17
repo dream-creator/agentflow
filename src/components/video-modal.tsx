@@ -11,6 +11,9 @@ interface VideoModalProps {
   label?: string;
 }
 
+const FOCUSABLE_SELECTOR =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
 export function VideoModal({
   open,
   onClose,
@@ -19,12 +22,17 @@ export function VideoModal({
   label = "AgentFlow pipeline demo",
 }: VideoModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const [mounted, setMounted] = useState(false);
   const [animate, setAnimate] = useState(false);
 
   // Mount transition on open
   useEffect(() => {
     if (open) {
+      // Remember what had focus before modal opened
+      previousFocusRef.current = document.activeElement as HTMLElement;
       setMounted(true);
       // Trigger animation on next frame
       requestAnimationFrame(() => {
@@ -33,15 +41,52 @@ export function VideoModal({
     } else {
       setAnimate(false);
       // Wait for exit animation before unmounting
-      const timer = setTimeout(() => setMounted(false), 300);
+      const timer = setTimeout(() => {
+        setMounted(false);
+        // Return focus to the element that triggered the modal
+        previousFocusRef.current?.focus();
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [open]);
 
+  // Move focus into modal when it opens
+  useEffect(() => {
+    if (animate && closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, [animate]);
+
   // ESC key handler
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      // Focus trap: Tab cycles through focusable elements inside the modal
+      if (e.key === "Tab" && containerRef.current) {
+        const focusable = containerRef.current.querySelectorAll(FOCUSABLE_SELECTOR);
+        if (focusable.length === 0) return;
+
+        const first = focusable[0] as HTMLElement;
+        const last = focusable[focusable.length - 1] as HTMLElement;
+
+        if (e.shiftKey) {
+          // Shift+Tab: if at first element, wrap to last
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          // Tab: if at last element, wrap to first
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
     },
     [onClose],
   );
@@ -73,6 +118,7 @@ export function VideoModal({
 
   return (
     <div
+      ref={containerRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8"
       role="dialog"
       aria-modal="true"
@@ -89,6 +135,7 @@ export function VideoModal({
 
       {/* Close button */}
       <button
+        ref={closeButtonRef}
         onClick={onClose}
         className={`absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300 ${
           animate ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
