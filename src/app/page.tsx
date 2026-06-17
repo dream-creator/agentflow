@@ -203,7 +203,7 @@ export default function LandingPage() {
               {
                 icon: <Clock className="h-5 w-5" />,
                 title: "Daily Follow-up",
-                desc: "Open the app. See exactly who to call today.",
+                desc: "Open the app. See exactly who to call today. Every single morning.",
                 preview: (
                   <div className="mt-4 p-3 bg-white rounded-lg border border-surface-100 text-left h-20 flex flex-col justify-between">
                     <div className="flex items-center gap-2">
