@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { StickyHeader } from "@/components/layout/sticky-header";
 import { HowItWorks } from "@/components/landing/how-it-works";
-import { ReducedMotionVideo } from "@/components/reduced-motion-video";
+import { HeroDemo } from "@/components/landing/hero-demo";
 
 // Lazy-load: only needed when Supabase OAuth drops ?code= on root
 // Removes ~165KB Supabase client from the landing page bundle
@@ -85,27 +85,7 @@ export default function LandingPage() {
 
           {/* Video demo — centered below text, frosted-glass container */}
           <ScrollReveal variant="hero" delay={180}>
-            <div className="mt-16 w-full max-w-4xl mx-auto">
-              <div className="relative overflow-hidden rounded-xl bg-surface-50/80 backdrop-blur-sm border border-surface-200 shadow-2xl">
-                <ReducedMotionVideo
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  className="w-full h-auto block"
-                  aria-label="AgentFlow pipeline demo showing lead management and stage transitions"
-                >
-                  <source src="/hero-demo.webm" type="video/webm" />
-                </ReducedMotionVideo>
-
-                <noscript>
-                  <div className="p-6 text-center text-surface-500 text-sm">
-                    AgentFlow pipeline demo
-                  </div>
-                </noscript>
-              </div>
-            </div>
+            <HeroDemo />
           </ScrollReveal>
         </div>
       </section>
