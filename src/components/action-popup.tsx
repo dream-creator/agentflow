@@ -46,7 +46,7 @@ function EmailComposer({
       } else {
         clearInterval(interval);
       }
-    }, 18);
+    }, 10);
     return () => clearInterval(interval);
   }, [fullText]);
 
@@ -58,7 +58,7 @@ function EmailComposer({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-surface-50 border-b border-surface-200">
         <div className="flex items-center gap-2">
-          <Mail className="h-4 w-4 text-blue-500" />
+          <Mail className="h-4 w-4 text-primary" />
           <span className="text-xs font-semibold text-surface-700">New Message</span>
         </div>
         <button onClick={onClose} className="p-1 rounded hover:bg-surface-200 transition-colors">
@@ -94,7 +94,7 @@ function EmailComposer({
           <Send className="h-3 w-3" />
           <span>agentflow.app</span>
         </div>
-        <button className="px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-lg hover:bg-blue-600 transition-colors">
+        <button className="px-3 py-1 bg-cta text-white text-xs font-medium rounded-lg hover:bg-cta-600 transition-colors">
           Send
         </button>
       </div>
@@ -126,12 +126,12 @@ function CallScreen({
 
   return (
     <div
-      className="w-72 bg-gradient-to-b from-surface-900 to-surface-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in slide-in-from-bottom-2 fade-in duration-200"
+      className="w-72 bg-white rounded-2xl shadow-2xl border border-surface-200 overflow-hidden z-50 animate-in slide-in-from-bottom-2 fade-in duration-200"
       style={{ position: "fixed", top: position.top, left: position.left }}
     >
       {/* Status bar */}
       <div className="px-4 pt-4 pb-2 text-center">
-        <p className="text-[10px] text-green-400 font-medium tracking-wider uppercase">Calling</p>
+        <p className="text-primary font-medium tracking-wider uppercase text-[10px]">Calling</p>
       </div>
 
       {/* Avatar + Name */}
@@ -141,9 +141,9 @@ function CallScreen({
             {leadName.split(" ").map((n) => n[0]).join("")}
           </span>
         </div>
-        <p className="text-white font-heading font-semibold text-sm">{leadName}</p>
-        <p className="text-surface-400 text-xs mt-0.5">{leadPhone || "+1-555-0100"}</p>
-        <p className="text-green-400 text-xs mt-2 font-mono">
+        <p className="text-surface-900 font-heading font-semibold text-sm">{leadName}</p>
+        <p className="text-surface-500 text-xs mt-0.5">{leadPhone || "+1-555-0100"}</p>
+        <p className="text-primary text-xs mt-2 font-mono">
           {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
         </p>
       </div>
@@ -188,7 +188,7 @@ function TextMessage({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-surface-50 border-b border-surface-200">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-purple-500" />
+          <MessageSquare className="h-4 w-4 text-primary" />
           <span className="text-xs font-semibold text-surface-700">{leadName}</span>
         </div>
         <button onClick={onClose} className="p-1 rounded hover:bg-surface-200 transition-colors">
@@ -200,7 +200,7 @@ function TextMessage({
       <div className="px-4 py-3 space-y-2 min-h-[80px]">
         {/* Outgoing message */}
         <div className="flex justify-end">
-          <div className="bg-purple-500 text-white text-xs px-3 py-2 rounded-2xl rounded-br-sm max-w-[85%]">
+          <div className="bg-primary text-white text-xs px-3 py-2 rounded-2xl rounded-br-sm max-w-[85%]">
             Hi! I have some new listings that match what you are looking for. Want to schedule a viewing?
           </div>
         </div>
@@ -223,7 +223,7 @@ function TextMessage({
         <div className="flex-1 bg-surface-50 rounded-full px-3 py-1.5 text-xs text-surface-400">
           Type a message...
         </div>
-        <div className="w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center">
+        <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center">
           <Send className="h-3 w-3 text-white" />
         </div>
       </div>
