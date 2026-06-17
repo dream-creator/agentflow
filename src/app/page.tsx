@@ -62,13 +62,13 @@ export default function LandingPage() {
             <ScrollReveal variant="hero" delay={240}>
               <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
                 <Link href="/signup">
-                  <Button size="lg" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto rounded-full">
                     Start for free
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
                 <a href="#how-it-works">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                  <Button variant="secondary" size="lg" className="w-full sm:w-auto rounded-full">
                     See how it works
                   </Button>
                 </a>
