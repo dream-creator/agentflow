@@ -165,8 +165,11 @@ export default function LandingPage() {
                         <p className="text-[10px] text-surface-500 truncate">jane@email.com</p>
                       </div>
                     </div>
-                    <div className="flex gap-1 items-center">
+                    <div className="flex items-center justify-between">
                       <span className="text-[10px] bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded">Referral</span>
+                      <div className="w-5 h-5 rounded bg-surface-100 flex items-center justify-center">
+                        <Contact className="h-3 w-3 text-surface-400" />
+                      </div>
                     </div>
                   </div>
                 ),
@@ -186,14 +189,13 @@ export default function LandingPage() {
                         <p className="text-[10px] text-surface-500 truncate">Showing scheduled</p>
                       </div>
                     </div>
-                    <div className="flex gap-1 overflow-hidden">
-                      {["New", "Showing", "Closed"].map((stage, i) => (
-                        <div key={i} className="flex-1 min-w-0">
-                          <div className={`text-[9px] font-medium text-center py-1 rounded transition-colors ${i === 1 ? "bg-primary text-white feature-pipeline-active" : "bg-surface-100 text-surface-500"}`}>
-                            {stage}
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] bg-accent-50 text-accent-700 px-1.5 py-0.5 rounded">Showing</span>
+                      <div className="flex gap-0.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-surface-200" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-surface-200" />
+                      </div>
                     </div>
                   </div>
                 ),
@@ -215,8 +217,8 @@ export default function LandingPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] bg-warning-50 text-warning-700 px-1.5 py-0.5 rounded">Overdue</span>
-                      <div className="w-6 h-6 rounded bg-primary flex items-center justify-center feature-phone-pulse">
-                        <Phone className="h-3 w-3 text-white" />
+                      <div className="w-5 h-5 rounded bg-primary flex items-center justify-center feature-phone-pulse">
+                        <Phone className="h-2.5 w-2.5 text-white" />
                       </div>
                     </div>
                   </div>
