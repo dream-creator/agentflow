@@ -3,6 +3,9 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { sendDailyDigest } from "@/lib/resend";
 
 export async function GET(request: NextRequest) {
+  // SECURITY: Bearer token gate — only Vercel Cron (or anyone who knows the secret)
+  // can trigger this endpoint. CRON_SECRET must be set in Vercel env. If unset,
+  // the comparison always fails (undefined !== any string) which is fail-closed.
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

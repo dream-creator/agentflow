@@ -49,7 +49,7 @@ export async function sendDailyDigest(
     .join("");
 
   const html = `
-    <h2>Good morning, ${userName}!</h2>
+    <h2>Good morning, ${escapeHtml(userName)}!</h2>
     <p>You have ${leads.length} lead${leads.length === 1 ? "" : "s"} to follow up with today:</p>
     <ul>${leadList}</ul>
     <p>
