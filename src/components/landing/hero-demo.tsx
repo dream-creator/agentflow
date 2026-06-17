@@ -14,7 +14,7 @@ export function HeroDemo() {
       <button
         type="button"
         onClick={() => setModalOpen(true)}
-        className="group relative w-full max-w-4xl mx-auto mt-24 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+        className="group relative w-full max-w-4xl mx-auto mt-24 block cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
         aria-label="Open pipeline demo video"
       >
         <div className="relative overflow-hidden rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 shadow-2xl transition-all duration-300 group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] group-hover:border-white/20">
