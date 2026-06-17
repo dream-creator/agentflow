@@ -4,27 +4,6 @@ import { Calendar, MapPin, Phone, Mail, Globe, Building2 } from 'lucide-react';
 
 const INTEGRATIONS = [
   {
-    name: 'Zillow',
-    icon: Building2,
-    description: 'Sync leads from your Zillow profile',
-    color: 'text-primary',
-    bgColor: 'bg-primary-50',
-  },
-  {
-    name: 'Realtor.com',
-    icon: Globe,
-    description: 'Import contacts from listings',
-    color: 'text-accent',
-    bgColor: 'bg-accent-50',
-  },
-  {
-    name: 'Google Calendar',
-    icon: Calendar,
-    description: 'Schedule showings and follow-ups',
-    color: 'text-surface-600',
-    bgColor: 'bg-surface-100',
-  },
-  {
     name: 'Phone & SMS',
     icon: Phone,
     description: 'One-tap calling from any contact',
@@ -39,9 +18,30 @@ const INTEGRATIONS = [
     bgColor: 'bg-warning-50',
   },
   {
-    name: 'MLS',
+    name: 'Google Calendar',
+    icon: Calendar,
+    description: 'Schedule showings and follow-ups',
+    color: 'text-surface-600',
+    bgColor: 'bg-surface-100',
+  },
+  {
+    name: 'CSV Import',
+    icon: Building2,
+    description: 'Import leads from any spreadsheet',
+    color: 'text-primary',
+    bgColor: 'bg-primary-50',
+  },
+  {
+    name: 'Map Location',
     icon: MapPin,
-    description: 'Track property showings and tours',
+    description: 'See leads near you on the map',
+    color: 'text-accent',
+    bgColor: 'bg-accent-50',
+  },
+  {
+    name: 'Daily Digest',
+    icon: Globe,
+    description: 'Morning email with who to call today',
     color: 'text-destructive',
     bgColor: 'bg-destructive-50',
   },
@@ -57,17 +57,15 @@ export default function IntegrationGrid() {
         {/* Heading */}
         <div className="text-center mb-10">
           <h2 className="text-2xl sm:text-3xl font-heading font-semibold text-surface-900 mb-2">
-            Works with your tools
+            Built-in tools
           </h2>
           <p className="text-sm sm:text-base text-surface-500">
-            Connects to the platforms you already use daily
+            Everything you need to manage leads — no integrations required
           </p>
         </div>
 
         {/* Integration grid */}
         <div
-          role="list"
-          aria-label="Available integrations"
           className="grid grid-cols-2 sm:grid-cols-3 gap-4"
         >
           {INTEGRATIONS.map((integration) => {
@@ -75,7 +73,6 @@ export default function IntegrationGrid() {
             return (
               <div
                 key={integration.name}
-                role="listitem"
                 className="group flex items-start gap-4 p-5 rounded-card border border-surface-200 bg-surface-50 hover:border-primary-200 transition-all cursor-default"
               >
                 <div
@@ -97,12 +94,12 @@ export default function IntegrationGrid() {
         </div>
 
         {/* Subtle note */}
-        <p className="text-center text-sm text-surface-400 mt-8">
-          Don&apos;t see your tool?{" "}
+        <p className="text-center text-sm text-surface-500 mt-8">
+          Want an integration we don&apos;t have yet?{" "}
           <a href="mailto:support@agent-flow.app" className="text-primary hover:underline">
             Tell us
           </a>{" "}
-          — we&apos;ll build it.
+          — we&apos;ll prioritize it.
         </p>
       </div>
     </section>
