@@ -21,6 +21,8 @@ export function LandingPricing() {
           className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${
             annual ? "bg-primary" : "bg-surface-200"
           }`}
+          role="switch"
+          aria-checked={annual}
           aria-label="Toggle annual billing"
         >
           <div
