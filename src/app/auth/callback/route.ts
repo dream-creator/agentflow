@@ -42,8 +42,19 @@ export async function GET(request: Request) {
           }
         }
 
-        const redirectUrl = next.startsWith("/") && !next.startsWith("//") ? next : "/";
-        return NextResponse.redirect(`${origin}${redirectUrl}`);
+        // Validate redirect: must be a same-origin absolute path (prevent open redirect)
+        let redirectPath = "/";
+        try {
+          // Resolve `next` against origin to catch relative and absolute URLs
+          const resolved = new URL(next, origin);
+          // Only allow same-origin redirects with a path-only value
+          if (resolved.origin === origin && resolved.pathname.startsWith("/")) {
+            redirectPath = resolved.pathname + resolved.search;
+          }
+        } catch {
+          // Invalid URL — fall back to root
+        }
+        return NextResponse.redirect(`${origin}${redirectPath}`);
       }
       console.error("[auth/callback] Exchange failed:", exchangeError.message, exchangeError);
     } catch (err) {
