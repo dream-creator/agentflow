@@ -1,6 +1,6 @@
 /**
- * Records a hero demo video of the pipeline page.
- * Showcases: email composer typing animation, call screen timer, text message typing indicator.
+ * Records a hero demo video of the pipeline page inside a macOS-style window frame.
+ * Showcases: sidebar navigation, email composer, call screen, text message, stage change.
  *
  * Usage: npx tsx scripts/record-hero-video.ts
  *
@@ -63,34 +63,48 @@ async function main() {
     // 1. Navigate to demo page
     console.log("1/14 Navigating to demo pipeline page...");
     await page.goto(`${BASE_URL}/demo`, { waitUntil: "networkidle" });
-    await sleep(1500);
-
-    await page.waitForSelector("h1:has-text('Pipeline')", { timeout: 10000 });
-    await sleep(800);
-
-    // 2. Initial static view
-    console.log("2/14 Holding initial view...");
     await sleep(2000);
 
-    // 3. Scroll to reveal action buttons
-    console.log("3/14 Scrolling to reveal lead cards...");
-    await page.evaluate(() => window.scrollTo({ top: 120, behavior: "smooth" }));
-    await sleep(1200);
+    // Wait for pipeline board to render inside macOS frame
+    await page.waitForSelector("h1:has-text('Pipeline')", { timeout: 10000 });
+    await sleep(1000);
+
+    // 2. Initial static view — show the full macOS window
+    console.log("2/14 Holding initial view of macOS window...");
+    await sleep(2500);
+
+    // 3. Hover over sidebar items to show interactivity
+    console.log("3/14 Hovering sidebar nav items...");
+    const leadsNav = page.locator("text=Leads").first();
+    if (await leadsNav.isVisible()) {
+      const box = await leadsNav.boundingBox();
+      if (box) {
+        await smoothMove(page, WIDTH / 2, HEIGHT / 2, box.x + box.width / 2, box.y + box.height / 2, 400);
+        await sleep(400);
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+        await sleep(300);
+      }
+    }
+
+    // Move back to pipeline area
+    console.log("4/14 Moving to pipeline content...");
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    await sleep(800);
 
     // ═══════════════════════════════════════════
-    // 4. EMAIL MOCKUP — Click email on Sarah Chen
+    // 5. EMAIL MOCKUP — Click email on Sarah Chen
     // ═══════════════════════════════════════════
-    console.log("4/14 Hovering over Sarah Chen card...");
+    console.log("5/14 Hovering over Sarah Chen card...");
     const sarahCard = page.locator("a:has-text('Sarah Chen')").first();
     if (await sarahCard.isVisible()) {
       const box = await sarahCard.boundingBox();
       if (box) {
-        await smoothMove(page, WIDTH / 2, HEIGHT / 2, box.x + box.width / 2, box.y + box.height / 2, 600);
+        await smoothMove(page, box.x - 100, box.y + 40, box.x + box.width / 2, box.y + box.height / 2, 600);
         await sleep(600);
       }
     }
 
-    console.log("5/14 Clicking email button — showing email composer...");
+    console.log("6/14 Clicking email button — showing email composer...");
     const emailBtn = page.locator('button[title="Email"]').first();
     if (await emailBtn.isVisible()) {
       const box = await emailBtn.boundingBox();
@@ -98,20 +112,20 @@ async function main() {
         await smoothMove(page, box.x - 80, box.y, box.x + box.width / 2, box.y + box.height / 2, 300);
         await sleep(300);
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-        // Wait for typing animation to play (the email body types out)
+        // Wait for typing animation to play
         await sleep(4000);
       }
     }
 
-    // Close email popup by clicking backdrop
-    console.log("6/14 Closing email popup...");
+    // Close email popup
+    console.log("7/14 Closing email popup...");
     await page.mouse.click(10, 10);
     await sleep(600);
 
     // ═══════════════════════════════════════════
-    // 7. CALL MOCKUP — Click call on Marcus Johnson
+    // 8. CALL MOCKUP — Click call on Marcus Johnson
     // ═══════════════════════════════════════════
-    console.log("7/14 Hovering over Marcus Johnson...");
+    console.log("8/14 Hovering over Marcus Johnson...");
     const marcusCard = page.locator("a:has-text('Marcus Johnson')").first();
     if (await marcusCard.isVisible()) {
       const box = await marcusCard.boundingBox();
@@ -121,7 +135,7 @@ async function main() {
       }
     }
 
-    console.log("8/14 Clicking call button — showing call screen...");
+    console.log("9/14 Clicking call button — showing call screen...");
     const callBtn = page.locator('button[title="Call"]').first();
     if (await callBtn.isVisible()) {
       const box = await callBtn.boundingBox();
@@ -134,17 +148,15 @@ async function main() {
       }
     }
 
-    // Close call popup by clicking the red end-call button
-    console.log("9/14 Ending call...");
-    const endCallBtn = page.locator("button:has(svg)").filter({ has: page.locator("[data-lucide='phone-off']") }).first();
-    // Fallback: click backdrop
+    // Close call popup
+    console.log("10/14 Ending call...");
     await page.mouse.click(10, 10);
     await sleep(600);
 
     // ═══════════════════════════════════════════
-    // 10. TEXT MOCKUP — Click text on Marcus Johnson
+    // 11. TEXT MOCKUP — Click text on Marcus Johnson
     // ═══════════════════════════════════════════
-    console.log("10/14 Clicking text button — showing message thread...");
+    console.log("11/14 Clicking text button — showing message thread...");
     const textBtn = page.locator('button[title="Text"]').first();
     if (await textBtn.isVisible()) {
       const box = await textBtn.boundingBox();
@@ -158,14 +170,14 @@ async function main() {
     }
 
     // Close text popup
-    console.log("11/14 Closing text popup...");
+    console.log("12/14 Closing text popup...");
     await page.mouse.click(10, 10);
     await sleep(600);
 
     // ═══════════════════════════════════════════
-    // 12. STAGE CHANGE — Move Emily to Showing
+    // 13. STAGE CHANGE — Move Emily to Showing
     // ═══════════════════════════════════════════
-    console.log("12/12 Opening stage dropdown on Emily Rodriguez...");
+    console.log("13/14 Opening stage dropdown on Emily Rodriguez...");
     const dropdown = page.locator("button:has-text('Contacted')").first();
     if (await dropdown.isVisible()) {
       const box = await dropdown.boundingBox();
@@ -177,7 +189,7 @@ async function main() {
       }
     }
 
-    console.log("13/14 Moving Emily Rodriguez to Showing stage...");
+    console.log("14/14 Moving Emily Rodriguez to Showing stage...");
     const showingOption = page.locator("button:has-text('Showing')").last();
     if (await showingOption.isVisible()) {
       const box = await showingOption.boundingBox();
@@ -189,9 +201,8 @@ async function main() {
       }
     }
 
-    // 14. Final view
-    console.log("14/14 Final view...");
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    // Final hold
+    console.log("Final view...");
     await sleep(1500);
 
     console.log("Recording complete!");
