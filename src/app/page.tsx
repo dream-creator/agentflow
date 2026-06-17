@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { StickyHeader } from "@/components/layout/sticky-header";
 import { HowItWorks } from "@/components/landing/how-it-works";
+import { ReducedMotionVideo } from "@/components/reduced-motion-video";
 
 // Lazy-load: only needed when Supabase OAuth drops ?code= on root
 // Removes ~165KB Supabase client from the landing page bundle
@@ -25,7 +26,6 @@ import {
   CheckCircle2,
   Contact,
   GitBranch,
-  CalendarCheck,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -85,7 +85,7 @@ export default function LandingPage() {
               </ScrollReveal>
             </div>
 
-            {/* Right: Product Mockup */}
+            {/* Right: Product Demo Video */}
             <ScrollReveal variant="hero" delay={180}>
               <div className="relative">
                 <div className="bg-surface-50 rounded-2xl border border-surface-200 p-1 shadow-xl">
@@ -99,56 +99,31 @@ export default function LandingPage() {
                       </div>
                       <div className="flex-1 text-center">
                         <div className="inline-block bg-surface-100 rounded-md px-3 py-1 text-xs text-surface-500">
-                          app.agent-flow.app/dashboard
+                          app.agent-flow.app/pipeline
                         </div>
                       </div>
                     </div>
 
-                    {/* App UI Mockup - Today's Follow-ups */}
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-6">
-                        <div>
-                          <h3 className="font-heading text-lg font-semibold text-surface-900">Today&apos;s Follow-ups</h3>
-                          <p className="text-sm text-surface-500">3 contacts due today</p>
-                        </div>
-                        <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center">
-                          <CalendarCheck className="h-5 w-5 text-primary" />
-                        </div>
-                      </div>
+                    {/* Demo video — plays in loop, muted, autoplay */}
+                    <div className="relative bg-white">
+                      <ReducedMotionVideo
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        className="w-full h-auto block"
+                        aria-label="AgentFlow pipeline demo showing lead management and stage transitions"
+                      >
+                        <source src="/hero-demo.webm" type="video/webm" />
+                      </ReducedMotionVideo>
 
-                      {/* Contact card mockup */}
-                      <div className="space-y-2">
-                        {[
-                          { name: "Sarah Chen", phone: "(555) 123-4567", stage: "Showing", time: "10:00 AM", color: "bg-primary", overdue: false },
-                          { name: "Mike O'Brien", phone: "(555) 987-6543", stage: "New Lead", time: "2:30 PM", color: "bg-accent", overdue: false },
-                          { name: "Jennifer Rodriguez-Martinez", phone: "(555) 456-7890", stage: "Offer", time: "4:00 PM", color: "bg-warning-500", overdue: true },
-                        ].map((contact, i) => (
-                          <div key={i} className={`flex items-center justify-between p-3 bg-white rounded-lg border ${contact.overdue ? "border-warning-200 bg-warning-50/30" : "border-surface-100"}`}>
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className={`w-8 h-8 rounded-full ${contact.color} bg-opacity-10 flex items-center justify-center shrink-0`}>
-                                <span className={`text-xs font-semibold ${contact.color === "bg-primary" ? "text-primary" : contact.color === "bg-accent" ? "text-accent" : "text-warning-600"}`}>
-                                  {contact.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                                </span>
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-surface-900 truncate">{contact.name}</p>
-                                <p className="text-[11px] text-surface-400 truncate">{contact.phone}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              {contact.overdue && (
-                                <span className="text-[10px] font-medium text-warning-600 bg-warning-100 px-1.5 py-0.5 rounded">
-                                  Overdue
-                                </span>
-                              )}
-                              <span className="text-[11px] text-surface-400">{contact.time}</span>
-                              <button aria-label="Call" className="w-7 h-7 rounded-md bg-primary text-white flex items-center justify-center">
-                                <Phone className="h-3 w-3" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      {/* Fallback for prefers-reduced-motion: show a static frame */}
+                      <noscript>
+                        <div className="p-6 text-center text-surface-500 text-sm">
+                          AgentFlow pipeline demo
+                        </div>
+                      </noscript>
                     </div>
                   </div>
                 </div>

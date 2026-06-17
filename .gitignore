@@ -41,6 +41,7 @@ next-env.d.ts
 # sensitive / internal docs
 ARCHITECTURE.md
 TEST_RELEASE_NOTES.txt
+SECURITY-AUDIT.md
 
 # env examples (do not commit)
 .env.local.example
