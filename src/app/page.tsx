@@ -23,7 +23,6 @@ import {
   Phone,
   Clock,
   ArrowRight,
-  CheckCircle2,
   Contact,
   GitBranch,
 } from "lucide-react";
@@ -44,105 +43,70 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="pt-24 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left: Copy */}
-            <div>
-              <ScrollReveal variant="hero">
-                <h1 className="font-heading text-4xl sm:text-5xl lg:text-[56px] font-bold text-surface-900 leading-[1.1] tracking-tight mb-6">
-                  The CRM for agents{" "}
-                  <span className="text-primary">who hate CRMs</span>
-                </h1>
-              </ScrollReveal>
-              <ScrollReveal variant="hero" delay={120}>
-                <p className="text-lg sm:text-xl text-surface-500 mb-8 max-w-xl leading-relaxed">
-                  Dead-simple contact management and follow-up for solo real estate
-                  agents. No bloat. No learning curve. Just who to call today.
-                </p>
-              </ScrollReveal>
+          {/* Centered text block */}
+          <div className="text-center max-w-3xl mx-auto">
+            <ScrollReveal variant="hero">
+              <h1 className="font-heading text-4xl sm:text-5xl lg:text-[56px] font-bold text-surface-900 leading-[1.1] tracking-tight mb-6">
+                The CRM for agents{" "}
+                <span className="text-primary">who hate CRMs</span>
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal variant="hero" delay={120}>
+              <p className="text-lg sm:text-xl text-surface-500 mb-8 max-w-xl mx-auto leading-relaxed">
+                Dead-simple contact management and follow-up for solo real estate
+                agents. No bloat. No learning curve. Just who to call today.
+              </p>
+            </ScrollReveal>
 
-              {/* Dual CTA */}
-              <ScrollReveal variant="hero" delay={240}>
-                <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                  <Link href="/signup">
-                    <Button size="lg" className="w-full sm:w-auto">
-                      Start for free
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
-                  <a href="#how-it-works">
-                    <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                      See how it works
-                    </Button>
-                  </a>
-                </div>
-              </ScrollReveal>
-
-              {/* Trust signal */}
-              <ScrollReveal variant="hero" delay={360}>
-                <p className="text-sm text-surface-500">
-                  Free to start. No credit card required.
-                </p>
-              </ScrollReveal>
-            </div>
-
-            {/* Right: Product Demo Video */}
-            <ScrollReveal variant="hero" delay={180}>
-              <div className="relative">
-                <div className="bg-surface-50 rounded-2xl border border-surface-200 p-1 shadow-xl">
-                  {/* Browser chrome */}
-                  <div className="bg-white rounded-card overflow-hidden">
-                    <div className="flex items-center gap-2 px-4 py-3 border-b border-surface-100">
-                      <div className="flex gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-surface-200" />
-                        <div className="w-3 h-3 rounded-full bg-surface-200" />
-                        <div className="w-3 h-3 rounded-full bg-surface-200" />
-                      </div>
-                      <div className="flex-1 text-center">
-                        <div className="inline-block bg-surface-100 rounded-md px-3 py-1 text-xs text-surface-500">
-                          app.agent-flow.app/pipeline
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Demo video — plays in loop, muted, autoplay */}
-                    <div className="relative bg-white">
-                      <ReducedMotionVideo
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        preload="auto"
-                        className="w-full h-auto block"
-                        aria-label="AgentFlow pipeline demo showing lead management and stage transitions"
-                      >
-                        <source src="/hero-demo.webm" type="video/webm" />
-                      </ReducedMotionVideo>
-
-                      {/* Fallback for prefers-reduced-motion: show a static frame */}
-                      <noscript>
-                        <div className="p-6 text-center text-surface-500 text-sm">
-                          AgentFlow pipeline demo
-                        </div>
-                      </noscript>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating badge — reveal-badge for slide-in feel */}
-                <ScrollReveal className="reveal-badge" delay={600}>
-                  <div className="absolute -bottom-3 -left-3 bg-white rounded-lg border border-surface-200 shadow-sm px-3 py-2 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-md bg-success-50 flex items-center justify-center">
-                      <CheckCircle2 className="h-4 w-4 text-success" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-surface-900">Follow-up complete</p>
-                      <p className="text-[11px] text-surface-400">Sarah Chen — 2 min ago</p>
-                    </div>
-                  </div>
-                </ScrollReveal>
+            {/* Dual CTA */}
+            <ScrollReveal variant="hero" delay={240}>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+                <Link href="/signup">
+                  <Button size="lg" className="w-full sm:w-auto">
+                    Start for free
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </Link>
+                <a href="#how-it-works">
+                  <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                    See how it works
+                  </Button>
+                </a>
               </div>
             </ScrollReveal>
+
+            {/* Trust signal */}
+            <ScrollReveal variant="hero" delay={360}>
+              <p className="text-sm text-surface-500">
+                Free to start. No credit card required.
+              </p>
+            </ScrollReveal>
           </div>
+
+          {/* Video demo — centered below text, frosted-glass container */}
+          <ScrollReveal variant="hero" delay={180}>
+            <div className="mt-16 w-full max-w-4xl mx-auto">
+              <div className="relative overflow-hidden rounded-xl bg-surface-50/80 backdrop-blur-sm border border-surface-200 shadow-2xl">
+                <ReducedMotionVideo
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  className="w-full h-auto block"
+                  aria-label="AgentFlow pipeline demo showing lead management and stage transitions"
+                >
+                  <source src="/hero-demo.webm" type="video/webm" />
+                </ReducedMotionVideo>
+
+                <noscript>
+                  <div className="p-6 text-center text-surface-500 text-sm">
+                    AgentFlow pipeline demo
+                  </div>
+                </noscript>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
