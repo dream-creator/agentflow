@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useLayoutEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Mail, Phone, MessageSquare, X, Send, PhoneOff } from "lucide-react";
 
 type ActionType = "email" | "call" | "text";
@@ -11,22 +12,32 @@ interface ActionPopupProps {
   leadEmail?: string | null;
   leadPhone?: string | null;
   onClose: () => void;
+  anchorRef?: React.RefObject<HTMLButtonElement | null>;
 }
+
+/** Width of each popup type (must match the w-* class) */
+const POPUP_WIDTHS: Record<ActionType, number> = {
+  email: 320,
+  call: 288,
+  text: 288,
+};
 
 /** Email composer mockup */
 function EmailComposer({
   leadName,
   leadEmail,
   onClose,
+  position,
 }: {
   leadName: string;
   leadEmail?: string | null;
   onClose: () => void;
+  position: { top: number; left: number };
 }) {
   const [typed, setTyped] = useState("");
   const fullText = `Hi ${leadName.split(" ")[0]},\n\nI wanted to follow up on the property we discussed. Are you available for a quick call this week?\n\nBest,\nYour Agent`;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let i = 0;
     const interval = setInterval(() => {
       if (i < fullText.length) {
@@ -40,7 +51,10 @@ function EmailComposer({
   }, [fullText]);
 
   return (
-    <div className="absolute bottom-full left-0 mb-2 w-80 bg-white rounded-xl shadow-2xl border border-surface-200 overflow-hidden z-30 animate-in slide-in-from-bottom-2 fade-in duration-200">
+    <div
+      className="w-80 bg-white rounded-xl shadow-2xl border border-surface-200 overflow-hidden z-50 animate-in slide-in-from-bottom-2 fade-in duration-200"
+      style={{ position: "fixed", top: position.top, left: position.left }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-surface-50 border-b border-surface-200">
         <div className="flex items-center gap-2">
@@ -93,14 +107,16 @@ function CallScreen({
   leadName,
   leadPhone,
   onClose,
+  position,
 }: {
   leadName: string;
   leadPhone?: string | null;
   onClose: () => void;
+  position: { top: number; left: number };
 }) {
   const [seconds, setSeconds] = useState(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const interval = setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => clearInterval(interval);
   }, []);
@@ -109,7 +125,10 @@ function CallScreen({
   const secs = seconds % 60;
 
   return (
-    <div className="absolute bottom-full left-0 mb-2 w-72 bg-gradient-to-b from-surface-900 to-surface-800 rounded-2xl shadow-2xl overflow-hidden z-30 animate-in slide-in-from-bottom-2 fade-in duration-200">
+    <div
+      className="w-72 bg-gradient-to-b from-surface-900 to-surface-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in slide-in-from-bottom-2 fade-in duration-200"
+      style={{ position: "fixed", top: position.top, left: position.left }}
+    >
       {/* Status bar */}
       <div className="px-4 pt-4 pb-2 text-center">
         <p className="text-[10px] text-green-400 font-medium tracking-wider uppercase">Calling</p>
@@ -147,20 +166,25 @@ function TextMessage({
   leadName,
   leadPhone,
   onClose,
+  position,
 }: {
   leadName: string;
   leadPhone?: string | null;
   onClose: () => void;
+  position: { top: number; left: number };
 }) {
   const [showReply, setShowReply] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const timer = setTimeout(() => setShowReply(true), 1500);
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="absolute bottom-full left-0 mb-2 w-72 bg-white rounded-xl shadow-2xl border border-surface-200 overflow-hidden z-30 animate-in slide-in-from-bottom-2 fade-in duration-200">
+    <div
+      className="w-72 bg-white rounded-xl shadow-2xl border border-surface-200 overflow-hidden z-50 animate-in slide-in-from-bottom-2 fade-in duration-200"
+      style={{ position: "fixed", top: position.top, left: position.left }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-surface-50 border-b border-surface-200">
         <div className="flex items-center gap-2">
@@ -207,30 +231,87 @@ function TextMessage({
   );
 }
 
-/** Main ActionPopup wrapper */
+/** Main ActionPopup wrapper — uses React Portal to escape overflow containers */
 export function ActionPopup({
   action,
   leadName,
   leadEmail,
   leadPhone,
   onClose,
+  anchorRef,
 }: ActionPopupProps) {
-  if (!action) return null;
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
 
-  return (
+  // Calculate popup position using useLayoutEffect to avoid flash at (0,0)
+  useLayoutEffect(() => {
+    if (!action || !anchorRef?.current) {
+      setPosition(null);
+      return;
+    }
+
+    const updatePosition = () => {
+      const rect = anchorRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const popupWidth = POPUP_WIDTHS[action];
+      const spacing = 8;
+      const viewportMargin = 8;
+
+      // Try to position above the button first
+      let top = rect.top - spacing;
+      let left = rect.left;
+
+      // Prefer left-aligned with the button, but shift left if popup overflows right edge
+      if (left + popupWidth > window.innerWidth - viewportMargin) {
+        left = window.innerWidth - popupWidth - viewportMargin;
+      }
+      if (left < viewportMargin) {
+        left = viewportMargin;
+      }
+
+      // Position ABOVE the button — always. These are small popups that look best
+      // anchored above their trigger. The video demo page has no sidebar/header
+      // so there's always enough space above.
+      // Use a generous estimate for popup height
+      const estimatedPopupHeight = 280;
+      top = rect.top - estimatedPopupHeight - spacing;
+
+      // Only flip below if there truly isn't enough room above (e.g. near top of viewport)
+      if (top < viewportMargin) {
+        top = rect.bottom + spacing;
+      }
+
+      setPosition({ top, left });
+    };
+
+    updatePosition();
+
+    // Update position on scroll/resize to keep popup anchored
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [action, anchorRef]);
+
+  if (!action || !position) return null;
+
+  return createPortal(
     <>
       {/* Backdrop to catch outside clicks */}
-      <div className="fixed inset-0 z-20" onClick={onClose} />
+      <div className="fixed inset-0 z-40" onClick={onClose} />
 
       {action === "email" && (
-        <EmailComposer leadName={leadName} leadEmail={leadEmail} onClose={onClose} />
+        <EmailComposer leadName={leadName} leadEmail={leadEmail} onClose={onClose} position={position} />
       )}
       {action === "call" && (
-        <CallScreen leadName={leadName} leadPhone={leadPhone} onClose={onClose} />
+        <CallScreen leadName={leadName} leadPhone={leadPhone} onClose={onClose} position={position} />
       )}
       {action === "text" && (
-        <TextMessage leadName={leadName} leadPhone={leadPhone} onClose={onClose} />
+        <TextMessage leadName={leadName} leadPhone={leadPhone} onClose={onClose} position={position} />
       )}
-    </>
+    </>,
+    document.body
   );
 }
