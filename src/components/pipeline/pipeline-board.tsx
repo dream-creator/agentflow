@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { Database } from "@/types";
+import { ActionPopup } from "@/components/action-popup";
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
 
@@ -64,9 +65,20 @@ function LeadCard({
   onStageChange: (leadId: string, newStage: string) => void;
 }) {
   const [showStageMenu, setShowStageMenu] = useState(false);
+  const [activePopup, setActivePopup] = useState<"email" | "call" | "text" | null>(null);
+  const callButtonRef = useRef<HTMLButtonElement>(null);
+  const emailButtonRef = useRef<HTMLButtonElement>(null);
+  const textButtonRef = useRef<HTMLButtonElement>(null);
   const score = getLeadScore(lead);
   const isOverdue =
     lead.next_action_date && lead.next_action_date < new Date().toISOString().split("T")[0];
+
+  const getAnchorRef = () => {
+    if (activePopup === "call") return callButtonRef;
+    if (activePopup === "email") return emailButtonRef;
+    if (activePopup === "text") return textButtonRef;
+    return undefined;
+  };
 
   return (
     <Card
@@ -136,34 +148,48 @@ function LeadCard({
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex items-center gap-1">
+          <div className="relative flex items-center gap-1">
             {lead.phone && (
-              <a
-                href={`tel:${lead.phone}`}
+              <button
+                ref={callButtonRef}
+                type="button"
+                onClick={() => setActivePopup(activePopup === "call" ? null : "call")}
                 className="p-1.5 rounded-lg text-surface-400 hover:text-green-600 hover:bg-green-50 transition-colors"
                 title="Call"
               >
                 <Phone className="h-3.5 w-3.5" />
-              </a>
+              </button>
             )}
             {lead.email && (
-              <a
-                href={`mailto:${lead.email}`}
+              <button
+                ref={emailButtonRef}
+                type="button"
+                onClick={() => setActivePopup(activePopup === "email" ? null : "email")}
                 className="p-1.5 rounded-lg text-surface-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                 title="Email"
               >
                 <Mail className="h-3.5 w-3.5" />
-              </a>
+              </button>
             )}
             {lead.phone && (
-              <a
-                href={`sms:${lead.phone}`}
+              <button
+                ref={textButtonRef}
+                type="button"
+                onClick={() => setActivePopup(activePopup === "text" ? null : "text")}
                 className="p-1.5 rounded-lg text-surface-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
                 title="Text"
               >
                 <MessageSquare className="h-3.5 w-3.5" />
-              </a>
+              </button>
             )}
+            <ActionPopup
+              action={activePopup}
+              leadName={lead.full_name}
+              leadEmail={lead.email}
+              leadPhone={lead.phone}
+              onClose={() => setActivePopup(null)}
+              anchorRef={getAnchorRef()}
+            />
           </div>
         </div>
       </div>
