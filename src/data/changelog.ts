@@ -19,6 +19,32 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "hero-demo-video",
+    date: "2026-06-17",
+    version: "0.24.0",
+    title: "Live hero demo video + security hardening + landing page audit",
+    summary:
+      "The landing page hero now shows a real, clickable product demo instead of a static mockup. We also completed a full frontend audit, fixed 20+ design and accessibility issues, and shipped two security fixes.",
+    items: [
+      "Hero: replaced static SVG mockup with a live 25-second pipeline demo video (autoplay, loop, muted)",
+      "Hero: click-to-fullscreen video modal with smooth scale/opacity transition",
+      "Demo video shows real workflow: email composer, call screen, and text messaging",
+      "Action popups restyled to match site design (white bg, teal accents, orange CTAs)",
+      "Hero content now visible immediately — no scroll-reveal delay on first load",
+      "Integration grid: removed fabricated claims (Zillow, Realtor.com, MLS), replaced with real capabilities",
+      "Scroll-reveal overuse reduced (14 → 8 animated elements)",
+      "Feature mock cards unified: consistent layout, equal heights, matching dimensions",
+      "Added JSON-LD structured data and canonical URL for SEO",
+      "Pricing toggle now has role='switch' and aria-checked for accessibility",
+      "Footer 'All rights reserved' removed",
+      "Contrast fixes: surface-400 → surface-500 across integration grid and HowItWorks",
+      "Added <main> landmark, prefers-reduced-motion on scroll-behavior, flattened card-elevated shadow",
+      "Security: auth callback redirect validated via URL origin check (open redirect fix)",
+      "Security: middleware now fails closed when Supabase env vars are missing",
+      "Security: escapeHtml applied to user names in daily digest email body",
+    ],
+  },
+  {
     id: "landing-scroll-reveal",
     date: "2026-06-13",
     version: "0.23.0",
@@ -67,7 +93,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     summary:
       "The landing page gets a real integration showcase, a unified teal color system, and better visual hierarchy with subtle shadows. Small cleanup across the codebase for consistency.",
     items: [
-      "Replaced StatsBar with Integration Ecosystem Grid showing real tools (Zillow, Realtor.com, Google Calendar, Phone & SMS, Email, MLS)",
+      "Replaced StatsBar with built-in tools grid (Phone & SMS, Email, Google Calendar, CSV Import, Map Location, Daily Digest)",
       "Unified button color: all CTAs now use teal instead of orange",
       "Card border-radius standardized to 10px across all components",
       "Added subtle shadows back to cards for better visual depth",
