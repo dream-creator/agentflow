@@ -91,7 +91,7 @@ async function main() {
     }
 
     console.log("5/14 Clicking email button — showing email composer...");
-    const emailBtn = page.locator('a[title="Email"]').first();
+    const emailBtn = page.locator('button[title="Email"]').first();
     if (await emailBtn.isVisible()) {
       const box = await emailBtn.boundingBox();
       if (box) {
@@ -122,7 +122,7 @@ async function main() {
     }
 
     console.log("8/14 Clicking call button — showing call screen...");
-    const callBtn = page.locator('a[title="Call"]').first();
+    const callBtn = page.locator('button[title="Call"]').first();
     if (await callBtn.isVisible()) {
       const box = await callBtn.boundingBox();
       if (box) {
@@ -145,7 +145,7 @@ async function main() {
     // 10. TEXT MOCKUP — Click text on Marcus Johnson
     // ═══════════════════════════════════════════
     console.log("10/14 Clicking text button — showing message thread...");
-    const textBtn = page.locator('a[title="Text"]').first();
+    const textBtn = page.locator('button[title="Text"]').first();
     if (await textBtn.isVisible()) {
       const box = await textBtn.boundingBox();
       if (box) {
