@@ -1,5 +1,6 @@
 /**
  * Records a hero demo video of the pipeline page.
+ * Showcases: lead cards, action buttons (email/call/text), stage changes, and pipeline flow.
  *
  * Usage: npx tsx scripts/record-hero-video.ts
  *
@@ -7,7 +8,7 @@
  *   - Dev server running on localhost:3000
  *   - playwright browsers installed
  *
- * Output: public/hero-demo.webm (~15s loop)
+ * Output: public/hero-demo.webm (~18s loop)
  */
 
 import { chromium, type Page } from "playwright";
@@ -60,7 +61,7 @@ async function main() {
 
   try {
     // 1. Navigate to demo page
-    console.log("1/8 Navigating to demo pipeline page...");
+    console.log("1/12 Navigating to demo pipeline page...");
     await page.goto(`${BASE_URL}/demo`, { waitUntil: "networkidle" });
     await sleep(1500);
 
@@ -68,20 +69,20 @@ async function main() {
     await page.waitForSelector("h1:has-text('Pipeline')", { timeout: 10000 });
     await sleep(800);
 
-    // 2. Initial static view — let viewer absorb layout
-    console.log("2/8 Holding initial view...");
+    // 2. Initial static view — let viewer absorb the full pipeline layout
+    console.log("2/12 Holding initial view...");
     await sleep(2000);
 
-    // 3. Slow scroll to reveal "Contacted" and "Showing" stages
-    console.log("3/8 Scrolling down to reveal stages...");
-    await page.evaluate(() => window.scrollTo({ top: 180, behavior: "smooth" }));
-    await sleep(1500);
+    // 3. Scroll down to reveal "New Lead" and "Contacted" stages with action buttons
+    console.log("3/12 Scrolling to reveal lead cards...");
+    await page.evaluate(() => window.scrollTo({ top: 120, behavior: "smooth" }));
+    await sleep(1200);
 
-    // 4. Hover over Sarah Chen card — show hover state
-    console.log("4/8 Hovering over lead card...");
-    const sarahName = page.locator("a:has-text('Sarah Chen')").first();
-    if (await sarahName.isVisible()) {
-      const box = await sarahName.boundingBox();
+    // 4. Hover over Sarah Chen card — reveal action buttons (email, call, text)
+    console.log("4/12 Hovering over Sarah Chen card to show action buttons...");
+    const sarahCard = page.locator("a:has-text('Sarah Chen')").first();
+    if (await sarahCard.isVisible()) {
+      const box = await sarahCard.boundingBox();
       if (box) {
         await smoothMove(
           page,
@@ -89,36 +90,115 @@ async function main() {
           HEIGHT / 2,
           box.x + box.width / 2,
           box.y + box.height / 2,
-          700
+          600
         );
-        await sleep(1000);
+        await sleep(800);
       }
     }
 
-    // 5. Click the stage dropdown on a card
-    console.log("5/8 Opening stage dropdown...");
-    const dropdowns = page.locator("button:has-text('New Lead')").first();
-    if (await dropdowns.isVisible()) {
-      const box = await dropdowns.boundingBox();
+    // 5. Click the Email button on Sarah Chen — showcase email interaction
+    console.log("5/12 Clicking email button on Sarah Chen...");
+    const emailBtn = page.locator('a[title="Email"]').first();
+    if (await emailBtn.isVisible()) {
+      const box = await emailBtn.boundingBox();
       if (box) {
         await smoothMove(
           page,
-          box.x - 100,
+          box.x - 80,
+          box.y,
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+          300
+        );
+        await sleep(400);
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await sleep(1200);
+      }
+    }
+
+    // 6. Hover over Marcus Johnson — show call button
+    console.log("6/12 Hovering over Marcus Johnson to show call button...");
+    const marcusCard = page.locator("a:has-text('Marcus Johnson')").first();
+    if (await marcusCard.isVisible()) {
+      const box = await marcusCard.boundingBox();
+      if (box) {
+        await smoothMove(
+          page,
+          box.x + box.width / 2,
           box.y,
           box.x + box.width / 2,
           box.y + box.height / 2,
           400
         );
-        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-        await sleep(1000);
+        await sleep(600);
       }
     }
 
-    // 6. Click "Contacted" in dropdown to move the lead
-    console.log("6/8 Moving lead to Contacted stage...");
-    const contactedOption = page.locator("button:has-text('Contacted')").last();
-    if (await contactedOption.isVisible()) {
-      const box = await contactedOption.boundingBox();
+    // 7. Click the Call button on Marcus Johnson — showcase calling interaction
+    console.log("7/12 Clicking call button on Marcus Johnson...");
+    const callBtn = page.locator('a[title="Call"]').first();
+    if (await callBtn.isVisible()) {
+      const box = await callBtn.boundingBox();
+      if (box) {
+        await smoothMove(
+          page,
+          box.x + box.width / 2,
+          box.y - 30,
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+          250
+        );
+        await sleep(400);
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await sleep(1200);
+      }
+    }
+
+    // 8. Click the Text button on Marcus Johnson — showcase messaging interaction
+    console.log("8/12 Clicking text button on Marcus Johnson...");
+    const textBtn = page.locator('a[title="Text"]').first();
+    if (await textBtn.isVisible()) {
+      const box = await textBtn.boundingBox();
+      if (box) {
+        await smoothMove(
+          page,
+          box.x + box.width / 2,
+          box.y,
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+          250
+        );
+        await sleep(400);
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await sleep(1200);
+      }
+    }
+
+    // 9. Click the stage dropdown on Emily Rodriguez — show stage management
+    console.log("9/12 Opening stage dropdown on Emily Rodriguez...");
+    const dropdown = page.locator("button:has-text('Contacted')").first();
+    if (await dropdown.isVisible()) {
+      const box = await dropdown.boundingBox();
+      if (box) {
+        await smoothMove(
+          page,
+          box.x - 120,
+          box.y,
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+          400
+        );
+        await sleep(500);
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+        await sleep(800);
+      }
+    }
+
+    // 10. Move Emily to "Showing" stage — demonstrate pipeline progression
+    console.log("10/12 Moving Emily Rodriguez to Showing stage...");
+    const showingOption = page.locator("button:has-text('Showing')").last();
+    if (await showingOption.isVisible()) {
+      const box = await showingOption.boundingBox();
       if (box) {
         await smoothMove(
           page,
@@ -128,14 +208,15 @@ async function main() {
           box.y + box.height / 2,
           300
         );
+        await sleep(400);
         await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
         await sleep(1200);
       }
     }
 
-    // 7. Scroll down to show Closed Won
-    console.log("7/8 Scrolling to show more stages...");
-    await page.evaluate(() => window.scrollTo({ top: 450, behavior: "smooth" }));
+    // 11. Scroll down to show Offer and Closed Won stages
+    console.log("11/12 Scrolling to show Offer and Closed Won...");
+    await page.evaluate(() => window.scrollTo({ top: 500, behavior: "smooth" }));
     await sleep(1500);
 
     // Hover over Alex Martinez (Closed Won)
@@ -155,8 +236,8 @@ async function main() {
       }
     }
 
-    // 8. Scroll back to top for final view
-    console.log("8/8 Final view at top...");
+    // 12. Scroll back to top for final view
+    console.log("12/12 Final view at top...");
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
     await sleep(2000);
 
