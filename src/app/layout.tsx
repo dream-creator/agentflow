@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   description:
     "Dead-simple contact management and follow-up for solo real estate agents. No automations. No dashboards. Just who to call today.",
   manifest: "/manifest.json",
+  alternates: {
+    canonical: appUrl,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -79,6 +82,54 @@ export default function RootLayout({
         {/* DNS-prefetch for third-party analytics and error tracking */}
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
         <link rel="dns-prefetch" href="https://browser.sentry-cdn.com" />
+        {/* JSON-LD structured data for Google rich snippets */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "AgentFlow",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              description:
+                "Dead-simple contact management and follow-up for solo real estate agents.",
+              url: appUrl,
+              offers: {
+                "@type": "AggregateOffer",
+                lowPrice: "0",
+                highPrice: "8",
+                priceCurrency: "USD",
+                offerCount: "2",
+                offers: [
+                  {
+                    "@type": "Offer",
+                    price: "0",
+                    priceCurrency: "USD",
+                    name: "Free",
+                    description: "10 active leads, 10 pipelines, daily email digest",
+                  },
+                  {
+                    "@type": "Offer",
+                    price: "8",
+                    priceCurrency: "USD",
+                    name: "Pro",
+                    description: "Unlimited leads, unlimited pipelines, priority support",
+                    priceSpecification: {
+                      "@type": "UnitPriceSpecification",
+                      price: "8",
+                      priceCurrency: "USD",
+                      billingDuration: "P1M",
+                    },
+                  },
+                ],
+              },
+              applicationSubCategory: "CRM, Real Estate Software",
+              featureList:
+                "Contact management, Pipeline tracking, Daily follow-up, CSV import, Lead scoring",
+            }),
+          }}
+        />
       </head>
       <body className="font-body antialiased min-h-screen">
         <a href="#main-content" className="skip-to-content">

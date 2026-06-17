@@ -7,6 +7,6 @@ export const footerLinks = {
   product: [
     { label: "Pricing", href: "/#pricing" },
     { label: "Features", href: "/#features" },
-    { label: "How it Works", href: "/#features" },
+    { label: "How it Works", href: "/#how-it-works" },
   ],
 };

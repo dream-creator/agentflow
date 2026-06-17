@@ -51,7 +51,7 @@ export default function IntegrationGrid() {
   return (
     <section
       aria-label="Integrations"
-      className="py-12 px-4 sm:px-6 bg-white"
+      className="py-20 sm:py-24 px-4 sm:px-6 bg-white"
     >
       <div className="max-w-3xl mx-auto">
         {/* Heading */}
@@ -76,7 +76,7 @@ export default function IntegrationGrid() {
               <div
                 key={integration.name}
                 role="listitem"
-                className="group flex items-start gap-4 p-5 rounded-card border border-surface-200 bg-surface-50 shadow-sm hover:border-primary-200 hover:shadow-md transition-all cursor-default"
+                className="group flex items-start gap-4 p-5 rounded-card border border-surface-200 bg-surface-50 hover:border-primary-200 transition-all cursor-default"
               >
                 <div
                   className={`w-11 h-11 rounded-xl ${integration.bgColor} flex items-center justify-center shrink-0`}
@@ -98,7 +98,11 @@ export default function IntegrationGrid() {
 
         {/* Subtle note */}
         <p className="text-center text-sm text-surface-400 mt-8">
-          More integrations coming soon
+          Don&apos;t see your tool?{" "}
+          <a href="mailto:support@agent-flow.app" className="text-primary hover:underline">
+            Tell us
+          </a>{" "}
+          — we&apos;ll build it.
         </p>
       </div>
     </section>

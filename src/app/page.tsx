@@ -67,11 +67,11 @@ export default function LandingPage() {
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
-                <a href="#how-it-works">
+                <Link href="/#how-it-works">
                   <Button variant="secondary" size="lg" className="w-full sm:w-auto rounded-full">
                     See how it works
                   </Button>
-                </a>
+                </Link>
               </div>
             </ScrollReveal>
 
@@ -161,7 +161,7 @@ export default function LandingPage() {
               {
                 icon: <Contact className="h-5 w-5" />,
                 title: "Contacts",
-                desc: "Name, phone, email, source. No custom fields. No tags taxonomy.",
+                desc: "Name, phone, email, and source. Everything you need, nothing you don't.",
                 preview: (
                   <div className="mt-4 p-3 bg-white rounded-lg border border-surface-100 text-left h-20 flex flex-col justify-between">
                     <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function LandingPage() {
               {
                 icon: <GitBranch className="h-5 w-5" />,
                 title: "Pipeline",
-                desc: "See where every lead stands. New → Contacted → Showing → Offer → Closed.",
+                desc: "See where every lead stands. Tap to move between stages.",
                 preview: (
                   <div className="mt-4 p-3 bg-white rounded-lg border border-surface-100 text-left h-20 flex flex-col justify-between">
                     <div className="flex items-center gap-2">
@@ -209,7 +209,7 @@ export default function LandingPage() {
               {
                 icon: <Clock className="h-5 w-5" />,
                 title: "Daily Follow-up",
-                desc: "Open the app. See who to call today. That's the whole app.",
+                desc: "Open the app. See exactly who to call today.",
                 preview: (
                   <div className="mt-4 p-3 bg-white rounded-lg border border-surface-100 text-left h-20 flex flex-col justify-between">
                     <div className="flex items-center gap-2">
@@ -232,7 +232,7 @@ export default function LandingPage() {
               },
             ].map((item, i) => (
               <ScrollReveal key={i} variant="content" delay={200 + i * 120}>
-                <div className="card-elevated text-left flex flex-col feature-card-hover hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-default">
+                <div className="card-elevated text-left flex flex-col feature-card-hover hover:-translate-y-1 transition-all duration-200 cursor-default">
                   <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary flex items-center justify-center mb-4 shrink-0">
                     {item.icon}
                   </div>

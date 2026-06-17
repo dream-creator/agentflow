@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home } from "lucide-react";
@@ -10,11 +10,14 @@ export function StickyHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const onScroll = useCallback(() => {
+    setScrolled(window.scrollY > 60);
+  }, []);
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [onScroll]);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -73,6 +76,7 @@ export function StickyHeader() {
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden w-11 h-11 flex items-center justify-center rounded-lg hover:bg-surface-100 transition-colors cursor-pointer"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
