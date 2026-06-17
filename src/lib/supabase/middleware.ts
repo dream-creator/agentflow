@@ -10,6 +10,18 @@ export async function updateSession(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
+    // Fail-closed: when Supabase is not configured, block protected routes
+    // instead of silently passing them through without authentication.
+    const protectedPaths = ["/dashboard", "/pipeline", "/leads", "/follow-ups", "/settings", "/api/leads", "/api/pipeline"];
+    const isProtected = protectedPaths.some((path) =>
+      request.nextUrl.pathname.startsWith(path)
+    );
+    if (isProtected) {
+      return new NextResponse("Authentication service unavailable", {
+        status: 503,
+        headers: { "Content-Type": "text/plain" },
+      });
+    }
     return supabaseResponse;
   }
 
