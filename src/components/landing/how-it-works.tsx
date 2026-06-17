@@ -43,7 +43,7 @@ const StepItem = memo(function StepItem({
           className={`w-12 h-12 rounded-2xl flex items-center justify-center font-heading text-lg font-bold shrink-0 transition-all duration-200 cursor-pointer ${
             isActive
               ? "bg-primary text-white"
-              : "bg-surface-100 text-surface-400 hover:bg-surface-200 hover:text-surface-600"
+              : "bg-surface-100 text-surface-500 hover:bg-surface-200 hover:text-surface-700"
           }`}
         >
           {item.step}
@@ -52,7 +52,7 @@ const StepItem = memo(function StepItem({
           className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200 ${
             isActive
               ? "bg-primary-50 text-primary"
-              : "bg-surface-50 text-surface-300"
+              : "bg-surface-50 text-surface-400"
           }`}
         >
           {item.icon}

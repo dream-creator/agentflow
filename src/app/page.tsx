@@ -35,58 +35,50 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-dvh bg-white" id="main-content">
+    <div className="min-h-dvh bg-white">
       <AuthCallbackRescue />
 
       <StickyHeader />
 
-      {/* Hero */}
+      <main id="main-content">
+
+      {/* Hero — visible immediately, no scroll-reveal */}
       <section className="pt-24 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           {/* Centered text block */}
           <div className="text-center max-w-3xl mx-auto">
-            <ScrollReveal variant="hero">
-              <h1 className="font-heading text-4xl sm:text-5xl lg:text-[56px] font-bold text-surface-900 leading-[1.1] tracking-tight mb-6">
-                The CRM for agents{" "}
-                <span className="text-primary">who hate CRMs</span>
-              </h1>
-            </ScrollReveal>
-            <ScrollReveal variant="hero" delay={120}>
-              <p className="text-lg sm:text-xl text-surface-500 mb-8 max-w-xl mx-auto leading-relaxed">
-                Dead-simple contact management and follow-up for solo real estate
-                agents. No bloat. No learning curve. Just who to call today.
-              </p>
-            </ScrollReveal>
+            <h1 className="font-heading text-4xl sm:text-5xl lg:text-[56px] font-bold text-surface-900 leading-[1.1] tracking-tight mb-6">
+              The CRM for agents{" "}
+              <span className="text-primary">who hate CRMs</span>
+            </h1>
+            <p className="text-lg sm:text-xl text-surface-500 mb-8 max-w-xl mx-auto leading-relaxed">
+              Dead-simple contact management and follow-up for solo real estate
+              agents. No bloat. No learning curve. Just who to call today.
+            </p>
 
             {/* Dual CTA */}
-            <ScrollReveal variant="hero" delay={240}>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
-                <Link href="/signup">
-                  <Button size="lg" className="w-full sm:w-auto rounded-full">
-                    Start for free
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </Link>
-                <Link href="/#how-it-works">
-                  <Button variant="secondary" size="lg" className="w-full sm:w-auto rounded-full">
-                    See how it works
-                  </Button>
-                </Link>
-              </div>
-            </ScrollReveal>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+              <Link href="/signup">
+                <Button size="lg" className="w-full sm:w-auto rounded-full">
+                  Start for free
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/#how-it-works">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto rounded-full">
+                  See how it works
+                </Button>
+              </Link>
+            </div>
 
             {/* Trust signal */}
-            <ScrollReveal variant="hero" delay={360}>
-              <p className="text-sm text-surface-500">
-                Free to start. No credit card required.
-              </p>
-            </ScrollReveal>
+            <p className="text-sm text-surface-500">
+              Free to start. No credit card required.
+            </p>
           </div>
 
           {/* Video demo — centered below text, frosted-glass container */}
-          <ScrollReveal variant="hero" delay={180}>
-            <HeroDemo />
-          </ScrollReveal>
+          <HeroDemo />
         </div>
       </section>
 
@@ -249,52 +241,40 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <ScrollReveal>
-        <HowItWorks />
-      </ScrollReveal>
+      <HowItWorks />
 
       {/* Pricing */}
       <section id="pricing" className="py-20 sm:py-24 px-4 sm:px-6 section-alt">
         <div className="max-w-3xl mx-auto text-center">
-          <ScrollReveal>
-            <h2 className="section-heading mb-4">
-              Simple pricing
-            </h2>
-          </ScrollReveal>
-          <ScrollReveal delay={100}>
-            <p className="section-subheading mb-8">
-              Less than one lunch per month. Zero guilt.
-            </p>
-          </ScrollReveal>
-          <ScrollReveal variant="conversion" delay={200}>
-            <LandingPricing />
-          </ScrollReveal>
+          <h2 className="section-heading mb-4">
+            Simple pricing
+          </h2>
+          <p className="section-subheading mb-8">
+            Less than one lunch per month. Zero guilt.
+          </p>
+          <LandingPricing />
         </div>
       </section>
 
       {/* Final CTA */}
       <section className="py-20 sm:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <ScrollReveal>
-            <h2 className="section-heading mb-4">
-              Stop losing leads to bad tools
-            </h2>
-          </ScrollReveal>
-          <ScrollReveal delay={100}>
-            <p className="section-subheading mb-8">
-              Join solo agents who actually use their CRM daily.
-            </p>
-          </ScrollReveal>
-          <ScrollReveal variant="conversion" delay={200}>
-            <Link href="/signup">
-              <Button size="lg">
-                Start for free
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </Link>
-          </ScrollReveal>
+          <h2 className="section-heading mb-4">
+            Stop losing leads to bad tools
+          </h2>
+          <p className="section-subheading mb-8">
+            Join solo agents who actually use their CRM daily.
+          </p>
+          <Link href="/signup">
+            <Button size="lg">
+              Start for free
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
         </div>
       </section>
+
+      </main>
 
       <Footer />
     </div>
