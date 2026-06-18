@@ -19,6 +19,24 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "auth-redesign-oauth",
+    date: "2026-06-18",
+    title: "Auth pages redesigned + Google & Slack sign-in",
+    summary:
+      "Cleaner, faster sign-in. Login and signup are now single-column with no distractions. You can now sign in with Google or Slack — just click a button.",
+    items: [
+      "Login and signup pages redesigned: clean single-column layout, centered on all screens",
+      "Sign in with Google — one-click OAuth, no password needed",
+      "Sign in with Slack — one-click OAuth for teams",
+      "Shared OAuth component across login and signup (consistent buttons, loading states, error handling)",
+      "Social sign-in buttons auto-detect which providers are enabled — greyed out with a friendly message if not configured",
+      "Orange CTA buttons (consistent with the rest of the site)",
+      "Better error messages: raw JSON errors replaced with readable text",
+      "Improved accessibility: proper aria-labels, focus rings, autocomplete attributes, keyboard navigation",
+      "Faster page loads: streamlined auth pages with less JavaScript",
+    ],
+  },
+  {
     id: "hero-demo-video",
     date: "2026-06-17",
     version: "0.24.0",
