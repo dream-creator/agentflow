@@ -7,22 +7,13 @@ import { createClient } from "@/lib/supabase/client";
 import { getOAuthRedirectTo } from "@/lib/auth";
 import { TurnstileWidget } from "@/components/turnstile-widget";
 import { CaptchaStatusPill } from "@/components/auth/captcha-status-pill";
-import { DotPattern } from "@/components/ui/dot-pattern";
-import {
-  Mail,
-  Home,
-  Loader2,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  ArrowRight,
-  Lock,
-  Check,
-} from "lucide-react";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { Mail, Loader2, Eye, EyeOff, AlertCircle, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   auth_callback_failed:
-    "We couldn't complete your sign-in. Please try again.",
+    "We couldn\u2019t complete your sign-in. Please try again.",
   access_denied: "Access was denied. Please try a different sign-in method.",
   invalid_credentials: "Invalid email or password.",
   email_not_confirmed:
@@ -31,9 +22,24 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
 };
 
 function humanizeAuthError(code: string): string {
-  const humanized = code.replace(/_/g, " ").toLowerCase();
-  const friendly = AUTH_ERROR_MESSAGES[code];
-  return friendly ? `${friendly} (${humanized})` : `Sign-in failed: ${humanized}`;
+  // Supabase sometimes passes raw JSON as the error param
+  let message = code;
+  try {
+    const parsed = JSON.parse(code);
+    if (parsed.msg) message = parsed.msg;
+  } catch {
+    // not JSON — use as-is
+  }
+
+  if (message.includes("provider is not enabled")) {
+    return "This sign-in method is not available yet. Please try another option.";
+  }
+
+  const friendly = AUTH_ERROR_MESSAGES[message];
+  const humanized = message.replace(/_/g, " ").toLowerCase();
+  return friendly
+    ? `${friendly} (${humanized})`
+    : `Sign-in failed: ${humanized}`;
 }
 
 const COMMON_DOMAINS: Record<string, string> = {
@@ -59,65 +65,16 @@ function suggestCorrection(email: string): string | null {
   return null;
 }
 
-/* ── Loading skeleton ────────────────────────────────────── */
-function LoginSkeleton() {
-  return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16 relative overflow-hidden">
-        <DotPattern
-          className="text-surface-300"
-          cr={1}
-          width={24}
-          height={24}
-        />
-        <div className="max-w-[420px] relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 flex items-center justify-center">
-              <Home className="w-6 h-6 text-primary" />
-            </div>
-            <span className="text-lg font-semibold text-surface-900 tracking-tight">
-              AgentFlow
-            </span>
-          </div>
-          <div className="h-8 w-[340px] bg-surface-200 rounded-md mt-6 mb-4 animate-pulse" />
-          <div className="h-4 w-[280px] bg-surface-200 rounded mt-4 mb-8 animate-pulse" />
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-4 h-4 rounded-full bg-surface-200 animate-pulse" />
-              <div className="h-4 w-[260px] bg-surface-200 rounded animate-pulse" />
-            </div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-4 h-4 rounded-full bg-surface-200 animate-pulse" />
-              <div className="h-4 w-[220px] bg-surface-200 rounded animate-pulse" />
-            </div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-4 h-4 rounded-full bg-surface-200 animate-pulse" />
-              <div className="h-4 w-[200px] bg-surface-200 rounded animate-pulse" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 flex flex-col justify-center items-center min-h-screen px-6 py-12 lg:py-0 bg-surface">
-        <div className="w-full max-w-[380px] mx-auto text-center">
-          <div className="h-7 w-[220px] bg-surface-100 rounded-md mb-2 animate-pulse mx-auto" />
-          <div className="h-4 w-[180px] bg-surface-100 rounded mb-7 animate-pulse mx-auto" />
-          <div className="h-11 w-full bg-surface-100 rounded-lg mb-3 animate-pulse" />
-          <div className="h-11 w-full bg-surface-200 rounded-lg animate-pulse" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── Main login component ────────────────────────────────── */
 function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
 
-  const [authLoading, setAuthLoading] = useState(true);
-  const [activeView, setActiveView] = useState<"magic-link" | "password" | "forgot-password">("magic-link");
+  const [activeView, setActiveView] = useState<
+    "magic-link" | "password" | "forgot-password"
+  >("magic-link");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [sentEmail, setSentEmail] = useState("");
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
@@ -125,11 +82,8 @@ function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
 
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [authError, setAuthError] = useState("");
@@ -137,28 +91,16 @@ function LoginContent() {
 
   const [resendCooldown, setResendCooldown] = useState(0);
   const [captchaToken, setCaptchaToken] = useState("");
-  // True once the Turnstile iframe has rendered and the challenge is visible.
-  // The submit buttons stay disabled until the widget has loaded, the user
-  // has interacted with the challenge, and captchaToken is non-empty.
   const [captchaReady, setCaptchaReady] = useState(false);
-  // Emergency kill switch — when the env var is set, the widget returns
-  // null and we treat the form as captcha-verified so users are not
-  // blocked. MUST be paired with disabling `security_captcha_enabled` in
-  // the Supabase dashboard, otherwise Supabase will reject the auth call
-  // with a captcha-token-missing error.
   const captchaDisabled =
     process.env.NEXT_PUBLIC_TURNSTILE_DISABLED === "true";
-  // True when the user has actually completed the Turnstile challenge
-  // (i.e. we have a token to send to Supabase), or when captcha is fully
-  // disabled via the env var.
   const captchaVerified = captchaDisabled || captchaToken !== "";
 
   const getSupabase = useCallback(() => createClient(), []);
 
+  const isLoading = loadingAction !== null;
+
   // Read any ?error= param left behind by the OAuth callback route
-  // (src/app/auth/callback/route.ts) and surface it as the banner
-  // error so the user sees a real reason instead of a silent redirect.
-  const searchParams = useSearchParams();
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam) {
@@ -166,11 +108,11 @@ function LoginContent() {
     }
   }, [searchParams]);
 
+  // Redirect if already authenticated
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const supabase = getSupabase();
-        const { data } = await supabase.auth.getSession();
+        const { data } = await getSupabase().auth.getSession();
         if (data.session) {
           router.push("/dashboard");
           return;
@@ -178,35 +120,32 @@ function LoginContent() {
       } catch {
         // Show form even on error
       }
-      setAuthLoading(false);
     };
     checkSession();
   }, [getSupabase, router]);
 
+  // Focus email input after session check resolves
   useEffect(() => {
-    if (!authLoading) {
-      const timer = setTimeout(() => {
-        emailInputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [authLoading, activeView]);
+    const timer = setTimeout(() => {
+      emailInputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [activeView]);
 
+  // Resend cooldown timer
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => {
-      setResendCooldown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  const validateEmail = (value: string, showSuggestion = false): boolean => {
+  /* ── Validation ── */
+  const validateEmail = (
+    value: string,
+    showSuggestion = false,
+  ): boolean => {
     if (!value.trim()) {
       setEmailError("Email address is required");
       setEmailSuggestion("");
@@ -240,11 +179,12 @@ function LoginContent() {
     return true;
   };
 
+  /* ── Handlers ── */
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
     if (!validateEmail(email, true)) return;
-    setMagicLinkLoading(true);
+    setLoadingAction("magic-link");
 
     const { error } = await getSupabase().auth.signInWithOtp({
       email,
@@ -258,7 +198,7 @@ function LoginContent() {
       setSentEmail(email);
       setResendCooldown(30);
     }
-    setMagicLinkLoading(false);
+    setLoadingAction(null);
   };
 
   const handlePasswordSignIn = async (e: React.FormEvent) => {
@@ -267,7 +207,7 @@ function LoginContent() {
     setPasswordError("");
     if (!validateEmail(email)) return;
     if (!validatePassword(password)) return;
-    setPasswordLoading(true);
+    setLoadingAction("password");
 
     const { error } = await getSupabase().auth.signInWithPassword({
       email,
@@ -282,29 +222,14 @@ function LoginContent() {
     } else {
       router.push("/dashboard");
     }
-    setPasswordLoading(false);
-  };
-
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
-    setAuthError("");
-
-    const { error } = await getSupabase().auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: getOAuthRedirectTo() },
-    });
-
-    if (error) {
-      setAuthError(error.message);
-      setGoogleLoading(false);
-    }
+    setLoadingAction(null);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
     if (!validateEmail(email, false)) return;
-    setForgotPasswordLoading(true);
+    setLoadingAction("forgot-password");
 
     const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -316,20 +241,18 @@ function LoginContent() {
     } else {
       setForgotPasswordSent(true);
     }
-    setForgotPasswordLoading(false);
+    setLoadingAction(null);
   };
 
   const handleResend = async () => {
     if (resendCooldown > 0) return;
-    setMagicLinkLoading(true);
+    setLoadingAction("magic-link");
     const { error } = await getSupabase().auth.signInWithOtp({
       email: sentEmail,
       options: { emailRedirectTo: getOAuthRedirectTo(), captchaToken },
     });
-    if (!error) {
-      setResendCooldown(30);
-    }
-    setMagicLinkLoading(false);
+    if (!error) setResendCooldown(30);
+    setLoadingAction(null);
   };
 
   const resetToMagicLink = () => {
@@ -343,578 +266,477 @@ function LoginContent() {
   const resetToLogin = () => {
     setActiveView("magic-link");
     setForgotPasswordSent(false);
-    setForgotPasswordLoading(false);
     setEmailError("");
     setEmailSuggestion("");
     setAuthError("");
   };
 
-  const inputBase =
-    "w-full h-11 px-3 text-[15px] text-surface-900 bg-white border-[1.5px] rounded-lg placeholder:text-surface-500 focus:outline-none transition-all duration-150";
-  const inputNormal = "border-surface-200 hover:border-surface-400 focus:border-primary focus:shadow-[0_0_0_3px_rgba(15,118,110,0.12)]";
-  const inputError = "border-destructive shadow-[0_0_0_3px_rgba(220,38,38,0.1)]";
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (emailError) setEmailError("");
+    if (emailSuggestion) setEmailSuggestion("");
+  };
 
-  if (authLoading) return <LoginSkeleton />;
+  /* ── Shared input classes ── */
+  const inputClasses = (hasError: boolean) =>
+    `input-field ${hasError ? "input-error" : ""}`;
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* ─── Left Panel ─── */}
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-surface-50 border-r border-surface-200 flex-col justify-center items-center px-16 relative overflow-hidden">
-        <DotPattern
-          className="text-surface-300"
-          cr={1}
-          width={24}
-          height={24}
-        />
-        <div className="w-full max-w-[420px] relative z-10">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 flex items-center justify-center">
-              <Home className="w-6 h-6 text-primary" />
-            </div>
-            <span className="text-lg font-semibold text-surface-900 tracking-tight">
-              AgentFlow
-            </span>
-          </div>
-
-          {/* Brand statement */}
-          <h2 className="text-[34px] font-semibold text-surface-900 leading-[1.15] tracking-[-0.02em] mt-6">
-            The only thing on your screen should be who to call today.
-          </h2>
-
-          {/* Supporting line */}
-          <p className="text-[16px] text-surface-500 leading-[1.6] mt-4">
-            AgentFlow removes everything a solo agent doesn&apos;t need.
-          </p>
-
-          {/* Feature lines */}
-          <div className="flex flex-col gap-3 mt-8">
-            <div className="flex items-center gap-2.5">
-              <Check className="w-4 h-4 text-primary shrink-0" />
-              <p className="text-[16px] text-surface-600">Open the app. See who to call.</p>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <Check className="w-4 h-4 text-primary shrink-0" />
-              <p className="text-[16px] text-surface-600">Track every lead without the noise.</p>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <Check className="w-4 h-4 text-primary shrink-0" />
-              <p className="text-[16px] text-surface-600">Set up in minutes, not hours.</p>
-            </div>
-          </div>
-        </div>
+    <>
+      {/* ── Header ── */}
+      <div className="text-center mb-1.5">
+        <h1 className="text-[26px] font-semibold text-surface-900 tracking-[-0.02em] leading-[1.2]">
+          {activeView === "forgot-password"
+            ? "Reset your password"
+            : "Welcome back"}
+        </h1>
+        <p className="text-[15px] text-surface-500 mt-1.5">
+          {activeView === "forgot-password"
+            ? "Enter your email and we\u2019ll send you a reset link."
+            : "Sign in to your AgentFlow account"}
+        </p>
       </div>
 
-      {/* ─── Mobile top bar ─── */}
-      <div className="lg:hidden flex items-center h-[72px] bg-primary px-6">
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 flex items-center justify-center">
-            <Home className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-lg font-semibold text-white tracking-tight">
-            AgentFlow
+      {activeView === "forgot-password" && (
+        <button
+          type="button"
+          onClick={resetToLogin}
+          className="text-[14px] text-primary font-medium hover:underline mb-4"
+        >
+          &larr; Back to sign in
+        </button>
+      )}
+
+      {/* ── OAuth buttons ── */}
+      {activeView !== "forgot-password" && (
+        <OAuthButtons onError={setAuthError} />
+      )}
+
+      {/* ── "or" divider ── */}
+      {activeView !== "forgot-password" && (
+        <div className="flex items-center my-5" aria-hidden="true">
+          <div className="flex-1 h-px bg-surface-200" />
+          <span className="text-[12px] text-surface-500 uppercase tracking-wider px-3">
+            or
+          </span>
+          <div className="flex-1 h-px bg-surface-200" />
+        </div>
+      )}
+
+      {/* ── Error banner ── */}
+      {authError && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 bg-destructive-50 border border-destructive-100 rounded-lg p-3 mb-3"
+        >
+          <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+          <span className="text-[14px] text-destructive leading-[1.4]">
+            {authError}
           </span>
         </div>
-      </div>
+      )}
 
-      {/* ─── Right Panel - Auth ─── */}
-      <div
-        role="main"
-        className="flex-1 flex flex-col justify-center items-center min-h-screen px-6 sm:px-12 py-12 lg:py-0 bg-surface"
-      >
-        <div className="w-full max-w-[380px]">
-          {/* ── Success states ── */}
-          {magicLinkSent ? (
-            <div className="text-center">
-              <div className="w-14 h-14 rounded-full bg-success-50 border border-success-100 flex items-center justify-center mx-auto mb-5">
-                <Mail className="w-7 h-7 text-success" />
-              </div>
-              <h2 className="text-2xl font-semibold text-surface-900 mb-2">
-                Check your email
-              </h2>
-              <p className="text-[15px] text-surface-500 leading-[1.6] mb-7 max-w-[320px] mx-auto">
-                We sent a magic link to {sentEmail}. Click the link to sign in.
-                It expires in 10 minutes.
-              </p>
-              <p className="text-[14px] text-surface-500">
-                Didn&apos;t get it?{" "}
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={resendCooldown > 0 || magicLinkLoading}
-                  className="text-primary font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+      {/* ── Off-screen Turnstile widget ── */}
+      {!captchaDisabled && (
+        <div
+          className="absolute -left-[9999px] -top-[9999px] w-px h-px overflow-hidden pointer-events-none"
+          aria-hidden="true"
+        >
+          <TurnstileWidget
+            onLoad={() => setCaptchaReady(true)}
+            onSuccess={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken("")}
+            onError={() => setCaptchaToken("")}
+          />
+        </div>
+      )}
+
+      {/* ── Success states ── */}
+      {magicLinkSent ? (
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-full bg-success-50 border border-success-100 flex items-center justify-center mx-auto mb-5">
+            <Mail className="w-7 h-7 text-success" />
+          </div>
+          <h2 className="text-2xl font-semibold text-surface-900 mb-2">
+            Check your email
+          </h2>
+          <p className="text-[15px] text-surface-500 leading-[1.6] mb-7 max-w-[320px] mx-auto">
+            We sent a magic link to {sentEmail}. Click the link to sign in.
+            It expires in 10 minutes.
+          </p>
+          <p className="text-[14px] text-surface-500">
+            Didn&apos;t get it?{" "}
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resendCooldown > 0 || isLoading}
+              className="text-primary font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {resendCooldown > 0
+                ? `Resend in ${resendCooldown}s...`
+                : "Resend the link"}
+            </button>
+          </p>
+          <p className="text-[13px] text-surface-500 mt-3">
+            Wrong email?{" "}
+            <button
+              type="button"
+              onClick={resetToMagicLink}
+              className="text-primary hover:underline"
+            >
+              Sign in with a different address
+            </button>
+          </p>
+        </div>
+      ) : forgotPasswordSent ? (
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-full bg-success-50 border border-success-100 flex items-center justify-center mx-auto mb-5">
+            <Mail className="w-7 h-7 text-success" />
+          </div>
+          <h2 className="text-2xl font-semibold text-surface-900 mb-2">
+            Reset link sent
+          </h2>
+          <p className="text-[15px] text-surface-500 leading-[1.6] mb-7 max-w-[320px] mx-auto">
+            Check your email for a link to reset your password. It expires
+            in 1 hour.
+          </p>
+          <button
+            type="button"
+            onClick={resetToLogin}
+            className="text-[14px] text-primary font-medium hover:underline"
+          >
+            &larr; Back to sign in
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* ── Magic link form ── */}
+          {activeView === "magic-link" && (
+            <form onSubmit={handleMagicLink}>
+              <div className="mb-3">
+                <label
+                  htmlFor="magic-email"
+                  className="block text-[14px] font-medium text-surface-700 mb-1.5"
                 >
-                  {resendCooldown > 0
-                    ? `Resend in ${resendCooldown}s...`
-                    : "Resend the link"}
-                </button>
-              </p>
-              <p className="text-[13px] text-surface-500 mt-3">
-                Wrong email?{" "}
-                <button
-                  type="button"
-                  onClick={resetToMagicLink}
-                  className="text-primary hover:underline"
-                >
-                  Sign in with a different address
-                </button>
-              </p>
-            </div>
-          ) : forgotPasswordSent ? (
-            <div className="text-center">
-              <div className="w-14 h-14 rounded-full bg-success-50 border border-success-100 flex items-center justify-center mx-auto mb-5">
-                <Mail className="w-7 h-7 text-success" />
+                  Email address
+                </label>
+                <input
+                  ref={emailInputRef}
+                  id="magic-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  onBlur={() => {
+                    if (email) validateEmail(email, true);
+                  }}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  aria-describedby={
+                    emailError
+                      ? "magic-email-error"
+                      : emailSuggestion
+                        ? "magic-email-suggestion"
+                        : undefined
+                  }
+                  aria-invalid={!!emailError}
+                  className={inputClasses(!!emailError)}
+                />
+                {emailError && (
+                  <p
+                    id="magic-email-error"
+                    className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
+                    role="alert"
+                  >
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    {emailError}
+                  </p>
+                )}
+                {emailSuggestion && !emailError && (
+                  <p
+                    id="magic-email-suggestion"
+                    className="mt-1 text-[13px] text-surface-500"
+                  >
+                    Did you mean{" "}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmail(emailSuggestion);
+                        setEmailSuggestion("");
+                      }}
+                      className="text-primary font-medium hover:underline cursor-pointer"
+                    >
+                      {emailSuggestion}
+                    </button>
+                    ?
+                  </p>
+                )}
               </div>
-              <h2 className="text-2xl font-semibold text-surface-900 mb-2">
-                Reset link sent
-              </h2>
-              <p className="text-[15px] text-surface-500 leading-[1.6] mb-7 max-w-[320px] mx-auto">
-                Check your email for a link to reset your password. It expires
-                in 1 hour.
-              </p>
+
+              {!captchaDisabled && (
+                <CaptchaStatusPill
+                  captchaVerified={captchaVerified}
+                  captchaReady={captchaReady}
+                />
+              )}
+
+              <Button
+                type="submit"
+                variant="cta"
+                size="lg"
+                loading={loadingAction === "magic-link"}
+                disabled={!captchaVerified}
+                aria-describedby="captcha-status"
+                className="w-full mt-3"
+              >
+                Send magic link
+              </Button>
+            </form>
+          )}
+
+          {/* ── Password form ── */}
+          {activeView === "password" && (
+            <form onSubmit={handlePasswordSignIn}>
+              <div className="mb-3">
+                <label
+                  htmlFor="password-email"
+                  className="block text-[14px] font-medium text-surface-700 mb-1.5"
+                >
+                  Email address
+                </label>
+                <input
+                  ref={emailInputRef}
+                  id="password-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => {
+                    if (email) validateEmail(email, false);
+                  }}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  aria-describedby={
+                    emailError ? "password-email-error" : undefined
+                  }
+                  aria-invalid={!!emailError}
+                  className={inputClasses(!!emailError)}
+                />
+                {emailError && (
+                  <p
+                    id="password-email-error"
+                    className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
+                    role="alert"
+                  >
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    {emailError}
+                  </p>
+                )}
+              </div>
+
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label
+                    htmlFor="password-input"
+                    className="text-[14px] font-medium text-surface-700"
+                  >
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setActiveView("forgot-password")}
+                    className="text-[13px] text-primary hover:underline cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    ref={passwordInputRef}
+                    id="password-input"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (passwordError) setPasswordError("");
+                      if (authError) setAuthError("");
+                    }}
+                    placeholder="Your password"
+                    autoComplete="current-password"
+                    aria-describedby={
+                      passwordError ? "password-error" : undefined
+                    }
+                    aria-invalid={!!passwordError}
+                    className={`input-field pr-10 ${
+                      passwordError ? "input-error" : ""
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    tabIndex={-1}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-500 hover:text-surface-700 cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                {passwordError && (
+                  <p
+                    id="password-error"
+                    className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
+                    role="alert"
+                  >
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    {passwordError}
+                  </p>
+                )}
+              </div>
+
+              {!captchaDisabled && (
+                <CaptchaStatusPill
+                  captchaVerified={captchaVerified}
+                  captchaReady={captchaReady}
+                />
+              )}
+
+              <Button
+                type="submit"
+                variant="cta"
+                size="lg"
+                loading={loadingAction === "password"}
+                disabled={!captchaVerified}
+                aria-describedby="captcha-status"
+                className="w-full mt-3"
+              >
+                Sign in
+              </Button>
+            </form>
+          )}
+
+          {/* ── Forgot password form ── */}
+          {activeView === "forgot-password" && !forgotPasswordSent && (
+            <form onSubmit={handleForgotPassword}>
+              <div className="mb-3">
+                <label
+                  htmlFor="forgot-email"
+                  className="block text-[14px] font-medium text-surface-700 mb-1.5"
+                >
+                  Email address
+                </label>
+                <input
+                  ref={emailInputRef}
+                  id="forgot-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => {
+                    if (email) validateEmail(email, false);
+                  }}
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  aria-describedby={
+                    emailError ? "forgot-email-error" : undefined
+                  }
+                  aria-invalid={!!emailError}
+                  className={inputClasses(!!emailError)}
+                />
+                {emailError && (
+                  <p
+                    id="forgot-email-error"
+                    className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
+                    role="alert"
+                  >
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    {emailError}
+                  </p>
+                )}
+              </div>
+
+              {!captchaDisabled && (
+                <CaptchaStatusPill
+                  captchaVerified={captchaVerified}
+                  captchaReady={captchaReady}
+                />
+              )}
+
+              <Button
+                type="submit"
+                variant="cta"
+                size="lg"
+                loading={loadingAction === "forgot-password"}
+                disabled={!captchaVerified}
+                aria-describedby="captcha-status"
+                className="w-full mt-3"
+              >
+                Send reset link
+              </Button>
+            </form>
+          )}
+
+          {/* ── Toggle to password sign-in ── */}
+          {activeView === "magic-link" && (
+            <>
+              <div className="flex items-center my-5" aria-hidden="true">
+                <div className="flex-1 h-px bg-surface-200" />
+                <span className="text-[12px] text-surface-500 uppercase tracking-wider px-3">
+                  or
+                </span>
+                <div className="flex-1 h-px bg-surface-200" />
+              </div>
+
               <button
                 type="button"
-                onClick={resetToLogin}
-                className="text-[14px] text-primary font-medium hover:underline"
+                onClick={() => {
+                  setActiveView("password");
+                  setAuthError("");
+                  setEmailError("");
+                  setEmailSuggestion("");
+                }}
+                className="w-full h-11 flex items-center justify-center gap-2 bg-transparent text-surface-600 text-[14px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] transition-all duration-150"
               >
-                &larr; Back to sign in
+                <Lock className="w-4 h-4" />
+                Sign in with password
               </button>
-            </div>
-          ) : (
-            <>
-              {/* ── Header ── */}
-              <div className="text-center mb-1.5">
-                <h1 className="text-[26px] font-semibold text-surface-900 tracking-[-0.02em] leading-[1.2]">
-                  {activeView === "forgot-password"
-                    ? "Reset your password"
-                    : "Welcome back"}
-                </h1>
-                <p className="text-[15px] text-surface-500 mt-1.5">
-                  {activeView === "forgot-password"
-                    ? "Enter your email and we'll send you a reset link."
-                    : "Sign in to your AgentFlow account"}
-                </p>
-              </div>
-
-              {activeView === "forgot-password" && (
-                <button
-                  type="button"
-                  onClick={resetToLogin}
-                  className="text-[14px] text-primary font-medium hover:underline mb-4"
-                >
-                  &larr; Back to sign in
-                </button>
-              )}
-
-              {/* ── Google OAuth (PRIMARY) ── */}
-              {activeView !== "forgot-password" && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    disabled={googleLoading}
-                    aria-label="Continue with Google"
-                    className="w-full h-12 flex items-center justify-center gap-2.5 bg-white text-surface-700 text-[15px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] focus:outline-2 focus:outline-primary focus:outline-offset-2 transition-all duration-150 disabled:opacity-75 disabled:cursor-not-allowed mb-4"
-                  >
-                    {googleLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <svg className="w-5 h-5" viewBox="0 0 24 24">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-                      </svg>
-                    )}
-                    Continue with Google
-                  </button>
-
-                  {/* "or" divider between OAuth and email form */}
-                  <div
-                    className="flex items-center mb-4"
-                    aria-hidden="true"
-                  >
-                    <div className="flex-1 h-px bg-surface-200" />
-                    <span className="text-[12px] text-surface-500 uppercase tracking-wider px-3">
-                      or
-                    </span>
-                    <div className="flex-1 h-px bg-surface-200" />
-                  </div>
-                </>
-              )}
-
-              {/* ── Error banner ── */}
-              {authError && (
-                <div
-                  role="alert"
-                  className="flex items-start gap-2 bg-destructive-50 border border-destructive-100 rounded-lg p-3 mb-3"
-                >
-                  <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-                  <span className="text-[14px] text-destructive leading-[1.4]">
-                    {authError}
-                  </span>
-                </div>
-              )}
-
-              {/* ── Off-screen Turnstile widget ──
-                  The widget still needs to mount (the iframe is what talks
-                  to Cloudflare and fires onSuccess), but invisible mode
-                  makes the visual footprint 0×0. Hiding it off-screen keeps
-                  it functional without creating empty space in the form. */}
-              {!captchaDisabled && (
-                <div
-                  className="absolute -left-[9999px] -top-[9999px] w-px h-px overflow-hidden pointer-events-none"
-                  aria-hidden="true"
-                >
-                  <TurnstileWidget
-                    onLoad={() => setCaptchaReady(true)}
-                    onSuccess={(token) => setCaptchaToken(token)}
-                    onExpire={() => setCaptchaToken("")}
-                    onError={() => setCaptchaToken("")}
-                  />
-                </div>
-              )}
-
-              {/* ── Magic link form ── */}
-              {activeView === "magic-link" && !magicLinkSent && (
-                <form onSubmit={handleMagicLink}>
-                  <div className="mb-3">
-                    <label
-                      htmlFor="magic-email"
-                      className="block text-[14px] font-medium text-surface-700 mb-1.5"
-                    >
-                      Email address
-                    </label>
-                    <input
-                      ref={emailInputRef}
-                      id="magic-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (emailError) setEmailError("");
-                        if (emailSuggestion) setEmailSuggestion("");
-                      }}
-                      onBlur={() => {
-                        if (email) validateEmail(email, true);
-                      }}
-                      placeholder="you@example.com"
-                      aria-describedby={
-                        emailError
-                          ? "magic-email-error"
-                          : emailSuggestion
-                            ? "magic-email-suggestion"
-                            : undefined
-                      }
-                      aria-invalid={!!emailError}
-                      className={`${inputBase} ${emailError ? inputError : inputNormal}`}
-                    />
-                    {emailError && (
-                      <p
-                        id="magic-email-error"
-                        className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
-                        role="alert"
-                      >
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        {emailError}
-                      </p>
-                    )}
-                    {emailSuggestion && !emailError && (
-                      <p
-                        id="magic-email-suggestion"
-                        className="mt-1 text-[13px] text-surface-500"
-                      >
-                        Did you mean{" "}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEmail(emailSuggestion);
-                            setEmailSuggestion("");
-                          }}
-                          className="text-primary font-medium hover:underline cursor-pointer"
-                        >
-                          {emailSuggestion}
-                        </button>
-                        ?
-                      </p>
-                    )}
-                  </div>
-
-                  {/* ── Captcha status pill (lives inside the form so the
-                       captcha verification is visually associated with the
-                       action it gates, not floating between sections) ── */}
-                  {!captchaDisabled && <CaptchaStatusPill captchaVerified={captchaVerified} captchaReady={captchaReady} />}
-
-                  <button
-                    type="submit"
-                    disabled={magicLinkLoading || !captchaVerified}
-                    aria-busy={magicLinkLoading}
-                    aria-describedby="captcha-status"
-                    className="btn-primary w-full flex items-center justify-center gap-2"
-                  >
-                    {magicLinkLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        Send magic link
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-
-                  <p className="text-center text-[13px] text-surface-500 mt-2.5 flex items-center justify-center gap-1.5">
-                    <Lock className="w-3 h-3" />
-                    No password required, instant sign-in
-                  </p>
-                </form>
-              )}
-
-              {/* ── Password form ── */}
-              {activeView === "password" && (
-                <form onSubmit={handlePasswordSignIn}>
-                  <div className="mb-3">
-                    <label
-                      htmlFor="password-email"
-                      className="block text-[14px] font-medium text-surface-700 mb-1.5"
-                    >
-                      Email address
-                    </label>
-                    <input
-                      ref={emailInputRef}
-                      id="password-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (emailError) setEmailError("");
-                      }}
-                      onBlur={() => {
-                        if (email) validateEmail(email, false);
-                      }}
-                      placeholder="you@example.com"
-                      aria-describedby={
-                        emailError ? "password-email-error" : undefined
-                      }
-                      aria-invalid={!!emailError}
-                      className={`${inputBase} ${emailError ? inputError : inputNormal}`}
-                    />
-                    {emailError && (
-                      <p
-                        id="password-email-error"
-                        className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
-                        role="alert"
-                      >
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        {emailError}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label
-                        htmlFor="password-input"
-                        className="text-[14px] font-medium text-surface-700"
-                      >
-                        Password
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setActiveView("forgot-password")}
-                        className="text-[13px] text-primary hover:underline cursor-pointer"
-                      >
-                        Forgot password?
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <input
-                        ref={passwordInputRef}
-                        id="password-input"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                          if (passwordError) setPasswordError("");
-                          if (authError) setAuthError("");
-                        }}
-                        placeholder="Your password"
-                        aria-describedby={
-                          passwordError ? "password-error" : undefined
-                        }
-                        aria-invalid={!!passwordError}
-                        className={`${inputBase} pr-10 ${passwordError ? inputError : inputNormal}`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label={
-                          showPassword ? "Hide password" : "Show password"
-                        }
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-500 hover:text-surface-500 cursor-pointer"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                    {passwordError && (
-                      <p
-                        id="password-error"
-                        className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
-                        role="alert"
-                      >
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        {passwordError}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* ── Captcha status pill ── */}
-                  {!captchaDisabled && <CaptchaStatusPill captchaVerified={captchaVerified} captchaReady={captchaReady} />}
-
-                  <button
-                    type="submit"
-                    disabled={passwordLoading || !captchaVerified}
-                    aria-busy={passwordLoading}
-                    aria-describedby="captcha-status"
-                    className="btn-primary w-full flex items-center justify-center gap-2"
-                  >
-                    {passwordLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Signing in...
-                      </>
-                    ) : (
-                      "Sign in"
-                    )}
-                  </button>
-                </form>
-              )}
-
-              {/* ── Forgot password form ── */}
-              {activeView === "forgot-password" && !forgotPasswordSent && (
-                <form onSubmit={handleForgotPassword}>
-                  <div className="mb-3">
-                    <label
-                      htmlFor="forgot-email"
-                      className="block text-[14px] font-medium text-surface-700 mb-1.5"
-                    >
-                      Email address
-                    </label>
-                    <input
-                      ref={emailInputRef}
-                      id="forgot-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (emailError) setEmailError("");
-                      }}
-                      onBlur={() => {
-                        if (email) validateEmail(email, false);
-                      }}
-                      placeholder="you@example.com"
-                      aria-describedby={
-                        emailError ? "forgot-email-error" : undefined
-                      }
-                      aria-invalid={!!emailError}
-                      className={`${inputBase} ${emailError ? inputError : inputNormal}`}
-                    />
-                    {emailError && (
-                      <p
-                        id="forgot-email-error"
-                        className="flex items-center gap-1 mt-1 text-[13px] text-destructive"
-                        role="alert"
-                      >
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        {emailError}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* ── Captcha status pill ── */}
-                  {!captchaDisabled && <CaptchaStatusPill captchaVerified={captchaVerified} captchaReady={captchaReady} />}
-
-                  <button
-                    type="submit"
-                    disabled={forgotPasswordLoading || !captchaVerified}
-                    aria-busy={forgotPasswordLoading}
-                    aria-describedby="captcha-status"
-                    className="btn-primary w-full flex items-center justify-center gap-2"
-                  >
-                    {forgotPasswordLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      "Send reset link"
-                    )}
-                  </button>
-                </form>
-              )}
-
-              {/* ── Secondary links ── */}
-              {activeView !== "forgot-password" && (
-                <>
-                  {/* Toggle to password */}
-                  <div className="flex items-center my-5" aria-hidden="true">
-                    <div className="flex-1 h-px bg-surface-200" />
-                    <span className="text-[12px] text-surface-500 uppercase tracking-wider px-3">
-                      or
-                    </span>
-                    <div className="flex-1 h-px bg-surface-200" />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveView("password");
-                      setAuthError("");
-                      setEmailError("");
-                      setEmailSuggestion("");
-                    }}
-                    className="w-full h-11 flex items-center justify-center gap-2 bg-transparent text-surface-600 text-[14px] font-medium border-[1.5px] border-surface-200 rounded-lg cursor-pointer hover:bg-surface-50 hover:border-surface-300 active:scale-[0.98] transition-all duration-150"
-                  >
-                    <Lock className="w-4 h-4" />
-                    Sign in with password
-                  </button>
-
-                  {/* Sign up link */}
-                  <div className="mt-6 pt-4 border-t border-surface-100">
-                    <p className="text-center text-[14px] text-surface-500">
-                      Don&apos;t have an account?{" "}
-                      <Link
-                        href="/signup"
-                        className="text-primary font-medium hover:underline"
-                      >
-                        Sign up free
-                      </Link>
-                    </p>
-                  </div>
-                </>
-              )}
             </>
           )}
-        </div>
-      </div>
-    </div>
+
+          {/* ── Sign-up link ── */}
+          <p className="text-center text-[14px] text-surface-500 mt-8">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/signup"
+              className="text-primary font-medium hover:underline"
+            >
+              Sign up free
+            </Link>
+          </p>
+        </>
+      )}
+    </>
   );
 }
 
 export default function LoginPage() {
-  // useSearchParams() inside LoginContent forces client-side rendering, which
-  // Next.js 14 requires to live behind a Suspense boundary so the static
-  // prerender pass can produce a fallback instead of failing with
-  // "useSearchParams() should be wrapped in a suspense boundary".
   return (
     <Suspense fallback={<LoginSkeleton />}>
       <LoginContent />
     </Suspense>
+  );
+}
+
+/* ── Loading skeleton ────────────────────────────────────── */
+function LoginSkeleton() {
+  return (
+    <>
+      <div className="h-7 w-[220px] bg-surface-100 rounded-md mb-2 animate-pulse mx-auto" />
+      <div className="h-4 w-[180px] bg-surface-100 rounded mb-7 animate-pulse mx-auto" />
+      <div className="h-11 w-full bg-surface-100 rounded-lg mb-3 animate-pulse" />
+      <div className="h-11 w-full bg-surface-200 rounded-lg animate-pulse" />
+    </>
   );
 }
