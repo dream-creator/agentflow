@@ -6,15 +6,20 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, CreditCard, ExternalLink, Loader2 } from "lucide-react";
+import { CheckCircle2, CreditCard, ExternalLink, Loader2, AlertTriangle } from "lucide-react";
 
 function BillingContent() {
   const searchParams = useSearchParams();
   const upgraded = searchParams.get("upgraded") === "true";
+  const cancelled = searchParams.get("cancelled") === "true";
   const [loading, setLoading] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [plan, setPlan] = useState<"free" | "pro">("free");
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  const [subscriptionInterval, setSubscriptionInterval] = useState<string>("month");
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const supabase = createClient();
 
   useEffect(() => {
@@ -23,11 +28,13 @@ function BillingContent() {
       if (user) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("plan")
+          .select("plan, subscription_status, subscription_interval")
           .eq("id", user.id)
           .single();
         if (profile) {
           setPlan(profile.plan as "free" | "pro");
+          setSubscriptionStatus(profile.subscription_status);
+          setSubscriptionInterval(profile.subscription_interval || "month");
         }
       }
       setLoadingProfile(false);
@@ -35,18 +42,55 @@ function BillingContent() {
     fetchProfile();
   }, [supabase]);
 
-  async function handleUpgrade() {
+  useEffect(() => {
+    if (upgraded) {
+      setSuccess("Your account has been upgraded to Pro! You now have unlimited leads and pipelines.");
+    }
+    if (cancelled) {
+      setSuccess("Your subscription has been cancelled. You'll remain on Pro until the end of your billing period.");
+    }
+  }, [upgraded, cancelled]);
+
+  async function handleUpgrade(interval: "monthly" | "annual" = "monthly") {
     setLoading(true);
+    setError("");
     try {
-      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const res = await fetch("/api/paymongo/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval }),
+      });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else if (data.subscriptionId) {
+        // Already active (card vaulted), no redirect needed
+        setSuccess("Your Pro subscription is now active!");
       }
     } catch {
       setError("Failed to start checkout. Please try again.");
     }
     setLoading(false);
+  }
+
+  async function handleCancel() {
+    if (!confirm("Are you sure you want to cancel your Pro subscription?")) return;
+    setCancelling(true);
+    setError("");
+    try {
+      const res = await fetch("/api/paymongo/cancel", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        setSuccess("Your subscription has been cancelled. You'll remain on Pro until the end of your billing period.");
+        setPlan("free");
+        setSubscriptionStatus("cancelled");
+      } else {
+        setError(data.error || "Failed to cancel subscription. Please try again.");
+      }
+    } catch {
+      setError("Failed to cancel subscription. Please try again.");
+    }
+    setCancelling(false);
   }
 
   return (
@@ -56,12 +100,22 @@ function BillingContent() {
         <p className="text-surface-500 text-sm mt-1">Manage your subscription</p>
       </div>
 
-      {upgraded && (
+      {success && (
         <div className="mb-6 p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-3">
           <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-          <p className="text-sm text-emerald-700">
-            Your account has been upgraded to Pro! You now have unlimited leads and pipelines.
-          </p>
+          <p className="text-sm text-emerald-700">{success}</p>
+        </div>
+      )}
+
+      {subscriptionStatus === "past_due" && (
+        <div className="mb-6 p-4 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+          <div>
+            <p className="text-sm text-amber-700 font-medium">Payment past due</p>
+            <p className="text-xs text-amber-600 mt-1">
+              Your payment failed. Please update your payment method to keep your Pro plan active.
+            </p>
+          </div>
         </div>
       )}
 
@@ -106,7 +160,41 @@ function BillingContent() {
                     </li>
                   ))}
                 </ul>
-                <Button onClick={handleUpgrade} loading={loading} className="w-full">
+
+                {/* Interval selector */}
+                <div className="space-y-2 mb-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleUpgrade("monthly")}
+                      disabled={loading}
+                      className={`p-3 rounded-lg border text-center transition-colors ${
+                        subscriptionInterval === "month"
+                          ? "border-primary bg-primary-50 text-primary"
+                          : "border-surface-200 hover:border-surface-300"
+                      }`}
+                    >
+                      <div className="text-sm font-medium">Monthly</div>
+                      <div className="text-lg font-bold">$8/mo</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpgrade("annual")}
+                      disabled={loading}
+                      className={`p-3 rounded-lg border text-center transition-colors ${
+                        subscriptionInterval === "annual"
+                          ? "border-primary bg-primary-50 text-primary"
+                          : "border-surface-200 hover:border-surface-300"
+                      }`}
+                    >
+                      <div className="text-sm font-medium">Annual</div>
+                      <div className="text-lg font-bold">$80/yr</div>
+                      <div className="text-xs text-emerald-600">2 months free</div>
+                    </button>
+                  </div>
+                </div>
+
+                <Button onClick={() => handleUpgrade("monthly")} loading={loading} className="w-full">
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
@@ -117,6 +205,25 @@ function BillingContent() {
                 {error && (
                   <p className="text-sm text-destructive mt-2 text-center">{error}</p>
                 )}
+              </div>
+            )}
+            {plan === "pro" && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-surface-500">Billing interval</span>
+                  <span className="text-surface-700 capitalize">{subscriptionInterval}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full text-destructive hover:text-destructive hover:bg-destructive-50"
+                  onClick={handleCancel}
+                  loading={cancelling}
+                >
+                  {cancelling ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  Cancel Subscription
+                </Button>
               </div>
             )}
           </Card>

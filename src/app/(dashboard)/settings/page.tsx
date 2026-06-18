@@ -113,6 +113,16 @@ export default function SettingsPage() {
                 </p>
               </div>
             )}
+            {profile?.plan === "pro" && profile?.subscription_status === "past_due" && (
+              <div className="pt-2">
+                <Button variant="destructive" className="w-full" onClick={() => router.push("/settings/billing")}>
+                  Update Payment Method
+                </Button>
+                <p className="text-xs text-amber-600 text-center mt-2">
+                  Your payment is past due. Please update to keep your Pro plan.
+                </p>
+              </div>
+            )}
           </div>
         </Card>
 

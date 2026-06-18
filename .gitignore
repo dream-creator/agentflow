@@ -67,6 +67,15 @@ __pycache__/
 # Hallmark design skill
 .impeccable/
 
+# OpenCode agent config
+.opencode/
+
+# Generated design system docs
+design-system/agentflow/
+
+# Roadmap (old, superseded)
+docs/ROADMAP-PHASES-3-4.md
+
 # Local dev skills (personal tools, not part of app)
 .opencode/skills/
 

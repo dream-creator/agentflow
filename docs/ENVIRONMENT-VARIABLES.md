@@ -116,12 +116,12 @@ The standard pattern is:
 > dev (they'd link to production). Keep `.env.local` pointing at
 > `localhost`.
 
-## Stripe
+## PayMongo
 
-### `STRIPE_SECRET_KEY`
+### `PAYMONGO_SECRET_KEY`
 
-**Where:** `src/lib/stripe.ts` (lazy-init). Used for Checkout
-Session creation, customer lookup, webhook signature verification.
+**Where:** `src/lib/paymongo.ts` (lazy-init). Used for Checkout
+Session creation, customer lookup, subscription management.
 
 **Required:** yes (production). The lazy init means the absence
 of this var in dev only causes runtime errors on first call, not
@@ -129,24 +129,14 @@ build failures.
 
 Format: `sk_live_...` in production, `sk_test_...` in dev.
 
-### `STRIPE_WEBHOOK_SECRET`
+### `PAYMONGO_WEBHOOK_SECRET`
 
-**Where:** `src/app/api/stripe/webhook/route.ts`. Used by
-`constructWebhookEvent` to verify the signature on incoming
-webhooks.
+**Where:** `src/app/api/paymongo/webhook/route.ts`. Used for
+HMAC-SHA256 signature verification on incoming webhooks.
 
 **Required:** yes (production). Get this from
-https://dashboard.stripe.com/webhooks after creating a webhook
-endpoint that points to `<origin>/api/stripe/webhook`.
-
-### `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-
-**Where:** Currently not used in app code (the app is
-server-driven for checkout). Listed for future client-side use
-(Stripe Elements, etc.) and for Stripe.js preflight detection.
-
-**Required:** not currently. Recommended to set in production
-to silence Stripe domain-detection warnings.
+https://dashboard.paymongo.com/webhooks after creating a webhook
+endpoint that points to `<origin>/api/paymongo/webhook`.
 
 ## Email (Resend)
 

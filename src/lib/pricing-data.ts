@@ -37,7 +37,7 @@ export const pricingPlans: PricingPlan[] = [
       "Custom follow-up reminders",
       "Priority support",
     ],
-    cta: "Start 14-day free trial",
+    cta: "Upgrade to Pro",
     href: "/signup",
     highlighted: true,
   },

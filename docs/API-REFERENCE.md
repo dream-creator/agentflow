@@ -187,64 +187,98 @@ optional):
 operations in `/pipeline` are not rate-limited at the database
 level.
 
-## Stripe
+## PayMongo
 
-### `POST /api/stripe/checkout`
+### `POST /api/paymongo/checkout`
 
-**File:** `src/app/api/stripe/checkout/route.ts`
+**File:** `src/app/api/paymongo/checkout/route.ts`
 
-Create a Stripe Checkout Session for the AgentFlow Pro subscription.
+Create a PayMongo Checkout Session for the AgentFlow Pro subscription.
 
-**Auth:** required.
+**Auth:** required (Supabase session).
 
-**Request body:** none.
+**Request body:**
+
+```ts
+{
+  interval?: "monthly" | "annual"; // defaults to "monthly"
+}
+```
 
 **Response:**
 
 ```ts
 200 OK
 {
-  url: string; // Checkout Session URL
+  url: string | null; // Checkout redirect URL (null if card already vaulted)
 }
 ```
 
 **Implementation:**
 
 1. `supabase.auth.getUser()` → user.
-2. Lazy-init the Stripe client (`getStripe()` from
-   `src/lib/stripe.ts`).
-3. `getOrCreateStripeCustomer(user)` — looks up
-   `profiles.stripe_customer_id`; if missing, creates a Stripe
-   customer and updates the profile via service-role key.
-4. `createCheckoutSession(customer, user.email, returnUrl)` —
-   mode: `subscription`, line_items: `STRIPE_CONFIG.price` (the
-   $5/mo Pro tier), success_url: `<origin>/settings/billing?upgraded=true`,
-   cancel_url: `<origin>/settings/billing`.
-5. Return `{ url: session.url }`.
+2. Lazy-init the PayMongo client (`getPayMongoClient()` from
+   `src/lib/paymongo.ts`).
+3. `getOrCreatePayMongoCustomer(user)` — looks up
+   `profiles.paymongo_customer_id`; if missing, creates a PayMongo
+   customer (with `metadata: { supabase_user_id: id }`) and updates
+   the profile via service-role key.
+4. `createSubscription(customer, email, plan, returnUrl)` — creates
+   a PayMongo subscription with the selected plan.
+5. Return `{ url: checkout_url }` (redirects user to hosted checkout)
+   or `{ url: null }` (card already vaulted, payment intent auto-charged).
 
-The client (`/settings/billing/page.tsx`) does
-`window.location.href = url` to start the checkout flow.
+### `POST /api/paymongo/webhook`
 
-### `POST /api/stripe/webhook`
+**File:** `src/app/api/paymongo/webhook/route.ts`
 
-**File:** `src/app/api/stripe/webhook/route.ts`
+PayMongo webhook receiver. Raw body is read via `request.text()`;
+signature is verified using HMAC-SHA256 with
+`crypto.timingSafeEqual()`.
 
-Stripe webhook receiver. Signature-verified; the raw body is read
-via `request.text()` and passed to
-`constructWebhookEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET)`.
-
-**Auth:** Stripe signature verification (no Supabase auth).
+**Auth:** PayMongo signature verification (no Supabase auth).
 
 **Handled events:**
 
 | Event | Handler |
 | --- | --- |
-| `checkout.session.completed` | `handleCheckoutCompleted()` — updates `profiles.plan = 'pro'`, `stripe_customer_id`, `stripe_subscription_id`. |
-| `customer.subscription.deleted` | `handleSubscriptionDeleted()` — sets `profiles.plan = 'free'`. |
-| `invoice.payment_failed` | `handlePaymentFailed()` — logs a warning and (optionally) downgrades the user. |
+| `subscription.created` / `subscription.updated` | `handleSubscriptionUpdated()` — syncs `plan`, `subscription_status`, `paymongo_customer_id`, `paymongo_subscription_id`, `subscription_interval`, `grace_period_ends_at` |
+| `subscription.deleted` | `handleSubscriptionDeleted()` — sets `profiles.plan = 'free'` |
+| `invoice.paid` | Logs successful renewal (no-op) |
+| `invoice.payment_failed` | `handlePaymentFailed()` — sets `past_due` with 3-day grace period |
 
-All handlers use the service-role key to bypass RLS, since the
-profile being updated may not match the (absent) user session.
+All handlers use the service-role key to bypass RLS. Events are
+deduplicated via `paymongo_event_id` in `webhook_events` table.
+
+### `POST /api/paymongo/cancel`
+
+**File:** `src/app/api/paymongo/cancel/route.ts`
+
+Cancel an active PayMongo subscription.
+
+**Auth:** required (Supabase session).
+
+**Response:**
+
+```ts
+200 OK
+{ success: true }
+
+400 Bad Request
+{ error: "No active subscription to cancel" }
+
+404 Not Found
+{ error: "Subscription not found" }
+```
+
+### `GET /api/cron/billing-check`
+
+**File:** `src/app/api/cron/billing-check/route.ts`
+
+Daily cron that checks for expired grace periods and downgrades
+users to the Free plan.
+
+**Auth:** Bearer token from `CRON_SECRET` env var.
 
 ## Cron
 

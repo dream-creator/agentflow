@@ -12,7 +12,7 @@ server, the Supabase database connected, and tests passing.
 - **Git.**
 - A Supabase project (the repo includes the schema; the host
   is your choice — cloud or local Docker).
-- A Stripe test account.
+- A PayMongo test account.
 - A Resend account (optional for local dev — the daily-digest
   cron will silently no-op without it).
 - A Cloudflare Turnstile site key (optional for local dev —
@@ -53,10 +53,9 @@ NEXT_PUBLIC_TURNSTILE_TEST_BYPASS=true
 Optional (for full feature parity):
 
 ```bash
-# Stripe
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+# PayMongo
+PAYMONGO_SECRET_KEY=sk_test_...
+PAYMONGO_WEBHOOK_SECRET=whsec_...
 
 # Resend
 RESEND_API_KEY=re_...
@@ -226,17 +225,15 @@ Either:
 - Add `127.0.0.1` too — Cloudflare distinguishes between
   the two.
 
-### "Stripe webhook returns 400"
+### "PayMongo webhook returns 400"
 
-Locally, you need to forward Stripe events to your dev server:
+Locally, you need to test with PayMongo sandbox. Use the test
+card `4120000000000007` for successful payments, or trigger
+webhook events from the PayMongo dashboard's webhook logs.
 
-```bash
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-```
-
-This prints a `whsec_...` signing secret. Set it as
-`STRIPE_WEBHOOK_SECRET` in `.env.local`. Do **not** use the
-production secret locally.
+The webhook signature verification uses HMAC-SHA256. Set
+`PAYMONGO_WEBHOOK_SECRET` in `.env.local` with the webhook
+endpoint's signing secret from the PayMongo dashboard.
 
 ### "Vercel build fails with 'SUPABASE_ACCESS_TOKEN' is empty"
 

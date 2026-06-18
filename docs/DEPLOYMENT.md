@@ -135,35 +135,38 @@ To add a new migration:
 5. Bump `types/supabase.ts` by re-running
    `supabase gen types typescript` and committing the diff.
 
-## Stripe
+## PayMongo
 
 ### Configuration
 
-- **Dashboard:** https://dashboard.stripe.com
-- **API version:** `2026-05-27.dahlia` (pinned in
-  `src/lib/stripe.ts`).
-- **Webhook endpoint:** `https://agent-flow.app/api/stripe/webhook`
-  (Production). Preview deploys do not need a webhook — Stripe
-  test events go to a separate `stripe listen` CLI forwarding
-  setup, not the preview URL.
-- **Handled events:** `checkout.session.completed`,
-  `customer.subscription.deleted`, `invoice.payment_failed`.
-  See [API-REFERENCE.md](./API-REFERENCE.md#post-apistripewebhook).
+- **Dashboard:** https://dashboard.paymongo.com
+- **API version:** `2019-08-01` (default PayMongo API version).
+- **Webhook endpoint:** `https://agent-flow.app/api/paymongo/webhook`
+  (Production). Preview deploys use the same webhook endpoint on
+  the live domain — PayMongo does not support per-preview webhooks.
+- **Handled events:** `subscription.created`, `subscription.updated`,
+  `subscription.deleted`, `invoice.paid`, `invoice.payment_failed`.
+  See [API-REFERENCE.md](./API-REFERENCE.md#paymongo).
 
-### Local testing with `stripe listen`
+### Setting up PayMongo Subscriptions
 
-For local dev, install the Stripe CLI and forward events to
-your dev server:
+1. Email `support@paymongo.com` requesting Subscriptions API access.
+2. Once enabled, configure `PAYMONGO_SECRET_KEY` and
+   `PAYMONGO_WEBHOOK_SECRET` in Vercel.
+3. Create two products in the PayMongo dashboard:
+   - **Pro Monthly** — ₱450/mo (≈$8 USD)
+   - **Pro Annual** — ₱4,500/yr (≈$80 USD, 2 months free)
+4. Set up the webhook endpoint to point to
+   `https://agent-flow.app/api/paymongo/webhook` and subscribe to
+   `subscription.*` and `invoice.*` events.
 
-```bash
-stripe login
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-# Copy the `whsec_...` to .env.local as STRIPE_WEBHOOK_SECRET
-```
+### Test card numbers
 
-Use Stripe's test card numbers
-(e.g. `4242 4242 4242 4242`, any future expiry, any CVC) for
-test checkouts.
+| Card number | Use case |
+| --- | --- |
+| `4120000000000007` | Successful payment |
+| `4120000000000018` | Insufficient funds |
+| `4120000000000026` | Generic decline |
 
 ## Resend
 

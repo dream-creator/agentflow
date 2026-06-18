@@ -16,7 +16,7 @@ the kill switches for emergencies.
 | Zod input validation | Invalid request bodies are rejected before reaching Supabase | `src/lib/validations.ts` |
 | Rate limiting | In-memory per-user rate limit on `GET /api/leads` | `src/lib/rate-limiter.ts` |
 | Security headers | CSP, HSTS, COOP, CORP, X-Frame-Options, X-Content-Type-Options, Permissions-Policy | `next.config.mjs` |
-| Stripe webhook signature | Prevents forged webhook events | `src/app/api/stripe/webhook/route.ts` |
+| PayMongo webhook signature | Prevents forged webhook events (HMAC-SHA256) | `src/app/api/paymongo/webhook/route.ts` |
 | Service-role key isolation | Only used server-side; never inlined in client bundle | Env var, no `NEXT_PUBLIC_` prefix |
 | Sentry lazy load | Sentry SDK only loaded on actual errors (in `global-error.tsx`) | `src/app/global-error.tsx` |
 
@@ -129,7 +129,7 @@ the full Turnstile flow. The relevant security points:
 
 - `POST /api/leads` — currently unprotected. Add a 5 req / 60s
   limit to slow brute-force inserts.
-- `POST /api/stripe/checkout` — currently unprotected. Add a
+- `POST /api/paymongo/checkout` — currently unprotected. Add a
   3 req / 60s limit to slow webhook-induced loop attacks.
 
 ## Input validation
@@ -171,8 +171,8 @@ for `profiles`).
 
 The service-role key bypasses RLS. It's used by:
 
-- `src/lib/stripe.ts` — update `profiles.plan` and
-  `stripe_customer_id` on subscription events.
+- `src/lib/paymongo.ts` — update `profiles.plan` and
+  `paymongo_customer_id` on subscription events.
 - `src/lib/resend.ts` and `src/app/api/cron/daily-digest/route.ts` —
   query all users for the daily digest.
 - `tests/e2e/fixtures/auth.ts` — test-only admin operations.
@@ -181,8 +181,8 @@ The service-role key bypasses RLS. It's used by:
 
 | Secret | Where stored | How exposed |
 | --- | --- | --- |
-| `STRIPE_SECRET_KEY` | Vercel Production env | Server only (no `NEXT_PUBLIC_` prefix). |
-| `STRIPE_WEBHOOK_SECRET` | Vercel Production env | Server only. |
+| `PAYMONGO_SECRET_KEY` | Vercel Production env | Server only (no `NEXT_PUBLIC_` prefix). |
+| `PAYMONGO_WEBHOOK_SECRET` | Vercel Production env | Server only. |
 | `RESEND_API_KEY` | Vercel Production env | Server only. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Vercel Production env | Server only. |
 | `CRON_SECRET` | Vercel Production env | Server only. |
@@ -200,8 +200,8 @@ Supabase, not in this repo) is what actually verifies tokens.
 
 | Secret | How to rotate |
 | --- | --- |
-| Stripe secret | Stripe dashboard → API keys → roll. Update Vercel. |
-| Stripe webhook secret | Stripe dashboard → webhooks → endpoint → roll. Update Vercel. |
+| PayMongo secret | PayMongo dashboard → API keys → regenerate. Update Vercel. |
+| PayMongo webhook secret | PayMongo dashboard → webhooks → endpoint → rotate. Update Vercel. |
 | Resend API key | Resend dashboard → API keys → revoke + re-create. Update Vercel. |
 | Supabase service role | Supabase dashboard → Settings → API → service_role → reset. Update Vercel + all CI secrets. |
 | Vercel token | Vercel dashboard → account tokens → revoke. Re-create and update GitHub Actions. |
