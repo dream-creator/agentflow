@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LogOut, CreditCard, User, Edit } from "lucide-react";
+import { LogOut, CreditCard, User, Edit, Download } from "lucide-react";
 import Link from "next/link";
 import type { Database } from "@/types";
 
@@ -113,6 +113,39 @@ export default function SettingsPage() {
                 </p>
               </div>
             )}
+          </div>
+        </Card>
+
+        {/* Data Export */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Your Data
+            </CardTitle>
+          </CardHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-surface-500">
+              Download a copy of all your leads, contacts, and activity history.
+            </p>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={async () => {
+                const res = await fetch("/api/export");
+                if (!res.ok) return;
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `agentflow-export-${new Date().toISOString().split("T")[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download My Data
+            </Button>
           </div>
         </Card>
 
