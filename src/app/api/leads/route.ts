@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
     .select("*")
     .eq("user_id", user.id)
     .eq("is_active", true)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(0, 49999); // Supabase defaults to 1000 rows — override for large accounts
 
   if (error) {
     console.error("Leads GET error:", error.message);
