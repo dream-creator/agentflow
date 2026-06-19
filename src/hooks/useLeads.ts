@@ -80,19 +80,14 @@ export async function bulkDeleteLeads(ids: string[]): Promise<{ success: boolean
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Not authenticated" };
 
-  const { error } = await supabase
-    .from("leads")
-    .update({ is_active: false, updated_at: new Date().toISOString() })
-    .in("id", ids)
-    .eq("user_id", user.id);
-
+  const { error } = await supabase.rpc("bulk_delete_leads", { lead_ids: ids });
   if (error) return { success: false, error: error.message };
   return { success: true, error: null };
 }
 
 export async function bulkUpdateLeads(
   ids: string[],
-  updates: LeadUpdate
+  updates: Pick<LeadUpdate, "pipeline_stage">
 ): Promise<{ success: boolean; error: string | null }> {
   if (ids.length === 0) return { success: true, error: null };
 
@@ -101,12 +96,10 @@ export async function bulkUpdateLeads(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Not authenticated" };
 
-  const { error } = await supabase
-    .from("leads")
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .in("id", ids)
-    .eq("user_id", user.id);
-
+  const { error } = await supabase.rpc("bulk_update_leads", {
+    lead_ids: ids,
+    new_stage: updates.pipeline_stage,
+  });
   if (error) return { success: false, error: error.message };
   return { success: true, error: null };
 }
