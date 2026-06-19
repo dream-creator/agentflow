@@ -60,7 +60,7 @@ AgentFlow is built on a modern, production-grade stack:
 | Styling | Tailwind CSS 3.4 |
 | Database | Supabase (PostgreSQL) |
 | Authentication | Supabase Auth (Magic Link + Google OAuth) |
-| Payments | Stripe |
+| Payments | PayMongo |
 | Email | Resend |
 | Testing | Vitest (84 tests, 99%+ coverage) + Playwright (E2E) |
 | CI/CD | GitHub Actions (4-stage automated pipeline) |
@@ -86,7 +86,7 @@ Comprehensive developer documentation lives in [`docs/`](./docs/README.md):
 - [**Components & Hooks**](./docs/COMPONENTS-AND-HOOKS.md) — UI primitive and hook catalog
 - [**Environment Variables**](./docs/ENVIRONMENT-VARIABLES.md) — full env matrix and per-runtime topology
 - [**Security**](./docs/SECURITY.md) — defense-in-depth, CSP, headers, captcha, secret rotation
-- [**Deployment**](./docs/DEPLOYMENT.md) — CI/CD, Vercel, Supabase, Stripe, Resend, Sentry
+- [**Deployment**](./docs/DEPLOYMENT.md) — CI/CD, Vercel, Supabase, PayMongo, Resend, Sentry
 - [**PWA**](./docs/PWA.md) — manifest, service worker, install prompt
 - [**Testing**](./docs/TESTING.md) — Vitest + Playwright patterns, auth fixture
 - [**Onboarding**](./docs/ONBOARDING.md) — first-time dev setup, common tasks, troubleshooting
@@ -150,7 +150,7 @@ AgentFlow is built on top of open-source dependencies. Each dependency is govern
 | React | MIT |
 | Tailwind CSS | MIT |
 | Supabase JS Client | MIT |
-| Stripe JS | Apache 2.0 |
+| PayMongo JS | Apache 2.0 |
 | Resend | MIT |
 | Lucide React | ISC |
 | Vitest | MIT |

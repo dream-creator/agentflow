@@ -187,13 +187,13 @@ optional):
 operations in `/pipeline` are not rate-limited at the database
 level.
 
-## Stripe
+## PayMongo
 
-### `POST /api/stripe/checkout`
+### `POST /api/paymongo/checkout`
 
-**File:** `src/app/api/stripe/checkout/route.ts`
+**File:** `src/app/api/paymongo/checkout/route.ts`
 
-Create a Stripe Checkout Session for the AgentFlow Pro subscription.
+Create a PayMongo Checkout Session for the AgentFlow Pro subscription.
 
 **Auth:** required.
 
@@ -211,35 +211,35 @@ Create a Stripe Checkout Session for the AgentFlow Pro subscription.
 **Implementation:**
 
 1. `supabase.auth.getUser()` → user.
-2. Lazy-init the Stripe client (`getStripe()` from
-   `src/lib/stripe.ts`).
-3. `getOrCreateStripeCustomer(user)` — looks up
-   `profiles.stripe_customer_id`; if missing, creates a Stripe
+2. Lazy-init the PayMongo client (`getPayMongo()` from
+   `src/lib/paymongo.ts`).
+3. `getOrCreatePayMongoCustomer(user)` — looks up
+   `profiles.paymongo_customer_id`; if missing, creates a PayMongo
    customer and updates the profile via service-role key.
 4. `createCheckoutSession(customer, user.email, returnUrl)` —
-   mode: `subscription`, line_items: `STRIPE_CONFIG.price` (the
-   $5/mo Pro tier), success_url: `<origin>/settings/billing?upgraded=true`,
+   mode: `subscription`, line_items: `PAYMONGO_CONFIG.price` (the
+   $8/mo Pro tier), success_url: `<origin>/settings/billing?upgraded=true`,
    cancel_url: `<origin>/settings/billing`.
 5. Return `{ url: session.url }`.
 
 The client (`/settings/billing/page.tsx`) does
 `window.location.href = url` to start the checkout flow.
 
-### `POST /api/stripe/webhook`
+### `POST /api/paymongo/webhook`
 
-**File:** `src/app/api/stripe/webhook/route.ts`
+**File:** `src/app/api/paymongo/webhook/route.ts`
 
-Stripe webhook receiver. Signature-verified; the raw body is read
+PayMongo webhook receiver. Signature-verified; the raw body is read
 via `request.text()` and passed to
-`constructWebhookEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET)`.
+`verifyPayMongoSignature(rawBody, sig, PAYMONGO_WEBHOOK_SECRET)`.
 
-**Auth:** Stripe signature verification (no Supabase auth).
+**Auth:** PayMongo signature verification (no Supabase auth).
 
 **Handled events:**
 
 | Event | Handler |
 | --- | --- |
-| `checkout.session.completed` | `handleCheckoutCompleted()` — updates `profiles.plan = 'pro'`, `stripe_customer_id`, `stripe_subscription_id`. |
+| `checkout.session.completed` | `handleCheckoutCompleted()` — updates `profiles.plan = 'pro'`, `paymongo_customer_id`, `paymongo_subscription_id`. |
 | `customer.subscription.deleted` | `handleSubscriptionDeleted()` — sets `profiles.plan = 'free'`. |
 | `invoice.payment_failed` | `handlePaymentFailed()` — logs a warning and (optionally) downgrades the user. |
 
@@ -312,7 +312,7 @@ monitoring.
 ```ts
 export const PLAN_LIMITS = {
   free: { maxActiveLeads: 10, maxPipelines: 10, price: 0 },
-  pro:  { maxActiveLeads: Infinity, maxPipelines: Infinity, price: 500 },  // $5/mo
+  pro:  { maxActiveLeads: Infinity, maxPipelines: Infinity, price: 800 },  // $8/mo
   team: { maxActiveLeads: Infinity, maxPipelines: Infinity, price: 0 },   // internal placeholder
 } as const;
 
@@ -363,7 +363,7 @@ with appropriate HTTP status codes:
 | Code | Meaning |
 | --- | --- |
 | `400` | Invalid request body (Zod parse failure) |
-| `401` | No authenticated user (or bad Stripe signature) |
+| `401` | No authenticated user (or bad PayMongo signature) |
 | `403` | Plan limit reached |
 | `404` | Resource not found or not owned by user |
 | `429` | Rate limit exceeded |

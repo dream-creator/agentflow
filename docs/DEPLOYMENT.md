@@ -1,6 +1,6 @@
 # Deployment
 
-AgentFlow deploys via Vercel, with Supabase / Stripe / Resend /
+AgentFlow deploys via Vercel, with Supabase / PayMongo / Resend /
 Cloudflare Turnstile as managed services. CI is GitHub Actions;
 the production release is on a fast-forward merge to `main` plus a
 Sentry release upload.
@@ -38,7 +38,7 @@ Live URL: **https://agent-flow.app**.
 See [ENVIRONMENT-VARIABLES.md](./ENVIRONMENT-VARIABLES.md#vercel-environment-topology)
 for the full per-env table. Summary:
 
-- **Production env** (`agent-flow.app`): real Stripe + Resend
+- **Production env** (`agent-flow.app`): real PayMongo + Resend
   keys, real Turnstile site key, real Sentry DSN, real
   Supabase URL.
 - **Preview env** (`*.vercel.app`): real services but
@@ -135,33 +135,32 @@ To add a new migration:
 5. Bump `types/supabase.ts` by re-running
    `supabase gen types typescript` and committing the diff.
 
-## Stripe
+## PayMongo
 
 ### Configuration
 
-- **Dashboard:** https://dashboard.stripe.com
-- **API version:** `2026-05-27.dahlia` (pinned in
-  `src/lib/stripe.ts`).
-- **Webhook endpoint:** `https://agent-flow.app/api/stripe/webhook`
-  (Production). Preview deploys do not need a webhook — Stripe
-  test events go to a separate `stripe listen` CLI forwarding
+- **Dashboard:** https://dashboard.paymongo.com
+- **API version:** PayMongo V1 API.
+- **Webhook endpoint:** `https://agent-flow.app/api/paymongo/webhook`
+  (Production). Preview deploys do not need a webhook — PayMongo
+  test events go to a separate `paymongo listen` CLI forwarding
   setup, not the preview URL.
 - **Handled events:** `checkout.session.completed`,
   `customer.subscription.deleted`, `invoice.payment_failed`.
-  See [API-REFERENCE.md](./API-REFERENCE.md#post-apistripewebhook).
+  See [API-REFERENCE.md](./API-REFERENCE.md#post-apipaymongowebhook).
 
-### Local testing with `stripe listen`
+### Local testing with `paymongo listen`
 
-For local dev, install the Stripe CLI and forward events to
+For local dev, install the PayMongo CLI and forward events to
 your dev server:
 
 ```bash
-stripe login
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-# Copy the `whsec_...` to .env.local as STRIPE_WEBHOOK_SECRET
+paymongo login
+paymongo listen --forward-to localhost:3000/api/paymongo/webhook
+# Copy the `whsec_...` to .env.local as PAYMONGO_WEBHOOK_SECRET
 ```
 
-Use Stripe's test card numbers
+Use PayMongo's test card numbers
 (e.g. `4242 4242 4242 4242`, any future expiry, any CVC) for
 test checkouts.
 

@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Pricing Display", () => {
-  test("landing page shows $5/mo for Pro plan", async ({ page }) => {
+  test("landing page shows $8/mo for Pro plan", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
-    // Pro plan price should be $5
-    const proPrice = page.locator("text=$5").first();
+    // Pro plan price should be $8
+    const proPrice = page.locator("text=$8").first();
     await expect(proPrice).toBeVisible();
 
     // Free plan should show $0
@@ -104,12 +104,12 @@ test.describe("API Endpoints", () => {
 });
 
 test.describe("Pricing Consistency", () => {
-  test("all pages reference $5 not $19", async ({ page }) => {
+  test("all pages reference $8 not $19", async ({ page }) => {
     // Check landing page - use innerText to avoid React RSC serialized references
     await page.goto("/");
     await page.waitForLoadState("networkidle");
     const text = await page.locator("body").innerText();
     expect(text).not.toContain("$19");
-    expect(text).toContain("$5");
+    expect(text).toContain("$8");
   });
 });
