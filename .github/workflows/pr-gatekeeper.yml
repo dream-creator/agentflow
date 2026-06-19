@@ -248,8 +248,8 @@ jobs:
         uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
-            ${{ needs.preview-deploy.outputs.url }}/
-            ${{ needs.preview-deploy.outputs.url }}/login
+            ${{ needs.preview-deploy.outputs.preview-url }}/
+            ${{ needs.preview-deploy.outputs.preview-url }}/login
           budgetPath: ./lighthouse-budget.json
           uploadArtifacts: true
 
