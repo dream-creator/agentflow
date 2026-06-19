@@ -11,8 +11,7 @@ import { ArrowLeft, Upload, FileText, Loader2, CheckCircle2 } from "lucide-react
 import Link from "next/link";
 import Papa from "papaparse";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_ROWS = 1000;
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 interface ParsedLead {
   full_name: string;
@@ -82,11 +81,6 @@ export default function ImportPage() {
           const data = results.data as Record<string, string>[];
           if (data.length === 0) {
             setErrors(["CSV file is empty or has no data rows"]);
-            return;
-          }
-
-          if (data.length > MAX_ROWS) {
-            setErrors([`File too large. Maximum ${MAX_ROWS} rows allowed. Found ${data.length} rows.`]);
             return;
           }
 
@@ -175,9 +169,15 @@ export default function ImportPage() {
     }
 
     const limit = await checkPlanLimit();
+    if (limit.error) {
+      setErrors([limit.error]);
+      setLoading(false);
+      return;
+    }
+
     if (!limit.allowed) {
       showToast(
-        `Free plan limited to ${limit.maxAllowed} active leads. Upgrade to Pro for unlimited.`,
+        `Plan limit reached. You have ${limit.currentCount} active leads (${limit.plan} plan). Upgrade to Pro for unlimited.`,
         "error",
         { label: "Upgrade to Pro", href: "/settings/billing" }
       );
@@ -186,7 +186,7 @@ export default function ImportPage() {
     }
 
     const remaining = limit.maxAllowed - limit.currentCount;
-    if (parsedLeads.length > remaining) {
+    if (isFinite(remaining) && parsedLeads.length > remaining) {
       showToast(
         `You can only import ${remaining} more leads on the Free plan. ${parsedLeads.length - remaining} leads will be skipped.`,
         "info",
@@ -291,7 +291,7 @@ export default function ImportPage() {
               Or drag and drop your file here
             </p>
             <p className="text-xs text-surface-400 mt-2">
-              Max {MAX_FILE_SIZE / 1024 / 1024}MB, {MAX_ROWS} rows
+              Max {MAX_FILE_SIZE / 1024 / 1024}MB
             </p>
           </div>
           <input

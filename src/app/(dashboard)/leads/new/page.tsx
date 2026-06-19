@@ -50,9 +50,15 @@ export default function NewLeadPage() {
 
     // Check plan limit before inserting
     const limit = await checkPlanLimit();
+    if (limit.error) {
+      setError(limit.error);
+      setLoading(false);
+      return;
+    }
+
     if (!limit.allowed) {
       showToast(
-        `Free plan limited to ${limit.maxAllowed} active leads. Upgrade to Pro for unlimited.`,
+        `Plan limit reached. You have ${limit.currentCount} active leads (${limit.plan} plan). Upgrade to Pro for unlimited.`,
         "error",
         { label: "Upgrade to Pro", href: "/settings/billing" }
       );

@@ -6,6 +6,7 @@ interface PlanLimitResult {
   plan: PlanType;
   currentCount: number;
   maxAllowed: number;
+  error?: string;
 }
 
 export async function checkPlanLimit(): Promise<PlanLimitResult> {
@@ -16,16 +17,20 @@ export async function checkPlanLimit(): Promise<PlanLimitResult> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { allowed: false, plan: "free", currentCount: 0, maxAllowed: 0 };
+    return { allowed: false, plan: "free", currentCount: 0, maxAllowed: 0, error: "Not authenticated" };
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("plan")
     .eq("id", user.id)
     .single();
 
-  const plan: PlanType = (profile?.plan as PlanType) || "free";
+  if (profileError || !profile) {
+    return { allowed: false, plan: "free", currentCount: 0, maxAllowed: 0, error: "Could not verify your plan. Please refresh and try again." };
+  }
+
+  const plan: PlanType = (profile.plan as PlanType) || "free";
   const limits = PLAN_LIMITS[plan];
 
   const { count } = await supabase

@@ -19,6 +19,20 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "csv-import-unlimited",
+    date: "2026-06-19",
+    title: "Unlimited CSV imports + larger file support",
+    summary:
+      "Import as many leads as you need in a single CSV file. We removed the old row limit and increased the file size so you can bring your entire database over in one go.",
+    items: [
+      "Removed the 1,000-row limit — import as many leads as your CSV contains",
+      "File size limit increased from 5MB to 50MB (supports 20,000+ leads per file)",
+      "Fixed a bug where imports could silently fail if your account information couldn't be loaded",
+      "Clearer error messages when something goes wrong during import",
+      "Bulk actions (stage change, delete) now complete faster — no more waiting",
+    ],
+  },
+  {
     id: "auth-redesign-oauth",
     date: "2026-06-18",
     title: "Auth pages redesigned + Google & Slack sign-in",
