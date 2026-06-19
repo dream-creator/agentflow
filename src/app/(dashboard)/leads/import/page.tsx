@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { showToast } from "@/components/ui/toast";
@@ -48,7 +47,6 @@ export default function ImportPage() {
   const [errors, setErrors] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = e.target.files?.[0];
@@ -158,16 +156,7 @@ export default function ImportPage() {
     setLoading(true);
     setErrors([]);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setErrors(["Not authenticated"]);
-      setLoading(false);
-      return;
-    }
-
+    // Client-side plan limit check (UX — server also enforces)
     const limit = await checkPlanLimit();
     if (limit.error) {
       setErrors([limit.error]);
@@ -194,50 +183,35 @@ export default function ImportPage() {
       );
     }
 
-    const BATCH_SIZE = 1000;
-    const newErrors: string[] = [];
-    let successCount = 0;
+    // Filter out rows with empty names client-side (server validates too)
+    const validLeads = parsedLeads.filter((lead) => lead.full_name.trim());
 
-    const validLeads = parsedLeads
-      .filter((lead) => {
-        if (!lead.full_name.trim()) {
-          newErrors.push("Skipping row: empty name");
-          return false;
-        }
-        return true;
-      })
-      .slice(0, remaining)
-      .map((lead) => ({
-        user_id: user.id,
-        full_name: lead.full_name,
-        email: lead.email,
-        phone: lead.phone,
-        source: "csv_import",
-        pipeline_stage: "new_lead",
-      }));
+    // POST to server-side import endpoint for proper validation + plan enforcement
+    const formData = new FormData();
+    formData.append("leads", JSON.stringify(validLeads));
 
-    if (parsedLeads.length > remaining) {
-      const skipped = parsedLeads.length - remaining;
-      for (let i = 0; i < skipped; i++) {
-        newErrors.push(`Skipped "${parsedLeads[remaining + i].full_name}": free plan limit reached`);
+    try {
+      const response = await fetch("/api/leads/import", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setErrors([result.error || "Import failed"]);
+        setLoading(false);
+        return;
       }
+
+      setImported(result.imported ?? 0);
+      setErrors(result.errors ?? []);
+      setStep("done");
+    } catch {
+      setErrors(["Network error — please check your connection and try again."]);
+    } finally {
+      setLoading(false);
     }
-
-    for (let i = 0; i < validLeads.length; i += BATCH_SIZE) {
-      const batch = validLeads.slice(i, i + BATCH_SIZE);
-      const { error } = await supabase.from("leads").insert(batch);
-
-      if (error) {
-        newErrors.push(`Batch import failed: ${error.message}`);
-      } else {
-        successCount += batch.length;
-      }
-    }
-
-    setImported(successCount);
-    setErrors(newErrors);
-    setStep("done");
-    setLoading(false);
   }
 
   return (

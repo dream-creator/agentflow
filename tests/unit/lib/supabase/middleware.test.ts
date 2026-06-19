@@ -10,19 +10,31 @@ vi.mock("@supabase/ssr", () => ({
   }),
 }));
 
-vi.mock("next/server", () => ({
-  NextResponse: {
-    next: vi.fn(({ request }: { request: unknown }) => ({
+vi.mock("next/server", () => {
+  function MockNextResponse(
+    body?: unknown,
+    init?: { status?: number; headers?: Record<string, string> }
+  ) {
+    return {
+      status: init?.status ?? 200,
+      headers: init?.headers ?? {},
       cookies: { set: vi.fn() },
-      request,
-    })),
-    redirect: vi.fn((url: URL) => ({
-      status: 307,
-      headers: { get: () => url.toString() },
-      url: url.toString(),
-    })),
-  },
-}));
+    };
+  }
+  return {
+    NextResponse: Object.assign(MockNextResponse, {
+      next: vi.fn(({ request }: { request: unknown }) => ({
+        cookies: { set: vi.fn() },
+        request,
+      })),
+      redirect: vi.fn((url: URL) => ({
+        status: 307,
+        headers: { get: () => url.toString() },
+        url: url.toString(),
+      })),
+    }),
+  };
+});
 
 import { updateSession } from "@/lib/supabase/middleware";
 import { NextRequest } from "next/server";

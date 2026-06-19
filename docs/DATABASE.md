@@ -20,8 +20,8 @@ migration 001; the trigger is recreated implicitly via
 | `id` | `uuid` | no | — | Primary key. Foreign key to `auth.users.id` (cascade on delete). |
 | `email` | `text` | no | — | Synced from `auth.users.email` on signup. |
 | `full_name` | `text` | yes | `null` | User-provided display name. |
-| `plan` | `text` | no | `'free'` | One of `'free'`, `'pro'`, `'team'`. Set by Stripe webhook on subscription change. |
-| `stripe_customer_id` | `text` | yes | `null` | Populated on first checkout. |
+| `plan` | `text` | no | `'free'` | One of `'free'`, `'pro'`, `'team'`. Set by PayMongo webhook on subscription change. |
+| `paymongo_customer_id` | `text` | yes | `null` | Populated on first checkout. |
 | `created_at` | `timestamptz` | no | `now()` | |
 | `updated_at` | `timestamptz` | no | `now()` | Updated by trigger on row update. |
 
@@ -317,8 +317,8 @@ Hard deletes are not exposed.
 
 - **Modifying `profiles` from a client.** The RLS policy is
   `auth.uid() = id`, which works. But the `plan` column should
-  never be set from a client — it's owned by the Stripe webhook.
-  The `profiles` row is updated by `src/lib/stripe.ts` using the
+  never be set from a client — it's owned by the PayMongo webhook.
+  The `profiles` row is updated by `src/lib/paymongo.ts` using the
   service-role key, which bypasses RLS.
 - **Inserting actions with a `lead_id` that doesn't belong to
   the user.** RLS on `leads` will reject the corresponding read,

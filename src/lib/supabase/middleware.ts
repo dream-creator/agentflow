@@ -1,6 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Protected routes — declared once at module scope so the catch block below
+// can reuse the same check when getUser() throws. Previously this list was
+// duplicated inside the try block, which meant an auth error silently passed
+// protected requests through (SEC-001 fail-open).
+const PROTECTED_PATHS = [
+  "/dashboard",
+  "/pipeline",
+  "/leads",
+  "/follow-ups",
+  "/settings",
+  "/api/leads",
+  "/api/pipeline",
+];
+
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PATHS.some((path) => pathname.startsWith(path));
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -12,11 +30,7 @@ export async function updateSession(request: NextRequest) {
   if (!url || !key) {
     // Fail-closed: when Supabase is not configured, block protected routes
     // instead of silently passing them through without authentication.
-    const protectedPaths = ["/dashboard", "/pipeline", "/leads", "/follow-ups", "/settings", "/api/leads", "/api/pipeline"];
-    const isProtected = protectedPaths.some((path) =>
-      request.nextUrl.pathname.startsWith(path)
-    );
-    if (isProtected) {
+    if (isProtectedPath(request.nextUrl.pathname)) {
       return new NextResponse("Authentication service unavailable", {
         status: 503,
         headers: { "Content-Type": "text/plain" },
@@ -50,10 +64,7 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     // Protected routes
-    const protectedPaths = ["/dashboard", "/pipeline", "/leads", "/follow-ups", "/settings", "/api/leads", "/api/pipeline"];
-    const isProtected = protectedPaths.some((path) =>
-      request.nextUrl.pathname.startsWith(path)
-    );
+    const isProtected = isProtectedPath(request.nextUrl.pathname);
 
     if (isProtected && !user) {
       const url = request.nextUrl.clone();
@@ -75,6 +86,18 @@ export async function updateSession(request: NextRequest) {
     }
   } catch (error) {
     console.error("Middleware auth error:", error instanceof Error ? error.message : "Unknown error");
+    // Fail-closed (SEC-001): if getUser() throws (malformed cookie, transient
+    // Supabase 5xx, network blip, JWKS fetch failure) we must NOT let the
+    // request fall through to a protected route handler unauthenticated.
+    // Public pages (login, signup, landing) still render so users can
+    // recover. Protected routes get a 503 so the user sees a clear error
+    // instead of silently bypassing the gate.
+    if (isProtectedPath(request.nextUrl.pathname)) {
+      return new NextResponse("Authentication service temporarily unavailable", {
+        status: 503,
+        headers: { "Content-Type": "text/plain" },
+      });
+    }
   }
 
   return supabaseResponse;

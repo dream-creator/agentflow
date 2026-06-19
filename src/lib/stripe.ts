@@ -50,10 +50,26 @@ export async function getOrCreateStripeCustomer(
     metadata: { user_id: userId },
   });
 
-  await supabase
-    .from("profiles")
-    .update({ stripe_customer_id: customer.id })
-    .eq("id", userId);
+  try {
+    await supabase
+      .from("profiles")
+      .update({ stripe_customer_id: customer.id })
+      .eq("id", userId);
+  } catch (err: unknown) {
+    // Unique constraint violation (Postgres 23505) means a concurrent request
+    // already wrote a stripe_customer_id for this user. Re-read to get the
+    // winning value. The orphaned Stripe customer record is harmless.
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("23505") || msg.includes("idx_profiles_stripe_customer_id")) {
+      const { data: retry } = await supabase
+        .from("profiles")
+        .select("stripe_customer_id")
+        .eq("id", userId)
+        .single();
+      if (retry?.stripe_customer_id) return retry.stripe_customer_id;
+    }
+    throw err;
+  }
 
   return customer.id;
 }
