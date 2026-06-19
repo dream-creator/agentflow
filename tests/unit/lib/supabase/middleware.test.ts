@@ -11,18 +11,18 @@ vi.mock("@supabase/ssr", () => ({
 }));
 
 vi.mock("next/server", () => {
-  const constructor = vi.fn(function (
-    this: unknown,
-    _body?: unknown,
+  function MockNextResponse(
+    body?: unknown,
     init?: { status?: number; headers?: Record<string, string> }
   ) {
     return {
       status: init?.status ?? 200,
       headers: init?.headers ?? {},
+      cookies: { set: vi.fn() },
     };
-  });
+  }
   return {
-    NextResponse: Object.assign(constructor, {
+    NextResponse: Object.assign(MockNextResponse, {
       next: vi.fn(({ request }: { request: unknown }) => ({
         cookies: { set: vi.fn() },
         request,
@@ -34,7 +34,7 @@ vi.mock("next/server", () => {
       })),
     }),
   };
-}));
+});
 
 import { updateSession } from "@/lib/supabase/middleware";
 import { NextRequest } from "next/server";
