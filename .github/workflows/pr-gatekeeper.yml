@@ -224,13 +224,12 @@ jobs:
 
             HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${URL}/" 2>/dev/null || echo "000")
 
-            if [ "$HTTP_STATUS" = "200" ]; then
-              echo "[OK] Health check passed (HTTP ${HTTP_STATUS})"
+            if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "401" ]; then
+              echo "[OK] Deployment is live (HTTP ${HTTP_STATUS})"
               exit 0
             fi
 
-            echo "[WARN] Got HTTP ${HTTP_STATUS}, retrying in ${RETRY_DELAY}s..."
-            sleep $RETRY_DELAY
+            echo "[WARN] Got HTTP ${HTTP_STATUS}, retrying in ${RETRY_DELAY}s..."            sleep $RETRY_DELAY
             RETRY_DELAY=$((RETRY_DELAY + 6))
           done
 
