@@ -97,4 +97,6 @@ The PayMongo migration branch (`dde749e`) is functionally complete but had sever
 
 ## Status
 
-All checklist items complete. Branch is ready for merge after user confirms PayMongo support has enabled subscriptions and USD card acceptance.
+All checklist items complete. Committed and pushed to `origin/feat/paymongo-migration` as `6cacab2`.
+
+Branch is ready for merge after user confirms PayMongo support has enabled subscriptions and USD card acceptance.
