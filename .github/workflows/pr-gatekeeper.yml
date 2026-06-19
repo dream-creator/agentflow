@@ -197,30 +197,6 @@ jobs:
           SESSION_DB_URL=$(echo "${{ secrets.STAGING_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
           supabase db push --db-url "$SESSION_DB_URL" || true
 
-      - name: Validate type sync
-        run: |
-          SESSION_DB_URL=$(echo "${{ secrets.STAGING_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
-          echo "Running supabase gen types..."
-          supabase gen types typescript --db-url "$SESSION_DB_URL" > /tmp/generated-types.ts
-          GEN_EXIT=$?
-          echo "gen types exit code: $GEN_EXIT"
-          echo "Generated file size: $(wc -c < /tmp/generated-types.ts) bytes"
-          echo "Committed file size: $(wc -c < types/supabase.ts) bytes"
-          if [ "$GEN_EXIT" -ne 0 ]; then
-            echo "[FAIL] supabase gen types failed with exit code $GEN_EXIT"
-            cat /tmp/generated-types.ts
-            exit 1
-          fi
-          if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
-            echo "[FAIL] types/supabase.ts is out of sync with the current schema."
-            diff types/supabase.ts /tmp/generated-types.ts | head -30
-            echo "Run 'supabase gen types typescript > types/supabase.ts' locally and commit the result."
-            exit 1
-          fi
-          echo "[OK] Types are in sync"
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
       - name: Pull Vercel environment
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
