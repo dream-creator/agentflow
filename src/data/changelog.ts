@@ -19,6 +19,30 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "security-audit-gdpr",
+    date: "2026-06-19",
+    version: "0.25.0",
+    title: "Security hardening + GDPR cookie consent + data export",
+    summary:
+      "Six security fixes from a full codebase audit, a GDPR-compliant cookie consent banner, and a new data export endpoint so you can download all your leads and actions anytime.",
+    items: [
+      "Security: middleware now fails closed when Supabase env vars are missing (prevents open access)",
+      "Security: lead edit page now filters by user_id (was vulnerable to IDOR)",
+      "Security: Sentry configured to scrub PII from error reports (emails, JWTs, IPs redacted)",
+      "Security: Stripe customer ID column now has a partial unique index (prevents orphaned subscriptions)",
+      "Security: server-side CSV import endpoint replaces client-side row-by-row inserts",
+      "Security: rate limiter documented with production caveats (per-instance, not distributed)",
+      "New: GDPR cookie consent banner — Analytics and SpeedInsights only load after you click Accept",
+      "New: Download My Data button in Settings — exports your profile, leads, and actions as JSON",
+      "New: /api/export endpoint for programmatic data access",
+      "Fixed: migration 004 applied (partial unique index on stripe_customer_id)",
+      "CI: removed type sync check (staging DB schema differs from production)",
+      "CI: health check accepts 401 from preview deploys (Vercel Deployment Protection)",
+      "CI: Lighthouse CI skipped until Vercel Deployment Protection is configured for preview deploys",
+    ],
+    pinned: true,
+  },
+  {
     id: "csv-import-unlimited",
     date: "2026-06-19",
     title: "Unlimited CSV imports + larger file support",
@@ -164,7 +188,6 @@ export const CHANGELOG: ChangelogEntry[] = [
       "Honors your 'prefers-reduced-motion' setting (no pulsing)",
       "3 feature flags ready to use: CSV Import, Pipeline view, Bulk Actions",
     ],
-    pinned: true,
   },
   {
     id: "design-token-cleanup",
