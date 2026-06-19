@@ -194,33 +194,43 @@ export default function ImportPage() {
       );
     }
 
-    let successCount = 0;
+    const BATCH_SIZE = 1000;
     const newErrors: string[] = [];
+    let successCount = 0;
 
-    for (const lead of parsedLeads) {
-      if (!lead.full_name.trim()) {
-        newErrors.push(`Skipping row: empty name`);
-        continue;
-      }
-
-      if (successCount >= remaining) {
-        newErrors.push(`Skipped "${lead.full_name}": free plan limit reached`);
-        continue;
-      }
-
-      const { error } = await supabase.from("leads").insert({
+    const validLeads = parsedLeads
+      .filter((lead) => {
+        if (!lead.full_name.trim()) {
+          newErrors.push("Skipping row: empty name");
+          return false;
+        }
+        return true;
+      })
+      .slice(0, remaining)
+      .map((lead) => ({
         user_id: user.id,
         full_name: lead.full_name,
         email: lead.email,
         phone: lead.phone,
         source: "csv_import",
         pipeline_stage: "new_lead",
-      });
+      }));
+
+    if (parsedLeads.length > remaining) {
+      const skipped = parsedLeads.length - remaining;
+      for (let i = 0; i < skipped; i++) {
+        newErrors.push(`Skipped "${parsedLeads[remaining + i].full_name}": free plan limit reached`);
+      }
+    }
+
+    for (let i = 0; i < validLeads.length; i += BATCH_SIZE) {
+      const batch = validLeads.slice(i, i + BATCH_SIZE);
+      const { error } = await supabase.from("leads").insert(batch);
 
       if (error) {
-        newErrors.push(`Failed to import ${lead.full_name}: ${error.message}`);
+        newErrors.push(`Batch import failed: ${error.message}`);
       } else {
-        successCount++;
+        successCount += batch.length;
       }
     }
 
