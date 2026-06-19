@@ -12,9 +12,9 @@ variable.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | yes | Vercel + local |
 | `SUPABASE_SERVICE_ROLE_KEY` | no | yes | Vercel only (never client) |
 | `NEXT_PUBLIC_APP_URL` | yes | yes | Vercel only (see note) |
-| `STRIPE_SECRET_KEY` | no | yes | Vercel only |
-| `STRIPE_WEBHOOK_SECRET` | no | yes | Vercel only |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | yes | yes | Vercel + local |
+| `PAYMONGO_SECRET_KEY` | no | yes | Vercel only |
+| `PAYMONGO_WEBHOOK_SECRET` | no | yes | Vercel only |
+| `NEXT_PUBLIC_PAYMONGO_PUBLIC_KEY` | yes | yes | Vercel + local |
 | `RESEND_API_KEY` | no | yes | Vercel only |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | yes | yes | Vercel + local |
 | `NEXT_PUBLIC_TURNSTILE_TEST_BYPASS` | yes | no | Vercel Preview only |
@@ -57,8 +57,8 @@ on the anon key being secret.
 
 ### `SUPABASE_SERVICE_ROLE_KEY`
 
-**Where:** `src/lib/stripe.ts` (for updating `profiles.plan` and
-`stripe_customer_id`), `src/lib/resend.ts` (for the daily digest
+**Where:** `src/lib/paymongo.ts` (for updating `profiles.plan` and
+`subscription_status` via webhook), `src/lib/resend.ts` (for the daily digest
 to query all users), `src/app/api/cron/daily-digest/route.ts`,
 `tests/e2e/fixtures/auth.ts` (test-only).
 
@@ -120,12 +120,12 @@ The standard pattern is:
 
 ### `PAYMONGO_SECRET_KEY`
 
-**Where:** `src/lib/paymongo.ts` (lazy-init). Used for Checkout
-Session creation, customer lookup, subscription management.
+**Where:** `src/lib/paymongo.ts` (lazy-init). Used for customer,
+plan, subscription, and checkout-session creation.
 
-**Required:** yes (production). The lazy init means the absence
-of this var in dev only causes runtime errors on first call, not
-build failures.
+**Required:** yes (production). The lazy init means the absence of
+this var in dev only causes runtime errors on first call, not build
+failures.
 
 Format: `sk_live_...` in production, `sk_test_...` in dev.
 
@@ -137,6 +137,17 @@ HMAC-SHA256 signature verification on incoming webhooks.
 **Required:** yes (production). Get this from
 https://dashboard.paymongo.com/webhooks after creating a webhook
 endpoint that points to `<origin>/api/paymongo/webhook`.
+
+### `NEXT_PUBLIC_PAYMONGO_PUBLIC_KEY`
+
+**Where:** `src/lib/paymongo.ts` (lazy-init). Currently only the
+secret key is used server-side; the public key is exposed for any
+future client-side PayMongo widgets (e.g., inline card tokenization).
+
+**Required:** no. Safe to leave empty until client-side PayMongo
+components are added.
+
+Format: `pk_live_...` in production, `pk_test_...` in dev.
 
 ## Email (Resend)
 
@@ -323,9 +334,9 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+PAYMONGO_SECRET_KEY=
+PAYMONGO_WEBHOOK_SECRET=
+NEXT_PUBLIC_PAYMONGO_PUBLIC_KEY=
 RESEND_API_KEY=
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 ```
@@ -359,7 +370,7 @@ infrastructure vars.
 
 | SDK | Behavior on missing var |
 | --- | --- |
-| Stripe (`src/lib/stripe.ts`) | Lazy. First call throws. Build succeeds. |
+| PayMongo (`src/lib/paymongo.ts`) | Lazy. First call throws if secret key is missing. Build succeeds. |
 | Resend (`src/lib/resend.ts`) | Lazy. First call throws. Build succeeds. |
 | Supabase browser client | Returns `{}` cast to `SupabaseClient` (safe on SSR). |
 | Supabase server client | **Throws on module load.** |

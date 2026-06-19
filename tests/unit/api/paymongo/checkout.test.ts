@@ -18,6 +18,11 @@ vi.mock("@/lib/supabase/service", () => ({
   createServiceClient: vi.fn(() => ({ from: mockFrom })),
 }));
 
+vi.mock("@/lib/rate-limiter", () => ({
+  apiRateLimit: vi.fn(() => Promise.resolve({ allowed: true, remaining: 9, limit: 10, reset: new Date() })),
+  resetRateLimiter: vi.fn(),
+}));
+
 vi.mock("@/lib/paymongo", () => ({
   getOrCreatePayMongoCustomer: mockGetOrCreateCustomer,
   createPayMongoSubscription: mockCreateSubscription,
@@ -62,7 +67,7 @@ vi.mock("next/server", () => ({
 
 describe("/api/paymongo/checkout", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     process.env.PAYMONGO_SECRET_KEY = "sk_test_fake";
   });
 
@@ -97,6 +102,27 @@ describe("/api/paymongo/checkout", () => {
     expect(body.error).toMatch(/unauthorized/i);
   });
 
+  it("returns 429 when rate limit is exceeded", async () => {
+    const { apiRateLimit } = await import("@/lib/rate-limiter");
+    vi.mocked(apiRateLimit).mockResolvedValue({
+      allowed: false,
+      remaining: 0,
+      limit: 10,
+      reset: new Date("2026-01-01T00:00:00Z"),
+    });
+    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+
+    const { POST } = await import("@/app/api/paymongo/checkout/route");
+    const req = new NextRequest("http://localhost:3000/api/paymongo/checkout", {
+      method: "POST",
+      body: JSON.stringify({ interval: "monthly" }),
+      headers: { "Content-Type": "application/json" } as unknown as HeadersInit,
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(429);
+  });
+
   it("defaults to monthly interval when body is empty", async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: "u1", email: "a@b.com" } } });
     const profileChain = buildSupabaseChain({
@@ -119,12 +145,7 @@ describe("/api/paymongo/checkout", () => {
 
     const res = await POST(req);
     expect(res.status).toBe(200);
-    // Verify monthly was used (default)
-    expect(mockCreateSubscription).toHaveBeenCalledWith(
-      "cus_123",
-      "u1",
-      "monthly",
-    );
+    expect(mockCreateSubscription).toHaveBeenCalledWith("cus_123", "u1", "monthly");
   });
 
   it("returns checkout URL on success", async () => {
@@ -180,18 +201,8 @@ describe("/api/paymongo/checkout", () => {
     expect(body.subscriptionId).toBe("sub_789");
   });
 
-  it("defaults to monthly for unrecognized interval", async () => {
+  it("returns 400 for invalid interval", async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: "u1", email: "a@b.com" } } });
-    const profileChain = buildSupabaseChain({
-      data: { email: "a@b.com", full_name: "Test" },
-      error: null,
-    });
-    mockFrom.mockReturnValue(profileChain);
-    mockGetOrCreateCustomer.mockResolvedValue("cus_123");
-    mockCreateSubscription.mockResolvedValue({
-      subscriptionId: "sub_123",
-      checkoutUrl: "https://checkout.paymongo.com/ok",
-    });
 
     const { POST } = await import("@/app/api/paymongo/checkout/route");
     const req = new NextRequest("http://localhost:3000/api/paymongo/checkout", {
@@ -201,13 +212,7 @@ describe("/api/paymongo/checkout", () => {
     });
 
     const res = await POST(req);
-    // Should default to monthly, not error
-    expect(res.status).toBe(200);
-    expect(mockCreateSubscription).toHaveBeenCalledWith(
-      "cus_123",
-      "u1",
-      "monthly",
-    );
+    expect(res.status).toBe(400);
   });
 
   it("returns error from PayMongoError when API call fails", async () => {
@@ -218,7 +223,6 @@ describe("/api/paymongo/checkout", () => {
     });
     mockFrom.mockReturnValue(profileChain);
 
-    // Use the mocked PayMongoError class (available via the mock)
     const MockedPayMongoError = vi.mocked(
       (await import("@/lib/paymongo")).PayMongoError,
     );

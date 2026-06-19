@@ -26,6 +26,11 @@ export const actionUpdateSchema = actionSchema.partial().extend({
   id: z.string().uuid("Invalid action ID"),
 });
 
+export const checkoutBodySchema = z.object({
+  interval: z.enum(["monthly", "annual"]).default("monthly"),
+});
+
+export type CheckoutBodyInput = z.infer<typeof checkoutBodySchema>;
 export type LeadInput = z.infer<typeof leadSchema>;
 export type LeadUpdateInput = z.infer<typeof leadUpdateSchema>;
 export type ActionInput = z.infer<typeof actionSchema>;

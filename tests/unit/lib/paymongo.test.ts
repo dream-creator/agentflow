@@ -40,27 +40,26 @@ describe("PayMongoError", () => {
 describe("PAYMONGO_PLANS", () => {
   it("has monthly and annual plans with correct amounts", async () => {
     const { PAYMONGO_PLANS } = await import("@/lib/paymongo");
-    expect(PAYMONGO_PLANS.monthly.amount).toBe(45000);
-    expect(PAYMONGO_PLANS.monthly.currency).toBe("php");
+    expect(PAYMONGO_PLANS.monthly.amount).toBe(800);
+    expect(PAYMONGO_PLANS.monthly.currency).toBe("usd");
     expect(PAYMONGO_PLANS.monthly.interval).toBe("month");
     expect(PAYMONGO_PLANS.monthly.intervalCount).toBe(1);
 
-    expect(PAYMONGO_PLANS.annual.amount).toBe(450000);
-    expect(PAYMONGO_PLANS.annual.currency).toBe("php");
+    expect(PAYMONGO_PLANS.annual.amount).toBe(8000);
+    expect(PAYMONGO_PLANS.annual.currency).toBe("usd");
     expect(PAYMONGO_PLANS.annual.interval).toBe("year");
     expect(PAYMONGO_PLANS.annual.intervalCount).toBe(1);
   });
 
-  it("monthly is cheaper than annual total", async () => {
+  it("annual is 10x monthly", async () => {
     const { PAYMONGO_PLANS } = await import("@/lib/paymongo");
-    // Annual = 10x monthly (2 months free)
     expect(PAYMONGO_PLANS.annual.amount).toBe(PAYMONGO_PLANS.monthly.amount * 10);
   });
 
-  it("both use PHP currency", async () => {
+  it("both use USD currency", async () => {
     const { PAYMONGO_PLANS } = await import("@/lib/paymongo");
-    expect(PAYMONGO_PLANS.monthly.currency).toBe("php");
-    expect(PAYMONGO_PLANS.annual.currency).toBe("php");
+    expect(PAYMONGO_PLANS.monthly.currency).toBe("usd");
+    expect(PAYMONGO_PLANS.annual.currency).toBe("usd");
   });
 });
 

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const downgradedCount = await handleGracePeriodExpired();
 
-    console.log(`Billing check: ${downgradedCount} subscriptions downgraded after grace period`);
+    console.info(`Billing check: ${downgradedCount} subscriptions downgraded after grace period`);
 
     return NextResponse.json({
       success: true,
@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Billing check cron error:", error);
+    import("@sentry/nextjs").then(({ captureException }) =>
+      captureException(error),
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

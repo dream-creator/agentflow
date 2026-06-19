@@ -36,9 +36,13 @@ vi.mock("next/server", () => ({
       this._body = (init?.body as string) || "{}";
       this._headers = (init?.headers as Record<string, string>) || {};
     }
-    async text() { return this._body; }
+    async text() {
+      return this._body;
+    }
     get headers() {
-      return { get: (name: string) => this._headers[name.toLowerCase()] || null };
+      return {
+        get: (name: string) => this._headers[name.toLowerCase()] || null,
+      };
     }
   },
   NextResponse: {
@@ -51,14 +55,26 @@ vi.mock("next/server", () => ({
 
 // ── Helpers ────────────────────────────────────────────────────
 
-function buildSupabaseChain(result: { data: unknown; error: unknown }) {
+function buildInsertResult(result: { data: unknown; error: unknown }) {
+  return {
+    insert: vi.fn(() => result),
+  };
+}
+
+function buildSelectResult(result: { data: unknown; error: unknown }) {
   const chain: Record<string, unknown> = {};
   chain.select = vi.fn(() => chain);
-  chain.insert = vi.fn(() => chain);
-  chain.update = vi.fn(() => chain);
   chain.eq = vi.fn(() => chain);
   chain.single = vi.fn(() => Promise.resolve(result));
-  chain.maybeSingle = vi.fn(() => Promise.resolve(result));
+  return chain;
+}
+
+function buildUpdateResult(result: { data: unknown; error: unknown }) {
+  const chain: Record<string, unknown> = {};
+  chain.update = vi.fn(() => chain);
+  chain.eq = vi.fn(() => chain);
+  // Supabase update returns a thenable promise-like chain, but we don't await it.
+  // We just need the chain to be callable so the route can fire it.
   return chain;
 }
 
@@ -66,7 +82,7 @@ function buildSupabaseChain(result: { data: unknown; error: unknown }) {
 
 describe("/api/paymongo/webhook", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     process.env.PAYMONGO_WEBHOOK_SECRET = "whsec_test";
   });
 
@@ -121,11 +137,18 @@ describe("/api/paymongo/webhook", () => {
 
   it("deduplicates already-processed events", async () => {
     mockVerifyWebhook.mockReturnValue(true);
-    const dedupChain = buildSupabaseChain({
-      data: { id: "existing" },
+    const insertResult = buildInsertResult({
+      data: null,
+      error: { code: "23505", message: "duplicate key value" },
+    });
+    const selectChain = buildSelectResult({
+      data: { status: "processed" },
       error: null,
     });
-    mockFrom.mockReturnValue(dedupChain);
+
+    mockFrom
+      .mockReturnValueOnce(insertResult)
+      .mockReturnValueOnce(selectChain);
 
     const payload = JSON.stringify({
       id: "evt_dup",
@@ -144,15 +167,49 @@ describe("/api/paymongo/webhook", () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.duplicate).toBe(true);
-    // Only called once for dedup check, not for profile lookup
-    expect(mockFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it("re-processes failed events on retry", async () => {
+    mockVerifyWebhook.mockReturnValue(true);
+    const insertResult = buildInsertResult({
+      data: null,
+      error: { code: "23505", message: "duplicate key value" },
+    });
+    const selectChain = buildSelectResult({
+      data: { status: "failed" },
+      error: null,
+    });
+    const updateChain = buildUpdateResult({ data: null, error: null });
+
+    mockFrom
+      .mockReturnValueOnce(insertResult)
+      .mockReturnValueOnce(selectChain)
+      .mockReturnValueOnce(updateChain);
+
+    const payload = JSON.stringify({
+      id: "evt_retry",
+      type: "subscription.activated",
+      data: { id: "sub_retry", type: "subscription", attributes: {} },
+    });
+
+    const { POST } = await import("@/app/api/paymongo/webhook/route");
+    const req = new NextRequest("http://localhost:3000/api/paymongo/webhook", {
+      method: "POST",
+      body: payload,
+      headers: { "paymongo-signature": "valid_sig" } as unknown as HeadersInit,
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
   });
 
   it("returns 200 for subscription.activated event", async () => {
     mockVerifyWebhook.mockReturnValue(true);
-    const dedupChain = buildSupabaseChain({ data: null, error: null });
-    const insertChain = buildSupabaseChain({ data: null, error: null });
-    mockFrom.mockReturnValueOnce(dedupChain).mockReturnValueOnce(insertChain);
+    const insertResult = buildInsertResult({ data: null, error: null });
+    const updateChain = buildUpdateResult({ data: null, error: null });
+    mockFrom
+      .mockReturnValueOnce(insertResult)
+      .mockReturnValueOnce(updateChain);
 
     const payload = JSON.stringify({
       id: "evt_001",
@@ -173,9 +230,11 @@ describe("/api/paymongo/webhook", () => {
 
   it("returns 200 for subscription.cancelled event", async () => {
     mockVerifyWebhook.mockReturnValue(true);
-    const dedupChain = buildSupabaseChain({ data: null, error: null });
-    const insertChain = buildSupabaseChain({ data: null, error: null });
-    mockFrom.mockReturnValueOnce(dedupChain).mockReturnValueOnce(insertChain);
+    const insertResult = buildInsertResult({ data: null, error: null });
+    const updateChain = buildUpdateResult({ data: null, error: null });
+    mockFrom
+      .mockReturnValueOnce(insertResult)
+      .mockReturnValueOnce(updateChain);
 
     const payload = JSON.stringify({
       id: "evt_002",
@@ -196,9 +255,11 @@ describe("/api/paymongo/webhook", () => {
 
   it("returns 200 for invoice.payment_failed event", async () => {
     mockVerifyWebhook.mockReturnValue(true);
-    const dedupChain = buildSupabaseChain({ data: null, error: null });
-    const insertChain = buildSupabaseChain({ data: null, error: null });
-    mockFrom.mockReturnValueOnce(dedupChain).mockReturnValueOnce(insertChain);
+    const insertResult = buildInsertResult({ data: null, error: null });
+    const updateChain = buildUpdateResult({ data: null, error: null });
+    mockFrom
+      .mockReturnValueOnce(insertResult)
+      .mockReturnValueOnce(updateChain);
 
     const payload = JSON.stringify({
       id: "evt_003",
@@ -219,9 +280,11 @@ describe("/api/paymongo/webhook", () => {
 
   it("returns 200 for invoice.paid event", async () => {
     mockVerifyWebhook.mockReturnValue(true);
-    const dedupChain = buildSupabaseChain({ data: null, error: null });
-    const insertChain = buildSupabaseChain({ data: null, error: null });
-    mockFrom.mockReturnValueOnce(dedupChain).mockReturnValueOnce(insertChain);
+    const insertResult = buildInsertResult({ data: null, error: null });
+    const updateChain = buildUpdateResult({ data: null, error: null });
+    mockFrom
+      .mockReturnValueOnce(insertResult)
+      .mockReturnValueOnce(updateChain);
 
     const payload = JSON.stringify({
       id: "evt_004",
@@ -242,9 +305,11 @@ describe("/api/paymongo/webhook", () => {
 
   it("returns 200 for unhandled event types (no-op)", async () => {
     mockVerifyWebhook.mockReturnValue(true);
-    const dedupChain = buildSupabaseChain({ data: null, error: null });
-    const insertChain = buildSupabaseChain({ data: null, error: null });
-    mockFrom.mockReturnValueOnce(dedupChain).mockReturnValueOnce(insertChain);
+    const insertResult = buildInsertResult({ data: null, error: null });
+    const updateChain = buildUpdateResult({ data: null, error: null });
+    mockFrom
+      .mockReturnValueOnce(insertResult)
+      .mockReturnValueOnce(updateChain);
 
     const payload = JSON.stringify({
       id: "evt_005",
@@ -261,5 +326,38 @@ describe("/api/paymongo/webhook", () => {
 
     const res = await POST(req);
     expect(res.status).toBe(200);
+  });
+
+  it("records failed status when handler throws", async () => {
+    mockVerifyWebhook.mockReturnValue(true);
+    const { handleSubscriptionActivated } = await import("@/lib/paymongo");
+    vi.mocked(handleSubscriptionActivated).mockRejectedValueOnce(
+      new Error("profile not found"),
+    );
+
+    const insertResult = buildInsertResult({ data: null, error: null });
+    const updateChain = buildUpdateResult({ data: null, error: null });
+    mockFrom
+      .mockReturnValueOnce(insertResult)
+      .mockReturnValueOnce(updateChain);
+
+    const payload = JSON.stringify({
+      id: "evt_err",
+      type: "subscription.activated",
+      data: { id: "sub_err", type: "subscription", attributes: {} },
+    });
+
+    const { POST } = await import("@/app/api/paymongo/webhook/route");
+    const req = new NextRequest("http://localhost:3000/api/paymongo/webhook", {
+      method: "POST",
+      body: payload,
+      headers: { "paymongo-signature": "valid_sig" } as unknown as HeadersInit,
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(500);
+    expect(updateChain.update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "failed" }),
+    );
   });
 });

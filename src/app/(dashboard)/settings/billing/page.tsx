@@ -101,18 +101,18 @@ function BillingContent() {
       </div>
 
       {success && (
-        <div className="mb-6 p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-          <p className="text-sm text-emerald-700">{success}</p>
+        <div className="mb-6 p-4 rounded-lg bg-success-50 border border-success-100 flex items-center gap-3">
+          <CheckCircle2 className="h-5 w-5 text-success-500 shrink-0" />
+          <p className="text-sm text-success-700">{success}</p>
         </div>
       )}
 
       {subscriptionStatus === "past_due" && (
-        <div className="mb-6 p-4 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-3">
-          <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+        <div className="mb-6 p-4 rounded-lg bg-warning-50 border border-warning-100 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-warning-500 shrink-0" />
           <div>
-            <p className="text-sm text-amber-700 font-medium">Payment past due</p>
-            <p className="text-xs text-amber-600 mt-1">
+            <p className="text-sm text-warning-700 font-medium">Payment past due</p>
+            <p className="text-xs text-warning-600 mt-1">
               Your payment failed. Please update your payment method to keep your Pro plan active.
             </p>
           </div>
@@ -189,7 +189,7 @@ function BillingContent() {
                     >
                       <div className="text-sm font-medium">Annual</div>
                       <div className="text-lg font-bold">$80/yr</div>
-                      <div className="text-xs text-emerald-600">2 months free</div>
+                      <div className="text-xs text-success-600">2 months free</div>
                     </button>
                   </div>
                 </div>

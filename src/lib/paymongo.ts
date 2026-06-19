@@ -16,7 +16,7 @@ export class PayMongoError extends Error {
 }
 
 interface PayMongoConfig {
-  amount: number; // centavos (45000 = ₱450.00)
+  amount: number; // smallest currency unit (cents for USD)
   currency: string;
   productName: string;
   productDescription: string;
@@ -87,8 +87,8 @@ export const PAYMONGO_API_BASE = "https://api.paymongo.com/v1";
 
 export const PAYMONGO_PLANS = {
   monthly: {
-    amount: 45000, // ₱450.00 in centavos
-    currency: "php",
+    amount: 800, // $8.00 USD in cents
+    currency: "usd",
     productName: "AgentFlow Pro",
     productDescription:
       "Unlimited leads, unlimited pipelines, custom branding, SMS reminders",
@@ -96,8 +96,8 @@ export const PAYMONGO_PLANS = {
     intervalCount: 1,
   },
   annual: {
-    amount: 450000, // ₱4,500.00 in centavos (10 months × ₱450)
-    currency: "php",
+    amount: 8000, // $80.00 USD in cents (10 months × $8)
+    currency: "usd",
     productName: "AgentFlow Pro (Annual)",
     productDescription:
       "Unlimited leads, unlimited pipelines, custom branding, SMS reminders — 2 months free",

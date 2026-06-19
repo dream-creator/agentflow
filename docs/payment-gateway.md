@@ -1,15 +1,15 @@
-# Payment Gateway Migration: Stripe → PayMongo
+# Payment Gateway: PayMongo
 
-## Problem
-Stripe is not fully supported in the Philippines. The user is based in the Philippines and cannot fully verify a Stripe account without a US LLC. PayMongo is the best alternative — BSP-regulated, Philippine ID-only KYC, supports Mastercard/Visa + GCash + Maya + QR Ph + Online Banking.
+**Status:** Production-ready on `feat/paymongo-migration` (Stripe removed).  
+**Goal:** Accept subscriptions via PayMongo for Philippine and international users.  
+**Pricing:** $8 / month or $80 / year (USD).  
+**Created:** 2026-06-19
 
-## Constraints
-- Keep USD pricing ($8/mo)
-- No active Stripe subscribers (clean slate)
-- All payment methods: Cards, GCash, Maya, QR Ph, Online Banking, BNPL
-- International clients must be able to pay
+## Why PayMongo
 
-## PayMongo Fee Summary
+Stripe is not fully supported in the Philippines. The user is based in the Philippines and cannot verify a Stripe account without a US LLC. PayMongo is BSP-regulated, Philippine ID-only KYC, and supports Mastercard/Visa + GCash + Maya + QR Ph + Online Banking + BNPL.
+
+## PayMongo Fee Summary (on USD $8)
 
 | Payment Method | Fee | On $8/mo |
 |----------------|-----|----------|
@@ -23,7 +23,7 @@ Stripe is not fully supported in the Philippines. The user is based in the Phili
 | Online Banking (BDO, BPI, etc.) | 0.71% or ₱13.39 | ~$0.13 |
 | BNPL (BillEase) | 1.34% | ~$0.11 |
 
-No setup fee. No monthly fee. Pay-as-you-go only.
+No setup fee, no monthly fee, pay-as-you-go.
 
 ---
 
@@ -32,53 +32,70 @@ No setup fee. No monthly fee. Pay-as-you-go only.
 ```
 User clicks "Upgrade"
   → POST /api/paymongo/checkout
-  → PayMongo: Create Customer + Subscription + Payment Intent
-  → Redirect to PayMongo hosted checkout (supports all methods)
-  → User pays (Card / GCash / Maya / QR Ph / Banking)
+  → Rate limit + Zod validation
+  → Get or create PayMongo Customer
+  → Get or create Plan ($8/mo or $80/yr USD)
+  → Create Subscription + Checkout Session
+  → Redirect user to PayMongo hosted checkout
+  → User pays (Card / GCash / Maya / QR Ph / Banking / BNPL)
   → PayMongo fires webhook → POST /api/paymongo/webhook
+  → Verify HMAC-SHA256 signature
+  → Insert into webhook_events (atomic dedup)
   → Update profiles table (plan: "pro", subscription active)
 ```
 
+### Webhook Deduplication
+
+The `webhook_events` table is the single source of truth for whether an event has been processed. The handler:
+
+1. Verifies the webhook signature.
+2. Inserts a row with `status: 'pending'` and `paymongo_event_id`.
+3. A PostgreSQL `UNIQUE` constraint on `paymongo_event_id` makes duplicate events fail with `23505`; the handler returns 200 and skips reprocessing.
+4. If business logic succeeds, the row is updated to `status: 'processed'`.
+5. If business logic fails, the row is updated to `status: 'failed'` with `error_message`, so PayMongo retries can be observed and reprocessed.
+
 ---
 
-## Phase 1: Core PayMongo Module
+## Core PayMongo Module
 
-**New file: `src/lib/paymongo.ts`** (~150 lines)
+**File:** `src/lib/paymongo.ts`
 
 | Function | Purpose |
 |----------|---------|
-| `getPayMongoClient()` | Lazy-initialized HTTP client for PayMongo API (Bearer token auth) |
-| `PAYMONGO_CONFIG` | Price (800 = $8.00), currency "usd", plan name, interval |
-| `getOrCreatePayMongoCustomer(userId, email, fullName)` | Creates PayMongo Customer, stores `paymongo_customer_id` on profile |
-| `createSubscription(customerId, userId)` | Creates Plan + Subscription + returns checkout URL |
-| `handleSubscriptionActive(subscriptionId, userId)` | Sets `plan: "pro"`, `subscription_status: "active"` |
-| `handleSubscriptionCancelled(subscriptionId)` | Resets to `plan: "free"`, `subscription_status: "cancelled"` |
-| `handlePaymentFailed(subscriptionId)` | Sets `subscription_status: "past_due"` |
-| `verifyWebhookSignature(body, signature)` | Verifies PayMongo webhook HMAC-SHA256 signature |
+| `getPayMongoConfig()` | USD price config, overridable via env vars |
+| `payMongoFetch()` | All API calls go through here; injects `Authorization`, `Content-Type`, and `Idempotency-Key` |
+| `getOrCreatePlan()` | Reuses an existing plan or creates one; cached in memory |
+| `getOrCreatePayMongoCustomer()` | Creates a PayMongo Customer and stores `paymongo_customer_id` on the profile |
+| `createSubscription()` | Creates Plan + Subscription + Checkout Session, returns checkout URL |
+| `cancelPayMongoSubscription()` | Calls `POST /v1/subscriptions/{id}/cancel` |
+| `handleSubscriptionActive()` | Sets `plan: "pro"`, `subscription_status: "active"` |
+| `handleSubscriptionCancelled()` | Resets to `plan: "free"`, `subscription_status: "cancelled"` |
+| `handlePaymentFailed()` | Sets `subscription_status: "past_due"` |
+| `verifyWebhookSignature()` | HMAC-SHA256 verification against `PAYMONGO_WEBHOOK_SECRET` |
 
-### PayMongo API Pattern (raw HTTP, not SDK)
+### Idempotency
+
+Every PayMongo POST includes an `Idempotency-Key` UUID. This prevents duplicate customer/plan/subscription creation if the request is retried.
+
+### Pricing Config
+
 ```typescript
-const response = await fetch("https://api.paymongo.com/v1/subscriptions", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Basic ${Buffer.from(`${secretKey}:`).toString("base64")}`,
-  },
-  body: JSON.stringify({ data: { attributes: { customer_id, plan_id } } }),
-});
+{
+  monthly: { amount: 800,  currency: "usd" },  // $8.00
+  annual:  { amount: 8000, currency: "usd" },  // $80.00
+}
 ```
 
-### Why raw HTTP instead of `josu-paymongo` SDK:
-- The SDK has minimal docs and is community-maintained
-- PayMongo's API is simple REST — no need for a heavy wrapper
-- We control error handling and retry logic
-- Matches the pattern of `src/lib/stripe.ts` (thin wrapper, not a full SDK)
+Override via env vars if needed (not recommended):
+- `PAYMONGO_PRICE_MONTHLY`
+- `PAYMONGO_PRICE_ANNUAL`
+- `PAYMONGO_CURRENCY`
 
 ---
 
-## Phase 2: Database Schema
+## Database Migrations
 
-**New migration: `003_add_paymongo_to_profiles.sql`**
+### `003_add_paymongo_to_profiles.sql`
 
 ```sql
 ALTER TABLE profiles
@@ -86,161 +103,159 @@ ALTER TABLE profiles
   ADD COLUMN paymongo_subscription_id TEXT;
 ```
 
-Keep existing Stripe columns (nullable, unused). Removing them requires full type regeneration and is unnecessary.
+### `004_create_webhook_events.sql`
+
+```sql
+CREATE TABLE IF NOT EXISTS webhook_events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  paymongo_event_id TEXT NOT NULL UNIQUE,
+  event_type TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('pending', 'processed', 'failed')),
+  payload JSONB NOT NULL,
+  error_message TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE webhook_events DISABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_webhook_events_paymongo_event_id ON webhook_events(paymongo_event_id);
+```
+
+RLS is disabled because the table is only written by the service-role client from the webhook route.
 
 ---
 
-## Phase 3: API Routes
+## API Routes
 
-### 3a. Checkout Route
-**New file: `src/app/api/paymongo/checkout/route.ts`** (~40 lines)
+### `POST /api/paymongo/checkout`
 
-```
-POST /api/paymongo/checkout
-→ Auth check (401 if no user)
-→ Get or create PayMongo customer
-→ Create subscription (Plan + Subscription)
-→ Return { url: checkout_session_url }
-```
+1. Auth check (401 if no user).
+2. Rate limit: 10 req/min per user.
+3. Zod validation: `interval: "monthly" | "annual"`.
+4. Get or create PayMongo customer.
+5. Get or create Plan.
+6. Create Subscription + Checkout Session.
+7. Return `{ url: checkout_session_url }`.
 
-### 3b. Webhook Route
-**New file: `src/app/api/paymongo/webhook/route.ts`** (~60 lines)
+### `POST /api/paymongo/webhook`
 
-```
-POST /api/paymongo/webhook
-→ Verify PayMongo webhook signature (HMAC-SHA256)
-→ Parse event type:
-  - "subscription.activated"  → handleSubscriptionActive()
-  - "subscription.cancelled"  → handleSubscriptionCancelled()
-  - "invoice.payment_failed"  → handlePaymentFailed()
-→ Return 200
-```
+1. Verify PayMongo signature.
+2. Atomic dedup via `webhook_events` insert.
+3. Process event:
+   - `subscription.activated` → `handleSubscriptionActive()`
+   - `subscription.cancelled` → `handleSubscriptionCancelled()`
+   - `invoice.payment_failed` → `handlePaymentFailed()`
+4. Return 200 on all recognized events (avoids PayMongo retries).
 
-### 3c. Cancel Route
-**New file: `src/app/api/paymongo/cancel/route.ts`** (~30 lines)
+### `POST /api/paymongo/cancel`
 
-```
-POST /api/paymongo/cancel
-→ Auth check
-→ Get paymongo_subscription_id from profile
-→ Call PayMongo API to cancel subscription
-→ Return success
-```
+1. Auth check.
+2. Rate limit: 10 req/min per user.
+3. Look up `paymongo_subscription_id` from profile.
+4. Call PayMongo cancel endpoint.
+5. Update local profile to `subscription_status: "cancelled"`.
 
 ---
 
-## Phase 4: UI Changes
+## UI Changes
 
-### 4a. Billing Page
-**Modified: `src/app/(dashboard)/settings/billing/page.tsx`**
+### `src/app/(dashboard)/settings/billing/page.tsx`
 
-| Change | Details |
-|--------|---------|
-| `handleUpgrade()` | POST to `/api/paymongo/checkout` (was `/api/stripe/checkout`) |
-| Success banner | Keep as-is (reads `?upgraded=true` URL param) |
-| Plan display | No change — shows "Free" or "Pro" based on `profiles.plan` |
-| Cancel button | Add "Cancel Subscription" → calls `/api/paymongo/cancel` |
+- `handleUpgrade()` → POST `/api/paymongo/checkout`.
+- Cancel button → POST `/api/paymongo/cancel`.
+- Success banner still reads `?upgraded=true`.
+- Plan display uses `profiles.plan` and `profiles.subscription_status`.
+- Color tokens use `success-*` / `warning-*` / `destructive-*` instead of raw Tailwind palettes.
 
-### 4b. Landing Pricing
-**Modified: `src/components/landing-pricing.tsx`**
+### Landing Pricing
 
-No price change ($8/mo stays). No payment method logos needed — PayMongo's checkout page shows all available methods.
+- `$8/mo` stays.
+- No payment-method logos on the landing page; PayMongo's checkout page shows the available methods automatically.
 
 ---
 
-## Phase 5: Environment Variables
+## Environment Variables
 
-**Add to `.env.local` and Vercel:**
-```
+```bash
+# Server-side (Vercel only)
 PAYMONGO_SECRET_KEY=sk_test_...
-PAYMONGO_PUBLIC_KEY=pk_test_...
 PAYMONGO_WEBHOOK_SECRET=whsec_...
+
+# Public (Vercel + local)
 NEXT_PUBLIC_PAYMONGO_PUBLIC_KEY=pk_test_...
 ```
 
-**Keep (don't break anything):**
-```
-STRIPE_SECRET_KEY
-STRIPE_WEBHOOK_SECRET
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-```
+See `ENVIRONMENT-VARIABLES.md` for the full matrix and topology.
 
 ---
 
-## Phase 6: Tests
+## Tests
 
-### Unit Tests (NEW)
+### Unit Tests
+
 | File | Tests | What |
 |------|-------|------|
-| `tests/unit/lib/paymongo.test.ts` | ~12 | Config, customer creation, subscription, webhook verification |
-| `tests/unit/api/paymongo/checkout.test.ts` | ~8 | Auth, customer creation, subscription creation, URL return |
-| `tests/unit/api/paymongo/webhook.test.ts` | ~8 | Signature verification, event handling, error cases |
+| `tests/unit/lib/paymongo.test.ts` | ~16 | Config, customer creation, plan reuse, subscription, webhook verification, cancellation |
+| `tests/unit/api/paymongo/checkout.test.ts` | ~10 | Auth, rate limiting, Zod validation, customer/subscription creation, URL return |
+| `tests/unit/api/paymongo/webhook.test.ts` | ~10 | Signature verification, atomic dedup, event handling, status updates |
+| `tests/unit/api/paymongo/cancel.test.ts` | ~6 | Auth, rate limiting, subscription lookup, cancellation API |
 
-### E2E Tests (MODIFY)
+### E2E Tests
+
 | File | Changes |
 |------|---------|
-| `tests/e2e/pricing-plan-limits.spec.ts` | Fix stale $5 assertions → $8, update checkout flow |
-
-### Delete Old Stripe Tests
-| File | Action |
-|------|--------|
-| `tests/unit/lib/stripe.test.ts` | Delete |
-| `tests/unit/api/stripe/checkout.test.ts` | Delete |
-| `tests/unit/api/stripe/webhook.test.ts` | Delete |
+| `tests/e2e/pricing-plan-limits.spec.ts` | $8 assertions, updated checkout flow |
 
 ---
 
-## Phase 7: Cleanup
+## Webhook Setup Checklist
 
-| Action | File |
-|--------|------|
-| Delete Stripe lib | `src/lib/stripe.ts` |
-| Delete Stripe checkout route | `src/app/api/stripe/checkout/route.ts` |
-| Delete Stripe webhook route | `src/app/api/stripe/webhook/route.ts` |
-| Delete Stripe tests | `tests/unit/lib/stripe.test.ts`, `tests/unit/api/stripe/` |
-| Update env example | `.env.local.example` |
-| Update docs | `docs/DEPLOYMENT.md`, `docs/ENVIRONMENT-VARIABLES.md` |
-| Update changelog | `src/data/changelog.ts` |
-
----
-
-## Implementation Order
-
-| Step | What | Files | Est. Lines |
-|------|------|-------|------------|
-| 1 | PayMongo core lib | `src/lib/paymongo.ts` (NEW) | ~150 |
-| 2 | DB migration | `supabase/migrations/003_add_paymongo_to_profiles.sql` (NEW) | ~15 |
-| 3 | Checkout API | `src/app/api/paymongo/checkout/route.ts` (NEW) | ~40 |
-| 4 | Webhook API | `src/app/api/paymongo/webhook/route.ts` (NEW) | ~60 |
-| 5 | Cancel API | `src/app/api/paymongo/cancel/route.ts` (NEW) | ~30 |
-| 6 | Billing page update | `src/app/(dashboard)/settings/billing/page.tsx` (MODIFY) | ~10 changed |
-| 7 | Env vars | `.env.local`, Vercel dashboard | config |
-| 8 | Unit tests | `tests/unit/lib/paymongo.test.ts`, `tests/unit/api/paymongo/` (NEW) | ~250 |
-| 9 | Fix e2e tests | `tests/e2e/pricing-plan-limits.spec.ts` (MODIFY) | ~5 changed |
-| 10 | Delete Stripe files | 6 files deleted | — |
-| 11 | Update docs/changelog | `docs/`, `src/data/changelog.ts` | ~30 |
-
-**Total new code:** ~550 lines across 5 new files
-**Total modified:** ~15 lines across 2 files
-**Total deleted:** ~700 lines across 6 files
+1. In PayMongo dashboard, create a webhook endpoint: `https://agent-flow.app/api/paymongo/webhook`.
+2. Copy the webhook secret into `PAYMONGO_WEBHOOK_SECRET`.
+3. Subscribe to events:
+   - `subscription.activated`
+   - `subscription.cancelled`
+   - `invoice.payment_failed`
+4. Run `supabase db push` to apply `004_create_webhook_events.sql`.
+5. Test with a PayMongo test-mode subscription.
 
 ---
 
-## Risk Assessment
+## Risks & Mitigations
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| PayMongo subscriptions need account activation | Can't test recurring billing | Use one-time payments as fallback; contact PayMongo support early |
-| USD pricing on PayMongo (they prefer PHP) | Possible FX conversion on card charges | Test with sandbox; confirm with PayMongo that USD cards work |
-| Webhook signature verification differs from Stripe | Security gap if done wrong | PayMongo uses HMAC-SHA256; implement per their docs |
-| No existing Stripe data to migrate | Good — clean slate | Just delete Stripe files, no data migration needed |
+| PayMongo subscriptions need account activation | Can't test recurring billing | Contact PayMongo support early; use one-time payments as fallback |
+| USD pricing requires USD card acceptance | International cards may be declined | Confirm USD card acceptance enabled in PayMongo dashboard |
+| Webhook signature differs from Stripe | Security gap if wrong | HMAC-SHA256 implemented per PayMongo docs |
+| Duplicate webhook events | Double-charge / double-upgrade | Atomic dedup via `paymongo_event_id` unique constraint |
+| Webhook processing slower than 30s | PayMongo retries | Handler is currently synchronous; keep logic fast and idempotent |
 
 ---
 
-## Prerequisites Before Implementation
+## Prerequisites Before Going Live
 
-1. Sign up at https://dashboard.paymongo.com
-2. Get API keys (test + live)
-3. Enable card payments on the account
-4. Contact PayMongo support to enable subscriptions (required for recurring billing)
-5. Set up webhook endpoint in PayMongo dashboard: `https://agent-flow.app/api/paymongo/webhook`
+1. Sign up at https://dashboard.paymongo.com.
+2. Get test + live API keys.
+3. Enable card payments on the account.
+4. **Contact PayMongo support to enable:**
+   - Subscriptions feature
+   - USD card acceptance (for $8/mo pricing)
+5. Set up webhook endpoint in PayMongo dashboard.
+6. Set env vars in Vercel and run `supabase db push`.
+7. Run a test subscription end-to-end in test mode before switching to live keys.
+
+---
+
+## What Was Removed
+
+All Stripe code and tests were removed from the branch once PayMongo was wired in:
+
+- `src/lib/stripe.ts`
+- `src/app/api/stripe/checkout/route.ts`
+- `src/app/api/stripe/webhook/route.ts`
+- `tests/unit/lib/stripe.test.ts`
+- `tests/unit/api/stripe/checkout.test.ts`
+- `tests/unit/api/stripe/webhook.test.ts`
+
+Architecture diagrams still reference Stripe for historical context; the live system uses PayMongo.

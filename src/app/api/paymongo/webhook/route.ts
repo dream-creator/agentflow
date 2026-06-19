@@ -19,6 +19,8 @@ interface PayMongoWebhookEvent {
   };
 }
 
+const PG_UNIQUE_VIOLATION = "23505";
+
 export async function POST(request: NextRequest) {
   if (!process.env.PAYMONGO_WEBHOOK_SECRET) {
     return NextResponse.json(
@@ -35,15 +37,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "No signature" }, { status: 400 });
   }
 
-  // Verify webhook signature
+  // Verify webhook signature before any parsing or DB work
   try {
     const isValid = verifyWebhookSignature(body, signature);
     if (!isValid) {
-      console.error("PayMongo webhook signature verification failed");
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
   } catch (error) {
-    console.error("PayMongo webhook verification error:", error);
     return NextResponse.json({ error: "Verification failed" }, { status: 400 });
   }
 
@@ -55,17 +55,37 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  // Deduplicate: check if we've already processed this event
   const supabase = createServiceClient();
-  const { data: existingEvent } = await supabase
-    .from("webhook_events")
-    .select("id")
-    .eq("paymongo_event_id", event.id)
-    .single();
 
-  if (existingEvent) {
-    // Already processed — return 200 to acknowledge
-    return NextResponse.json({ received: true, duplicate: true });
+  // Atomic dedup: insert the event first. The unique constraint on
+  // paymongo_event_id guarantees that only one delivery can be processed.
+  const { error: insertError } = await supabase.from("webhook_events").insert({
+    paymongo_event_id: event.id,
+    event_type: event.type,
+    status: "pending",
+  });
+
+  if (insertError) {
+    if (insertError.code === PG_UNIQUE_VIOLATION) {
+      // Duplicate delivery. If it was already processed successfully, just
+      // acknowledge it. If it failed or is still pending, we fall through and
+      // re-process (PayMongo retries give us another chance to fix a transient
+      // failure).
+      const { data: existingEvent } = await supabase
+        .from("webhook_events")
+        .select("status")
+        .eq("paymongo_event_id", event.id)
+        .single();
+
+      if (existingEvent?.status === "processed") {
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+    } else {
+      return NextResponse.json(
+        { error: "Failed to record event" },
+        { status: 500 },
+      );
+    }
   }
 
   // Process event
@@ -86,18 +106,32 @@ export async function POST(request: NextRequest) {
         await handlePaymentPaid(subscriptionId);
         break;
       default:
-        // Unhandled event type — log but return 200
-        console.log(`Unhandled PayMongo event type: ${event.type}`);
+        // Unhandled event types are acknowledged with 200 so PayMongo does
+        // not retry them, but we intentionally do not touch business state.
+        break;
     }
 
-    // Record event as processed
-    await supabase.from("webhook_events").insert({
-      paymongo_event_id: event.id,
-      event_type: event.type,
-      processed_at: new Date().toISOString(),
-    });
+    // Mark event as successfully processed
+    await supabase
+      .from("webhook_events")
+      .update({
+        status: "processed",
+        processed_at: new Date().toISOString(),
+      })
+      .eq("paymongo_event_id", event.id);
   } catch (error) {
-    console.error(`PayMongo webhook handler failed for ${event.type}:`, error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    await supabase
+      .from("webhook_events")
+      .update({
+        status: "failed",
+        error_message: errorMessage,
+      })
+      .eq("paymongo_event_id", event.id);
+
+    import("@sentry/nextjs").then(({ captureException }) =>
+      captureException(error),
+    );
 
     if (error instanceof PayMongoError) {
       return NextResponse.json(
