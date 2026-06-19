@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { fetchLeads, updateLead, bulkDeleteLeads, bulkUpdateLeads } from "@/hooks/useLeads";
+import { fetchLeads, bulkDeleteLeads, bulkUpdateLeads } from "@/hooks/useLeads";
+import { showToast } from "@/components/ui/toast";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -176,8 +177,10 @@ export default function LeadsPage() {
     });
   }
 
+  const allVisibleSelected = filteredLeads.length > 0 && filteredLeads.every((l) => selected.has(l.id));
+
   function selectAll() {
-    if (selected.size === filteredLeads.length) {
+    if (allVisibleSelected) {
       setSelected(new Set());
     } else {
       setSelected(new Set(filteredLeads.map((l) => l.id)));
@@ -186,24 +189,42 @@ export default function LeadsPage() {
 
   async function bulkDelete() {
     const ids = Array.from(selected);
-    setBulkDeleting(true);
-    const { success } = await bulkDeleteLeads(ids);
-    if (success) {
-      setLeads((prev) => prev.filter((l) => !selected.has(l.id)));
-      setSelected(new Set());
+    if (!window.confirm(`Delete ${ids.length} lead${ids.length > 1 ? "s" : ""}? This cannot be undone.`)) {
+      return;
     }
-    setBulkDeleting(false);
+    setBulkDeleting(true);
+    try {
+      const { success, error } = await bulkDeleteLeads(ids);
+      if (success) {
+        setLeads((prev) => prev.filter((l) => !selected.has(l.id)));
+        setSelected(new Set());
+        showToast(`Deleted ${ids.length} lead${ids.length > 1 ? "s" : ""}`, "success");
+      } else {
+        showToast(`Failed to delete leads: ${error}`, "error");
+      }
+    } catch {
+      showToast("An unexpected error occurred while deleting leads", "error");
+    } finally {
+      setBulkDeleting(false);
+    }
   }
 
   async function bulkChangeStage(stage: string) {
     const ids = Array.from(selected);
-    const { success } = await bulkUpdateLeads(ids, { pipeline_stage: stage });
-    if (success) {
-      setLeads((prev) =>
-        prev.map((l) => (selected.has(l.id) ? { ...l, pipeline_stage: stage } : l))
-      );
+    try {
+      const { success, error } = await bulkUpdateLeads(ids, { pipeline_stage: stage });
+      if (success) {
+        setLeads((prev) =>
+          prev.map((l) => (selected.has(l.id) ? { ...l, pipeline_stage: stage } : l))
+        );
+        setSelected(new Set());
+        showToast(`Updated ${ids.length} leads to ${stage.replace("_", " ")}`, "success");
+      } else {
+        showToast(`Failed to update leads: ${error}`, "error");
+      }
+    } catch {
+      showToast("An unexpected error occurred while updating leads", "error");
     }
-    setSelected(new Set());
   }
 
   if (loading) {
@@ -382,7 +403,7 @@ export default function LeadsPage() {
           onClick={selectAll}
           className="text-xs text-surface-500 hover:text-surface-700 font-medium"
         >
-          {selected.size === filteredLeads.length ? "Deselect all" : "Select all"}
+          {allVisibleSelected ? "Deselect all" : "Select all"}
         </button>
       )}
 
