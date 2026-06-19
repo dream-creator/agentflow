@@ -86,13 +86,20 @@ export async function POST(request: NextRequest) {
   }
 
   // Plan limit enforcement: check active lead count against plan limits
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("plan")
     .eq("id", user.id)
     .single();
 
-  const plan: PlanType = (profile?.plan as PlanType) || "free";
+  if (profileError || !profile) {
+    return NextResponse.json(
+      { error: "Could not verify your subscription plan. Please try again." },
+      { status: 500 }
+    );
+  }
+
+  const plan: PlanType = (profile.plan as PlanType) || "free";
   const limits = PLAN_LIMITS[plan];
 
   const { count: activeLeadCount } = await supabase
