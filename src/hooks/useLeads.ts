@@ -5,22 +5,37 @@ type Lead = Database["public"]["Tables"]["leads"]["Row"];
 type LeadInsert = Database["public"]["Tables"]["leads"]["Insert"];
 type LeadUpdate = Database["public"]["Tables"]["leads"]["Update"];
 
+const PAGE_SIZE = 1000; // Supabase PostgREST default max_rows cap
+
 export async function fetchLeads(): Promise<{ data: Lead[] | null; error: string | null }> {
   const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: null, error: "Not authenticated" };
 
-  const { data, error } = await supabase
-    .from("leads")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false })
-    .range(0, 49999); // Supabase defaults to 1000 rows — override for large accounts
+  // Paginate through all leads — Supabase caps each request at max_rows (default 1000)
+  const allLeads: Lead[] = [];
+  let offset = 0;
+  let hasMore = true;
 
-  if (error) return { data: null, error: error.message };
-  return { data, error: null };
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("leads")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error) return { data: null, error: error.message };
+    if (!data || data.length === 0) break;
+
+    allLeads.push(...data);
+    hasMore = data.length === PAGE_SIZE;
+    offset += PAGE_SIZE;
+  }
+
+  return { data: allLeads, error: null };
 }
 
 export async function createLead(lead: LeadInsert): Promise<{ data: Lead | null; error: string | null }> {

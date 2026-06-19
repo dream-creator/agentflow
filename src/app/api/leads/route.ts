@@ -4,6 +4,8 @@ import { leadSchema } from "@/lib/validations";
 import { apiRateLimit } from "@/lib/rate-limiter";
 import { PLAN_LIMITS, type PlanType } from "@/lib/constants";
 
+const PAGE_SIZE = 1000; // Supabase PostgREST default max_rows cap
+
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const {
@@ -29,20 +31,32 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const { data, error } = await supabase
-    .from("leads")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("is_active", true)
-    .order("created_at", { ascending: false })
-    .range(0, 49999); // Supabase defaults to 1000 rows — override for large accounts
+  // Paginate through all leads — Supabase caps each request at max_rows (default 1000)
+  const allLeads: Record<string, unknown>[] = [];
+  let offset = 0;
+  let hasMore = true;
 
-  if (error) {
-    console.error("Leads GET error:", error.message);
-    return NextResponse.json({ error: "Failed to fetch leads" }, { status: 500 });
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("leads")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    if (error) {
+      console.error("Leads GET error:", error.message);
+      return NextResponse.json({ error: "Failed to fetch leads" }, { status: 500 });
+    }
+    if (!data || data.length === 0) break;
+
+    allLeads.push(...data);
+    hasMore = data.length === PAGE_SIZE;
+    offset += PAGE_SIZE;
   }
 
-  return NextResponse.json(data, {
+  return NextResponse.json(allLeads, {
     headers: {
       "X-RateLimit-Limit": String(rateLimitResult.limit),
       "X-RateLimit-Remaining": String(rateLimitResult.remaining),
