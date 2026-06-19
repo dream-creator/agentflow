@@ -57,8 +57,8 @@ on the anon key being secret.
 
 ### `SUPABASE_SERVICE_ROLE_KEY`
 
-**Where:** `src/lib/stripe.ts` (for updating `profiles.plan` and
-`stripe_customer_id`), `src/lib/resend.ts` (for the daily digest
+**Where:** `src/lib/paymongo.ts` (for updating `profiles.plan` and
+`paymongo_customer_id`), `src/lib/resend.ts` (for the daily digest
 to query all users), `src/app/api/cron/daily-digest/route.ts`,
 `tests/e2e/fixtures/auth.ts` (test-only).
 
@@ -116,11 +116,11 @@ The standard pattern is:
 > dev (they'd link to production). Keep `.env.local` pointing at
 > `localhost`.
 
-## Stripe
+## PayMongo
 
-### `STRIPE_SECRET_KEY`
+### `PAYMONGO_SECRET_KEY`
 
-**Where:** `src/lib/stripe.ts` (lazy-init). Used for Checkout
+**Where:** `src/lib/paymongo.ts` (lazy-init). Used for Checkout
 Session creation, customer lookup, webhook signature verification.
 
 **Required:** yes (production). The lazy init means the absence
@@ -129,24 +129,24 @@ build failures.
 
 Format: `sk_live_...` in production, `sk_test_...` in dev.
 
-### `STRIPE_WEBHOOK_SECRET`
+### `PAYMONGO_WEBHOOK_SECRET`
 
-**Where:** `src/app/api/stripe/webhook/route.ts`. Used by
-`constructWebhookEvent` to verify the signature on incoming
+**Where:** `src/app/api/paymongo/webhook/route.ts`. Used by
+`verifyPayMongoSignature` to verify the signature on incoming
 webhooks.
 
 **Required:** yes (production). Get this from
-https://dashboard.stripe.com/webhooks after creating a webhook
-endpoint that points to `<origin>/api/stripe/webhook`.
+https://dashboard.paymongo.com/webhooks after creating a webhook
+endpoint that points to `<origin>/api/paymongo/webhook`.
 
-### `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+### `NEXT_PUBLIC_PAYMONGO_PUBLISHABLE_KEY`
 
 **Where:** Currently not used in app code (the app is
 server-driven for checkout). Listed for future client-side use
-(Stripe Elements, etc.) and for Stripe.js preflight detection.
+(PayMongo Elements, etc.) and for PayMongo.js preflight detection.
 
 **Required:** not currently. Recommended to set in production
-to silence Stripe domain-detection warnings.
+to silence PayMongo domain-detection warnings.
 
 ## Email (Resend)
 
@@ -369,7 +369,7 @@ infrastructure vars.
 
 | SDK | Behavior on missing var |
 | --- | --- |
-| Stripe (`src/lib/stripe.ts`) | Lazy. First call throws. Build succeeds. |
+| PayMongo (`src/lib/paymongo.ts`) | Lazy. First call throws. Build succeeds. |
 | Resend (`src/lib/resend.ts`) | Lazy. First call throws. Build succeeds. |
 | Supabase browser client | Returns `{}` cast to `SupabaseClient` (safe on SSR). |
 | Supabase server client | **Throws on module load.** |

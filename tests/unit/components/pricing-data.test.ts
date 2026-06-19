@@ -70,7 +70,7 @@ describe("pricingPlans", () => {
   it("Pro annual price saves 2 months vs monthly", async () => {
     const { pricingPlans } = await import("@/lib/pricing-data");
     const pro = pricingPlans.find((p) => p.name === "Pro");
-    // 10 months * $5 = $50 annual (saves 2 months)
+    // 10 months * $8 = $80 annual (saves 2 months)
     expect(pro?.annualPrice).toBe(pro!.monthlyPrice * 10);
   });
 });

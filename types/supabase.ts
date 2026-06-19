@@ -185,7 +185,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      bulk_delete_leads: { Args: { lead_ids: string[] }; Returns: undefined }
+      bulk_update_leads: {
+        Args: { lead_ids: string[]; new_stage: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { ServiceWorkerRegistration } from "@/components/ui/sw-register";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ConsentAwareAnalytics } from "@/components/consent-aware-analytics";
+import { CookieConsent } from "@/components/cookie-consent";
 import "./globals.css";
 
 const inter = Inter({
@@ -137,8 +137,8 @@ export default function RootLayout({
         </a>
         <ServiceWorkerRegistration />
         {children}
-        <Analytics />
-        <SpeedInsights />
+        <CookieConsent />
+        <ConsentAwareAnalytics />
       </body>
     </html>
   );
