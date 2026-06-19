@@ -200,12 +200,7 @@ jobs:
       - name: Validate type sync
         run: |
           SESSION_DB_URL=$(echo "${{ secrets.STAGING_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
-          npx supabase gen types typescript --db-url "$SESSION_DB_URL" > /tmp/generated-types.ts 2>/dev/null || true
-          echo "--- SUPABASE CLI VERSION ---"
-          npx supabase --version 2>/dev/null || true
-          echo "--- DIFF OUTPUT (up to 50 lines) ---"
-          diff types/supabase.ts /tmp/generated-types.ts | head -50 || true
-          echo "--- END DIFF ---"
+          supabase gen types typescript --db-url "$SESSION_DB_URL" > /tmp/generated-types.ts 2>/dev/null
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
             echo "[FAIL] types/supabase.ts is out of sync with the current schema."
             echo "Run 'supabase gen types typescript > types/supabase.ts' locally and commit the result."
