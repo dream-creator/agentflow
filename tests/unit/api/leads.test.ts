@@ -46,7 +46,8 @@ function buildChain(result: { data: unknown; error: unknown }) {
   chain.select = vi.fn(() => chain);
   chain.insert = vi.fn(() => chain);
   chain.eq = vi.fn(() => chain);
-  chain.order = vi.fn(() => Promise.resolve(result));
+  chain.order = vi.fn(() => chain);
+  chain.range = vi.fn(() => Promise.resolve(result));
   chain.single = vi.fn(() => Promise.resolve(result));
   // Make chain awaitable for count queries (no .single() call)
   chain.then = (resolve: (v: unknown) => unknown) => resolve(result);
