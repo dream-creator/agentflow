@@ -89,3 +89,24 @@ export async function bulkDeleteLeads(ids: string[]): Promise<{ success: boolean
   if (error) return { success: false, error: error.message };
   return { success: true, error: null };
 }
+
+export async function bulkUpdateLeads(
+  ids: string[],
+  updates: LeadUpdate
+): Promise<{ success: boolean; error: string | null }> {
+  if (ids.length === 0) return { success: true, error: null };
+
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("leads")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .in("id", ids)
+    .eq("user_id", user.id);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, error: null };
+}

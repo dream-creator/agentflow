@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { fetchLeads, updateLead, bulkDeleteLeads } from "@/hooks/useLeads";
+import { fetchLeads, updateLead, bulkDeleteLeads, bulkUpdateLeads } from "@/hooks/useLeads";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -197,12 +197,12 @@ export default function LeadsPage() {
 
   async function bulkChangeStage(stage: string) {
     const ids = Array.from(selected);
-    for (const id of ids) {
-      await updateLead(id, { pipeline_stage: stage });
+    const { success } = await bulkUpdateLeads(ids, { pipeline_stage: stage });
+    if (success) {
+      setLeads((prev) =>
+        prev.map((l) => (selected.has(l.id) ? { ...l, pipeline_stage: stage } : l))
+      );
     }
-    setLeads((prev) =>
-      prev.map((l) => (selected.has(l.id) ? { ...l, pipeline_stage: stage } : l))
-    );
     setSelected(new Set());
   }
 
