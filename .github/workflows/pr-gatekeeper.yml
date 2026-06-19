@@ -194,12 +194,12 @@ jobs:
         run: |
           # Session-mode pooler (port 5432) avoids pgbouncer prepared-statement
           # leaks that block supabase db push on the transaction pooler (6543).
-          SESSION_DB_URL=$(echo "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
+          SESSION_DB_URL=$(echo "${{ secrets.STAGING_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
           supabase db push --db-url "$SESSION_DB_URL" || true
 
       - name: Validate type sync
         run: |
-          SESSION_DB_URL=$(echo "${{ secrets.PREVIEW_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
+          SESSION_DB_URL=$(echo "${{ secrets.STAGING_SUPABASE_DB_URL }}" | sed 's/:6543/:5432/')
           npx supabase gen types typescript --db-url "$SESSION_DB_URL" > /tmp/generated-types.ts 2>/dev/null
           if ! diff -q types/supabase.ts /tmp/generated-types.ts > /dev/null 2>&1; then
             echo "[FAIL] types/supabase.ts is out of sync with the current schema."
