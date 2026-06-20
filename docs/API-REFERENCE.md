@@ -189,9 +189,9 @@ level.
 
 ## Stripe
 
-### `POST /api/stripe/checkout`
+### `POST /api/paymongo/checkout`
 
-**File:** `src/app/api/stripe/checkout/route.ts`
+**File:** `src/app/api/paymongo/checkout/route.ts`
 
 Create a Stripe Checkout Session for the AgentFlow Pro subscription.
 
@@ -213,8 +213,8 @@ Create a Stripe Checkout Session for the AgentFlow Pro subscription.
 1. `supabase.auth.getUser()` → user.
 2. Lazy-init the Stripe client (`getStripe()` from
    `src/lib/stripe.ts`).
-3. `getOrCreateStripeCustomer(user)` — looks up
-   `profiles.stripe_customer_id`; if missing, creates a Stripe
+3. `getOrCreatePayMongoCustomer(user)` — looks up
+   `profiles.paymongo_customer_id`; if missing, creates a Stripe
    customer and updates the profile via service-role key.
 4. `createCheckoutSession(customer, user.email, returnUrl)` —
    mode: `subscription`, line_items: `STRIPE_CONFIG.price` (the
@@ -225,11 +225,11 @@ Create a Stripe Checkout Session for the AgentFlow Pro subscription.
 The client (`/settings/billing/page.tsx`) does
 `window.location.href = url` to start the checkout flow.
 
-### `POST /api/stripe/webhook`
+### `POST /api/paymongo/webhook`
 
-**File:** `src/app/api/stripe/webhook/route.ts`
+**File:** `src/app/api/paymongo/webhook/route.ts`
 
-Stripe webhook receiver. Signature-verified; the raw body is read
+PayMongo webhook receiver. Signature-verified; the raw body is read
 via `request.text()` and passed to
 `constructWebhookEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET)`.
 
@@ -239,7 +239,7 @@ via `request.text()` and passed to
 
 | Event | Handler |
 | --- | --- |
-| `checkout.session.completed` | `handleCheckoutCompleted()` — updates `profiles.plan = 'pro'`, `stripe_customer_id`, `stripe_subscription_id`. |
+| `checkout.session.completed` | `handleCheckoutCompleted()` — updates `profiles.plan = 'pro'`, `paymongo_customer_id`, `paymongo_subscription_id`. |
 | `customer.subscription.deleted` | `handleSubscriptionDeleted()` — sets `profiles.plan = 'free'`. |
 | `invoice.payment_failed` | `handlePaymentFailed()` — logs a warning and (optionally) downgrades the user. |
 

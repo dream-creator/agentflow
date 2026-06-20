@@ -142,13 +142,13 @@ To add a new migration:
 - **Dashboard:** https://dashboard.stripe.com
 - **API version:** `2026-05-27.dahlia` (pinned in
   `src/lib/stripe.ts`).
-- **Webhook endpoint:** `https://agent-flow.app/api/stripe/webhook`
+- **Webhook endpoint:** `https://agent-flow.app/api/paymongo/webhook`
   (Production). Preview deploys do not need a webhook — Stripe
   test events go to a separate `stripe listen` CLI forwarding
   setup, not the preview URL.
 - **Handled events:** `checkout.session.completed`,
   `customer.subscription.deleted`, `invoice.payment_failed`.
-  See [API-REFERENCE.md](./API-REFERENCE.md#post-apistripewebhook).
+  See [API-REFERENCE.md](./API-REFERENCE.md#post-apipaymangowebhook).
 
 ### Local testing with `stripe listen`
 
@@ -157,7 +157,7 @@ your dev server:
 
 ```bash
 stripe login
-stripe listen --forward-to localhost:3000/api/stripe/webhook
+stripe listen --forward-to localhost:3000/api/paymongo/webhook
 # Copy the `whsec_...` to .env.local as STRIPE_WEBHOOK_SECRET
 ```
 
