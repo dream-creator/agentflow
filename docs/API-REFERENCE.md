@@ -187,13 +187,13 @@ optional):
 operations in `/pipeline` are not rate-limited at the database
 level.
 
-## Stripe
+## PayMongo
 
 ### `POST /api/paymongo/checkout`
 
 **File:** `src/app/api/paymongo/checkout/route.ts`
 
-Create a Stripe Checkout Session for the AgentFlow Pro subscription.
+Create a PayMongo Checkout Session for the AgentFlow Pro subscription.
 
 **Auth:** required.
 
@@ -211,13 +211,13 @@ Create a Stripe Checkout Session for the AgentFlow Pro subscription.
 **Implementation:**
 
 1. `supabase.auth.getUser()` → user.
-2. Lazy-init the Stripe client (`getStripe()` from
-   `src/lib/stripe.ts`).
+2. Lazy-init the PayMongo client (`getPayMongo()` from
+   `src/lib/paymongo.ts`).
 3. `getOrCreatePayMongoCustomer(user)` — looks up
-   `profiles.paymongo_customer_id`; if missing, creates a Stripe
+   `profiles.paymongo_customer_id`; if missing, creates a PayMongo
    customer and updates the profile via service-role key.
 4. `createCheckoutSession(customer, user.email, returnUrl)` —
-   mode: `subscription`, line_items: `STRIPE_CONFIG.price` (the
+   mode: `subscription`, line_items: `PAYMONGO_CONFIG.price` (the
    $5/mo Pro tier), success_url: `<origin>/settings/billing?upgraded=true`,
    cancel_url: `<origin>/settings/billing`.
 5. Return `{ url: session.url }`.
@@ -231,9 +231,9 @@ The client (`/settings/billing/page.tsx`) does
 
 PayMongo webhook receiver. Signature-verified; the raw body is read
 via `request.text()` and passed to
-`constructWebhookEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET)`.
+`constructWebhookEvent(rawBody, sig, PAYMONGO_WEBHOOK_SECRET)`.
 
-**Auth:** Stripe signature verification (no Supabase auth).
+**Auth:** PayMongo signature verification (no Supabase auth).
 
 **Handled events:**
 
@@ -363,7 +363,7 @@ with appropriate HTTP status codes:
 | Code | Meaning |
 | --- | --- |
 | `400` | Invalid request body (Zod parse failure) |
-| `401` | No authenticated user (or bad Stripe signature) |
+| `401` | No authenticated user (or bad PayMongo signature) |
 | `403` | Plan limit reached |
 | `404` | Resource not found or not owned by user |
 | `429` | Rate limit exceeded |
