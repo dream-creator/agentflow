@@ -15,15 +15,15 @@ flowchart LR
     User([User -- browser])
     CF[Cloudflare Turnstile]
     Supabase[(Supabase<br/>Postgres + Auth)]
-    Stripe[Stripe]
+    PayMongo[PayMongo]
     Resend[Resend Email]
     Vercel[Vercel<br/>hosting + cron]
 
     User <-->|HTTPS| Vercel
     Vercel -->|API routes| CF
     Vercel <-->|cookies + RLS| Supabase
-    Vercel -->|Checkout Sessions| Stripe
-    Stripe -.->|webhook| Vercel
+    Vercel -->|Checkout Sessions| PayMongo
+    PayMongo -.->|webhook| Vercel
     Vercel -->|daily cron GET| Resend
     Resend -.->|digest email| User
 ```
@@ -201,9 +201,9 @@ sequenceDiagram
 
 ---
 
-## 7. Stripe — Checkout + Webhook (Pro upgrade)
+## 7. PayMongo — Checkout + Webhook (Pro upgrade)
 
-The flow splits into a synchronous user-facing leg (create-checkout → Stripe-hosted page) and an async server leg (webhook → DB update). The webhook is the source of truth — never trust the redirect.
+The flow splits into a synchronous user-facing leg (create-checkout → PayMongo-hosted page) and an async server leg (webhook → DB update). The webhook is the source of truth — never trust the redirect.
 
 ```mermaid
 sequenceDiagram
@@ -224,7 +224,7 @@ sequenceDiagram
     API->>ST: checkout.sessions.create({ customer, success_url, cancel_url, metadata.user_id })
     PM-->>API: { url }
     API-->>S: { url }
-    S-->>U: window.location -> Stripe-hosted checkout
+    S-->>U: window.location -> PayMongo-hosted checkout
 
     U->>ST: enter card, click Subscribe
     PM->>ST: create subscription, charge
@@ -235,12 +235,12 @@ sequenceDiagram
     WH-->>ST: 200 { received: true }
 ```
 
-**Webhook handlers** (`src/lib/stripe.ts`):
+**Webhook handlers** (`src/lib/paymongo.ts`):
 - `checkout.session.completed` → `handleCheckoutCompleted` → set plan to `pro`
 - `customer.subscription.deleted` → `handleSubscriptionDeleted` → set plan to `free`
 - `invoice.payment_failed` → `handlePaymentFailed` → set `subscription_status='past_due'`
 
-**Idempotency:** Stripe retries webhooks on 5xx. The DB update is a single row-level UPDATE keyed on `id` (the user) — safe to re-apply.
+**Idempotency:** PayMongo retries webhooks on 5xx. The DB update is a single row-level UPDATE keyed on `id` (the user) — safe to re-apply.
 
 ---
 
@@ -317,7 +317,7 @@ flowchart TD
         Pipeline["(dashboard)/pipeline/page.tsx"]
         Billing["(dashboard)/settings/billing/page.tsx"]
         ApiLeads["/api/leads/route.ts"]
-        ApiStripe["/api/paymongo/checkout"]
+        ApiPayMongo["/api/paymongo/checkout"]
         ApiWH["/api/paymongo/webhook"]
         ApiCron["/api/cron/daily-digest"]
     end
@@ -326,7 +326,7 @@ flowchart TD
         Auth[auth.ts]
         Valid[validations.ts]
         RL[rate-limiter.ts]
-        StripeLib[stripe.ts]
+        PayMongoLib[stripe.ts]
         ResendLib[resend.ts]
         Constants[constants.ts<br/>PLAN_LIMITS]
         PlanLimit[plan-limit.ts]
@@ -353,10 +353,10 @@ flowchart TD
     ApiLeads --> RL
     ApiLeads --> Constants
 
-    Billing --> ApiStripe
-    ApiStripe --> SBS
-    ApiStripe --> StripeLib
-    ApiWH --> StripeLib
+    Billing --> ApiPayMongo
+    ApiPayMongo --> SBS
+    ApiPayMongo --> PayMongoLib
+    ApiWH --> PayMongoLib
     ApiCron --> SBS
     ApiCron --> ResendLib
 
