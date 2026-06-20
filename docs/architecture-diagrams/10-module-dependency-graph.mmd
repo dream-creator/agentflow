@@ -7,8 +7,8 @@ flowchart TD
         Pipeline["(dashboard)/pipeline/page.tsx"]
         Billing["(dashboard)/settings/billing/page.tsx"]
         ApiLeads["/api/leads/route.ts"]
-        ApiStripe["/api/stripe/checkout"]
-        ApiWH["/api/stripe/webhook"]
+        ApiPayMongo["/api/paymongo/checkout"]
+        ApiWH["/api/paymongo/webhook"]
         ApiCron["/api/cron/daily-digest"]
     end
 
@@ -16,7 +16,7 @@ flowchart TD
         Auth[auth.ts]
         Valid[validations.ts]
         RL[rate-limiter.ts]
-        StripeLib[stripe.ts]
+        PayMongoLib[stripe.ts]
         ResendLib[resend.ts]
         Constants[constants.ts<br/>PLAN_LIMITS]
         PlanLimit[plan-limit.ts]
@@ -43,10 +43,10 @@ flowchart TD
     ApiLeads --> RL
     ApiLeads --> Constants
 
-    Billing --> ApiStripe
-    ApiStripe --> SBS
-    ApiStripe --> StripeLib
-    ApiWH --> StripeLib
+    Billing --> ApiPayMongo
+    ApiPayMongo --> SBS
+    ApiPayMongo --> PayMongoLib
+    ApiWH --> PayMongoLib
     ApiCron --> SBS
     ApiCron --> ResendLib
 
