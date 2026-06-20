@@ -226,12 +226,12 @@ Either:
 - Add `127.0.0.1` too — Cloudflare distinguishes between
   the two.
 
-### "Stripe webhook returns 400"
+### "PayMongo webhook returns 400"
 
 Locally, you need to forward Stripe events to your dev server:
 
 ```bash
-stripe listen --forward-to localhost:3000/api/stripe/webhook
+stripe listen --forward-to localhost:3000/api/paymongo/webhook
 ```
 
 This prints a `whsec_...` signing secret. Set it as
