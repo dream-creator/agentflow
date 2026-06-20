@@ -68,7 +68,7 @@ tests/
 │   │   ├── auth.test.ts
 │   │   ├── plan-limit.test.ts
 │   │   ├── rate-limiter.test.ts
-│   │   ├── stripe.test.ts
+│   │   ├── paymongo.test.ts
 │   │   ├── resend.test.ts
 │   │   ├── supabase-middleware.test.ts
 │   │   ├── utils.test.ts
