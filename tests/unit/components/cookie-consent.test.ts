@@ -12,8 +12,8 @@ describe("CookieConsent component", () => {
     expect(source).toMatch(/^"use client"/);
   });
 
-  it("has role dialog for accessibility", () => {
-    expect(source).toContain('role="dialog"');
+  it("has role alertdialog for accessibility", () => {
+    expect(source).toContain('role="alertdialog"');
   });
 
   it("has aria-live polite for screen readers", () => {
@@ -37,12 +37,13 @@ describe("CookieConsent component", () => {
     expect(source).toContain("Decline");
   });
 
-  it("uses surface-900 dark background for the banner", () => {
-    expect(source).toContain("surface-900");
+  it("uses white background with flat border design", () => {
+    expect(source).toContain("bg-white");
+    expect(source).toContain("border-surface-200");
   });
 
-  it("uses cta orange for the primary button", () => {
-    expect(source).toContain("bg-cta");
+  it("uses primary teal for the accept button", () => {
+    expect(source).toContain("bg-primary");
   });
 
   it("handles keyboard Escape to dismiss", () => {
@@ -51,5 +52,22 @@ describe("CookieConsent component", () => {
 
   it("respects prefers-reduced-motion", () => {
     expect(source).toContain("prefers-reduced-motion");
+  });
+
+  it("has dismiss button with aria-label", () => {
+    expect(source).toContain('aria-label="Dismiss cookie consent"');
+  });
+
+  it("uses flat design with no shadows", () => {
+    expect(source).not.toContain("shadow-elevated");
+    expect(source).not.toContain("shadow-card");
+  });
+
+  it("has tactile feedback with scale on active", () => {
+    expect(source).toContain("active:scale-[0.97]");
+  });
+
+  it("has proper touch target sizes", () => {
+    expect(source).toContain("min-h-[44px]");
   });
 });
