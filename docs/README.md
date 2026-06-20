@@ -19,9 +19,9 @@ codebase-level reference for the project.
 | [DATABASE.md](./DATABASE.md) | Tables, RLS, plan-limit trigger, types/supabase.ts consumption, migration history, regenerating schema |
 | [API-REFERENCE.md](./API-REFERENCE.md) | Every route handler with method, path, request/response shape, auth, rate limit, error semantics |
 | [COMPONENTS-AND-HOOKS.md](./COMPONENTS-AND-HOOKS.md) | Catalog of every component and hook with props, signature, purpose, and dependencies |
-| [ENVIRONMENT-VARIABLES.md](./ENVIRONMENT-VARIABLES.md) | Full env-var matrix (Supabase, Stripe, Resend, Turnstile, Sentry, Cron, Captcha, App URL) with where each is consumed |
+| [ENVIRONMENT-VARIABLES.md](./ENVIRONMENT-VARIABLES.md) | Full env-var matrix (Supabase, PayMongo, Resend, Turnstile, Sentry, Cron, Captcha, App URL) with where each is consumed |
 | [SECURITY.md](./SECURITY.md) | CSP, RLS, captcha, rate limiting, security headers, secret management, kill switches, Sentry DSN handling |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | CI/CD pipelines, Vercel + Supabase + Stripe + Resend + Cloudflare Turnstile + Sentry configuration, branch / env topology |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | CI/CD pipelines, Vercel + Supabase + PayMongo + Resend + Cloudflare Turnstile + Sentry configuration, branch / env topology |
 | [PWA.md](./PWA.md) | `manifest.json`, service worker, install prompt, icon assets, off-screen Turnstile iframe |
 | [TESTING.md](./TESTING.md) | Vitest unit + Playwright e2e patterns, project setup, auth fixture, captcha bypass, Lighthouse CI |
 | [ONBOARDING.md](./ONBOARDING.md) | New-developer setup: install, env, dev workflow, common tasks, troubleshooting |
@@ -70,8 +70,8 @@ the rest easier to read.
   `supabase/migrations/002_update_free_tier_limit_to_10.sql`. See
   [DATABASE.md](./DATABASE.md#plan-tier-enforcement).
 
-- **Lazy module pattern.** Stripe and Resend are lazy-initialized in
-  `src/lib/stripe.ts` and `src/lib/resend.ts` so a missing API key
+- **Lazy module pattern.** PayMongo and Resend are lazy-initialized in
+  `src/lib/paymongo.ts` and `src/lib/resend.ts` so a missing API key
   doesn't crash `next build`. The Turnstile widget itself is
   `React.lazy` (in `src/components/turnstile-widget.tsx`) to keep
   the Cloudflare script out of the main bundle.
