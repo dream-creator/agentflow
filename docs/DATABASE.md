@@ -318,7 +318,7 @@ Hard deletes are not exposed.
 - **Modifying `profiles` from a client.** The RLS policy is
   `auth.uid() = id`, which works. But the `plan` column should
   never be set from a client — it's owned by the PayMongo webhook.
-  The `profiles` row is updated by `src/lib/stripe.ts` using the
+  The `profiles` row is updated by `src/lib/paymongo.ts` using the
   service-role key, which bypasses RLS.
 - **Inserting actions with a `lead_id` that doesn't belong to
   the user.** RLS on `leads` will reject the corresponding read,
