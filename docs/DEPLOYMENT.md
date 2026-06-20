@@ -1,6 +1,6 @@
 # Deployment
 
-AgentFlow deploys via Vercel, with Supabase / Stripe / Resend /
+AgentFlow deploys via Vercel, with Supabase / PayMongo / Resend /
 Cloudflare Turnstile as managed services. CI is GitHub Actions;
 the production release is on a fast-forward merge to `main` plus a
 Sentry release upload.
@@ -38,7 +38,7 @@ Live URL: **https://agent-flow.app**.
 See [ENVIRONMENT-VARIABLES.md](./ENVIRONMENT-VARIABLES.md#vercel-environment-topology)
 for the full per-env table. Summary:
 
-- **Production env** (`agent-flow.app`): real Stripe + Resend
+- **Production env** (`agent-flow.app`): real PayMongo + Resend
   keys, real Turnstile site key, real Sentry DSN, real
   Supabase URL.
 - **Preview env** (`*.vercel.app`): real services but

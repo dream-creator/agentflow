@@ -397,7 +397,7 @@ with appropriate HTTP status codes:
 | Code | Meaning |
 | --- | --- |
 | `400` | Invalid request body (Zod parse failure) |
-| `401` | No authenticated user (or bad Stripe signature) |
+| `401` | No authenticated user (or bad PayMongo signature) |
 | `403` | Plan limit reached |
 | `404` | Resource not found or not owned by user |
 | `429` | Rate limit exceeded |

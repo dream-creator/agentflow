@@ -201,46 +201,45 @@ sequenceDiagram
 
 ---
 
-## 7. Stripe — Checkout + Webhook (Pro upgrade)
+## 7. PayMongo — Checkout + Webhook (Pro upgrade)
 
-The flow splits into a synchronous user-facing leg (create-checkout → Stripe-hosted page) and an async server leg (webhook → DB update). The webhook is the source of truth — never trust the redirect.
+The flow splits into a synchronous user-facing leg (create-checkout → PayMongo-hosted page) and an async server leg (webhook → DB update). The webhook is the source of truth — never trust the redirect.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor U as User
     participant S as /settings/billing
-    participant API as /api/stripe/checkout
-    participant ST as Stripe
-    participant WH as /api/stripe/webhook
+    participant API as /api/paymongo/checkout
+    participant PM as PayMongo
+    participant WH as /api/paymongo/webhook
     participant DB as Supabase
 
     U->>S: click "Upgrade to Pro"
-    S->>API: POST /api/stripe/checkout
+    S->>API: POST /api/paymongo/checkout
     API->>API: getUser() -> must be logged in
     API->>DB: SELECT email, full_name FROM profiles
-    API->>ST: customers.create or reuse stripe_customer_id
-    ST-->>API: customer.id
-    API->>ST: checkout.sessions.create({ customer, success_url, cancel_url, metadata.user_id })
-    ST-->>API: { url }
+    API->>PM: getOrCreateCustomer + createSubscription
+    PM-->>API: checkout URL
     API-->>S: { url }
-    S-->>U: window.location -> Stripe-hosted checkout
+    S-->>U: window.location → PayMongo-hosted checkout
 
-    U->>ST: enter card, click Subscribe
-    ST->>ST: create subscription, charge
-    ST-->>U: 302 -> /settings?upgraded=true
-    ST->>WH: POST /api/stripe/webhook (event: checkout.session.completed)
-    WH->>WH: constructWebhookEvent (verify signature)
-    WH->>DB: UPDATE profiles SET plan='pro', stripe_subscription_id, subscription_status='active'
-    WH-->>ST: 200 { received: true }
+    U->>PM: enter card, click Subscribe
+    PM->>PM: create subscription, charge
+    PM-->>U: 302 → /settings?upgraded=true
+    PM->>WH: POST /api/paymongo/webhook (event: subscription.activated)
+    WH->>WH: verifyWebhookSignature (HMAC-SHA256)
+    WH->>DB: UPDATE profiles SET plan='pro', subscription_status='active'
+    WH-->>PM: 200 OK
 ```
 
-**Webhook handlers** (`src/lib/stripe.ts`):
-- `checkout.session.completed` → `handleCheckoutCompleted` → set plan to `pro`
-- `customer.subscription.deleted` → `handleSubscriptionDeleted` → set plan to `free`
+**Webhook handlers** (`src/lib/paymongo.ts`):
+- `subscription.activated` → `handleSubscriptionActivated` → set plan to `pro`
+- `subscription.cancelled` → `handleSubscriptionCancelled` → set plan to `free`
 - `invoice.payment_failed` → `handlePaymentFailed` → set `subscription_status='past_due'`
+- `invoice.paid` → `handlePaymentPaid` → restore active status
 
-**Idempotency:** Stripe retries webhooks on 5xx. The DB update is a single row-level UPDATE keyed on `id` (the user) — safe to re-apply.
+**Idempotency:** PayMongo retries webhooks on 5xx. The DB update is a single row-level UPDATE keyed on `id` (the user) — safe to re-apply. Deduplication uses the `webhook_events` table with `paymongo_event_id` unique constraint.
 
 ---
 
@@ -317,8 +316,8 @@ flowchart TD
         Pipeline["(dashboard)/pipeline/page.tsx"]
         Billing["(dashboard)/settings/billing/page.tsx"]
         ApiLeads["/api/leads/route.ts"]
-        ApiStripe["/api/stripe/checkout"]
-        ApiWH["/api/stripe/webhook"]
+        ApiPayMongo["/api/paymongo/checkout"]
+        ApiWH["/api/paymongo/webhook"]
         ApiCron["/api/cron/daily-digest"]
     end
 
@@ -326,7 +325,7 @@ flowchart TD
         Auth[auth.ts]
         Valid[validations.ts]
         RL[rate-limiter.ts]
-        StripeLib[stripe.ts]
+        PayMongoLib[paymongo.ts]
         ResendLib[resend.ts]
         Constants[constants.ts<br/>PLAN_LIMITS]
         PlanLimit[plan-limit.ts]
@@ -353,10 +352,10 @@ flowchart TD
     ApiLeads --> RL
     ApiLeads --> Constants
 
-    Billing --> ApiStripe
-    ApiStripe --> SBS
-    ApiStripe --> StripeLib
-    ApiWH --> StripeLib
+    Billing --> ApiPayMongo
+    ApiPayMongo --> SBS
+    ApiPayMongo --> PayMongoLib
+    ApiWH --> PayMongoLib
     ApiCron --> SBS
     ApiCron --> ResendLib
 
