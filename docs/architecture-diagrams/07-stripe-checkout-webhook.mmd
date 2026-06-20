@@ -2,26 +2,26 @@ sequenceDiagram
     autonumber
     actor U as User
     participant S as /settings/billing
-    participant API as /api/stripe/checkout
-    participant ST as Stripe
-    participant WH as /api/stripe/webhook
+    participant API as /api/paymongo/checkout
+    participant PM as PayMongo
+    participant WH as /api/paymongo/webhook
     participant DB as Supabase
 
     U->>S: click "Upgrade to Pro"
-    S->>API: POST /api/stripe/checkout
+    S->>API: POST /api/paymongo/checkout
     API->>API: getUser() -> must be logged in
     API->>DB: SELECT email, full_name FROM profiles
     API->>ST: customers.create or reuse stripe_customer_id
-    ST-->>API: customer.id
+    PM-->>API: customer.id
     API->>ST: checkout.sessions.create({ customer, success_url, cancel_url, metadata.user_id })
-    ST-->>API: { url }
+    PM-->>API: { url }
     API-->>S: { url }
-    S-->>U: window.location -> Stripe-hosted checkout
+    S-->>U: window.location -> PayMongo-hosted checkout
 
     U->>ST: enter card, click Subscribe
-    ST->>ST: create subscription, charge
-    ST-->>U: 302 -> /settings?upgraded=true
-    ST->>WH: POST /api/stripe/webhook (event: checkout.session.completed)
+    PM->>ST: create subscription, charge
+    PM-->>U: 302 -> /settings?upgraded=true
+    PM->>WH: POST /api/paymongo/webhook (event: checkout.session.completed)
     WH->>WH: constructWebhookEvent (verify signature)
     WH->>DB: UPDATE profiles SET plan='pro', stripe_subscription_id, subscription_status='active'
     WH-->>ST: 200 { received: true }
