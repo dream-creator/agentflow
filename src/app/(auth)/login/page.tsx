@@ -341,6 +341,9 @@ function LoginContent() {
         <div
           className="absolute -left-[9999px] -top-[9999px] w-px h-px overflow-hidden pointer-events-none"
           aria-hidden="true"
+          // `inert` prevents keyboard focus from entering the off-screen widget,
+          // which otherwise trips the aria-hidden-focus a11y rule.
+          inert
         >
           <TurnstileWidget
             onLoad={() => setCaptchaReady(true)}

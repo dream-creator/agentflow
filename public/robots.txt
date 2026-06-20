@@ -1,0 +1,13 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /dashboard
+Disallow: /leads
+Disallow: /pipeline
+Disallow: /follow-ups
+Disallow: /settings
+Disallow: /api/
+
+Sitemap: https://agent-flow.app/sitemap.xml

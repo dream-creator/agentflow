@@ -96,7 +96,10 @@ export default function IntegrationGrid() {
         {/* Subtle note */}
         <p className="text-center text-sm text-surface-500 mt-8">
           Want an integration we don&apos;t have yet?{" "}
-          <a href="mailto:support@agent-flow.app" className="text-primary hover:underline">
+          <a
+            href="mailto:support@agent-flow.app"
+            className="text-primary font-medium underline underline-offset-2 hover:no-underline"
+          >
             Tell us
           </a>{" "}
           — we&apos;ll prioritize it.
