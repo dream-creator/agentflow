@@ -181,8 +181,8 @@ The service-role key bypasses RLS. It's used by:
 
 | Secret | Where stored | How exposed |
 | --- | --- | --- |
-| `STRIPE_SECRET_KEY` | Vercel Production env | Server only (no `NEXT_PUBLIC_` prefix). |
-| `STRIPE_WEBHOOK_SECRET` | Vercel Production env | Server only. |
+| `PAYMONGO_SECRET_KEY` | Vercel Production env | Server only (no `NEXT_PUBLIC_` prefix). |
+| `PAYMONGO_WEBHOOK_SECRET` | Vercel Production env | Server only. |
 | `RESEND_API_KEY` | Vercel Production env | Server only. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Vercel Production env | Server only. |
 | `CRON_SECRET` | Vercel Production env | Server only. |

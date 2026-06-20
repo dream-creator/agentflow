@@ -12,9 +12,9 @@ variable.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | yes | Vercel + local |
 | `SUPABASE_SERVICE_ROLE_KEY` | no | yes | Vercel only (never client) |
 | `NEXT_PUBLIC_APP_URL` | yes | yes | Vercel only (see note) |
-| `STRIPE_SECRET_KEY` | no | yes | Vercel only |
-| `STRIPE_WEBHOOK_SECRET` | no | yes | Vercel only |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | yes | yes | Vercel + local |
+| `PAYMONGO_SECRET_KEY` | no | yes | Vercel only |
+| `PAYMONGO_WEBHOOK_SECRET` | no | yes | Vercel only |
+| `NEXT_PUBLIC_PAYMONGO_PUBLISHABLE_KEY` | yes | yes | Vercel + local |
 | `RESEND_API_KEY` | no | yes | Vercel only |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | yes | yes | Vercel + local |
 | `NEXT_PUBLIC_TURNSTILE_TEST_BYPASS` | yes | no | Vercel Preview only |
@@ -333,9 +333,9 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+PAYMONGO_SECRET_KEY=
+PAYMONGO_WEBHOOK_SECRET=
+NEXT_PUBLIC_PAYMONGO_PUBLISHABLE_KEY=
 RESEND_API_KEY=
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 ```
