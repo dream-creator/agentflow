@@ -58,7 +58,7 @@ on the anon key being secret.
 ### `SUPABASE_SERVICE_ROLE_KEY`
 
 **Where:** `src/lib/stripe.ts` (for updating `profiles.plan` and
-`stripe_customer_id`), `src/lib/resend.ts` (for the daily digest
+`paymongo_customer_id`), `src/lib/resend.ts` (for the daily digest
 to query all users), `src/app/api/cron/daily-digest/route.ts`,
 `tests/e2e/fixtures/auth.ts` (test-only).
 
@@ -131,13 +131,13 @@ Format: `sk_live_...` in production, `sk_test_...` in dev.
 
 ### `STRIPE_WEBHOOK_SECRET`
 
-**Where:** `src/app/api/stripe/webhook/route.ts`. Used by
+**Where:** `src/app/api/paymongo/webhook/route.ts`. Used by
 `constructWebhookEvent` to verify the signature on incoming
 webhooks.
 
 **Required:** yes (production). Get this from
 https://dashboard.stripe.com/webhooks after creating a webhook
-endpoint that points to `<origin>/api/stripe/webhook`.
+endpoint that points to `<origin>/api/paymongo/webhook`.
 
 ### `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 
