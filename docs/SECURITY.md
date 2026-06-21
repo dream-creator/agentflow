@@ -139,17 +139,16 @@ the full Turnstile flow. The relevant security points:
 - `leadSchema` — `POST /api/leads` body.
 - `leadUpdateSchema` — `PUT /api/leads/[id]` body (all fields
   optional).
-- `actionSchema` — used by the `useActions` hook for new actions.
-- `actionUpdateSchema` — used by `useActions` for completion
-  updates.
+- `actionSchema` — was used by the `useActions` hook (now removed).
+- `actionUpdateSchema` — was used by `useActions` (now removed).
 
 All schemas are `strict()`-equivalent (unknown keys are
 stripped or rejected). Validation failures return 400 with the
 parse error.
 
 **Coverage:** every public API route validates its body. Hooks
-(`useLeads`, `useProfile`, `useActions`) do **not** validate on
-the client side — the API route does it server-side. This means
+(`useLeads`, `useProfile`) do **not** validate on the client
+side — the API route does it server-side. This means
 direct Supabase calls from the browser can skip validation, but
 RLS still enforces ownership.
 
@@ -171,8 +170,6 @@ for `profiles`).
 
 The service-role key bypasses RLS. It's used by:
 
-- `src/lib/paymongo.ts` — update `profiles.plan` and
-  `paymongo_customer_id` on subscription events.
 - `src/lib/resend.ts` and `src/app/api/cron/daily-digest/route.ts` —
   query all users for the daily digest.
 - `tests/e2e/fixtures/auth.ts` — test-only admin operations.

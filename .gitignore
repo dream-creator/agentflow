@@ -60,6 +60,8 @@ supabase/.temp/
 
 # local debug scripts (do not commit)
 scripts/debug-*.ts
+scripts/record-hero-video.ts
+scripts/generate-icons.js
 
 # Python
 __pycache__/
