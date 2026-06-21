@@ -58,10 +58,8 @@ supabase/config.toml
 supabase/.temp/
 .env*
 
-# local debug scripts (do not commit)
-scripts/debug-*.ts
-scripts/record-hero-video.ts
-scripts/generate-icons.js
+# scripts (local dev tools, not part of app)
+scripts/
 
 # Python
 __pycache__/
