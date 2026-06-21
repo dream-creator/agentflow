@@ -140,23 +140,14 @@ active state. 44px touch targets per Apple HIG.
 
 ## Pipeline (`src/components/pipeline/`)
 
-### `DndBoard`
+### `PipelineBoard`
 
-**File:** `src/components/pipeline/dnd-board.tsx`
+**File:** `src/components/pipeline/pipeline-board.tsx`
 
-6-column Kanban board built on `@hello-pangea/dnd`. Columns:
-`new_lead`, `contacted`, `showing`, `offer`, `closed_won`,
-`closed_lost`. Each column is a `Droppable`; each lead card is
-a `Draggable`.
-
-`onDragEnd` calls `onLeadMove(leadId, newStage)` which the page
-plumbs to `updateLead({ pipeline_stage: newStage })`. Optimistic
-update via local state; rolls back on error with a toast.
-
-**Why it's in its own file:** lazy-loaded via
-`next/dynamic(() => import("@/components/pipeline/dnd-board"),
-{ ssr: false })` in `pipeline/page.tsx`. This keeps the 191KB
-`@hello-pangea/dnd` bundle off the auth + dashboard chunks.
+Accordion-based pipeline view with collapsible stage sections.
+Each lead card shows action buttons (Call, Email, Text) and a
+stage dropdown for one-tap moves. Replaces the old drag-and-drop
+board for better mobile UX and accessibility.
 
 ## Auth (`src/components/auth/`)
 
@@ -259,27 +250,11 @@ updateProfile(patch: { full_name?: string; email?: string; brokerage?: string })
 Used by the settings page and the sidebar user card. RLS scopes
 the read/write to the current user.
 
-### `useActions`
+### ~~`useActions`~~ (removed)
 
-**File:** `src/hooks/useActions.ts`
-
-```ts
-fetchActions(leadId?: string): Promise<{ data: Action[]; error: SupabaseError | null }>
-createAction(input: NewAction): Promise<{ data: Action | null; error: SupabaseError | null }>
-completeAction(id: string): Promise<{ data: Action | null; error: SupabaseError | null }>
-```
-
-- `fetchActions(leadId?)` — if `leadId` is provided, filters
-  to that lead's actions; otherwise all actions for the user.
-- `completeAction(id)` — sets `completed = true` and
-  `completed_at = now()`.
-- Ordered by `due_date` ascending.
-
-### `hooks/index.ts`
-
-Barrel that re-exports the 9 functions from the three hook
-modules. Import like `import { createLead, completeAction } from
-"@/hooks"`.
+Previously provided `fetchActions`, `createAction`, `completeAction`.
+Removed — no production consumers. The `actions` table exists in the
+DB schema but no UI or server code calls these functions.
 
 ## Page composition (high level)
 

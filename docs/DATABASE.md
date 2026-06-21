@@ -236,7 +236,7 @@ type Lead = Database["public"]["Tables"]["leads"]["Row"];
 type NewLead = Database["public"]["Tables"]["leads"]["Insert"];
 ```
 
-The hooks (`useLeads`, `useProfile`, `useActions`) return these
+The hooks (`useLeads`, `useProfile`) return these
 typed rows directly, so a UI component reading `data[0].pipeline_stage`
 gets full type safety without redeclaring the shape.
 
@@ -253,7 +253,7 @@ they drift, the workflow fails.
 ## Helper functions
 
 The codebase reads the database almost exclusively through the
-`src/hooks/` wrappers (`useLeads`, `useProfile`, `useActions`).
+`src/hooks/` wrappers (`useLeads`, `useProfile`).
 Two pure-JS helpers wrap the lead logic in
 `src/lib/constants.ts` and `src/lib/plan-limit.ts`:
 
@@ -317,9 +317,9 @@ Hard deletes are not exposed.
 
 - **Modifying `profiles` from a client.** The RLS policy is
   `auth.uid() = id`, which works. But the `plan` column should
-  never be set from a client — it's owned by the PayMongo webhook.
-  The `profiles` row is updated by `src/lib/paymongo.ts` using the
-  service-role key, which bypasses RLS.
+  never be set from a client — it's owned by the payment webhook.
+  The `profiles` row is updated by the payment webhook handler
+  using the service-role key, which bypasses RLS.
 - **Inserting actions with a `lead_id` that doesn't belong to
   the user.** RLS on `leads` will reject the corresponding read,
   so the user can never see the action. The server-side insert

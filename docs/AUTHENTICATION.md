@@ -65,7 +65,7 @@ reads/writes from `NextRequest.cookies` and writes to the
 
 | Client | Runtime | Cookie source | Used by |
 | --- | --- | --- | --- |
-| `client.ts` | Browser | `document.cookie` | `useLeads`, `useProfile`, `useActions`, browser-side `supabase.auth.*` calls |
+| `client.ts` | Browser | `document.cookie` | `useLeads`, `useProfile`, browser-side `supabase.auth.*` calls |
 | `server.ts` | Node (RSC + actions) | `next/headers` `cookies()` | Server Components, Server Actions, Route Handlers that need auth |
 | `middleware.ts` | Edge | `NextRequest.cookies` | `src/middleware.ts` only |
 
