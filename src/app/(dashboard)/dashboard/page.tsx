@@ -1,12 +1,9 @@
-"use client";
-
-import { useEffect, useState, useMemo } from "react";
-import { fetchLeads } from "@/hooks/useLeads";
-import { fetchProfile } from "@/hooks/useProfile";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { getDashboardData } from "@/hooks/useDashboard";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
   Phone,
@@ -21,7 +18,6 @@ import {
   Upload,
   CalendarCheck,
 } from "lucide-react";
-import Link from "next/link";
 import { formatStage, getStageVariant } from "@/lib/utils";
 import type { Database } from "@/types";
 
@@ -42,69 +38,31 @@ function getFormattedDate(): string {
   });
 }
 
-export default function DashboardPage() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState("");
+export default async function DashboardPage() {
+  const { leads, profile, error } = await getDashboardData();
 
-  useEffect(() => {
-    async function loadData() {
-      const [leadsResult, profileResult] = await Promise.all([
-        fetchLeads(),
-        fetchProfile(),
-      ]);
-      if (leadsResult.data) setLeads(leadsResult.data);
-      if (profileResult.data?.full_name) {
-        setUserName(profileResult.data.full_name.split(" ")[0]);
-      }
-      setLoading(false);
-    }
-    loadData();
-  }, []);
-
-  const stats = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const totalLeads = leads.length;
-    const overdueLeads = leads.filter(
-      (l) => l.next_action_date && l.next_action_date < today
-    );
-    const todayLeads = leads.filter(
-      (l) => l.next_action_date === today
-    );
-    const pipelineLeads = leads.filter(
-      (l) => !["closed_won", "closed_lost"].includes(l.pipeline_stage)
-    );
-
-    return {
-      total: totalLeads,
-      overdue: overdueLeads.length,
-      today: todayLeads.length,
-      pipeline: pipelineLeads.length,
-      overdueLeads: overdueLeads.slice(0, 5),
-      todayLeads: todayLeads.slice(0, 5),
-    };
-  }, [leads]);
-
-  if (loading) {
-    return (
-      <div className="p-4 md:p-8 space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-24" />
-          ))}
-        </div>
-        <Skeleton className="h-48" />
-      </div>
-    );
+  if (error === "Not authenticated") {
+    redirect("/login");
   }
+
+  const userName = profile?.full_name?.split(" ")[0] ?? "there";
+  const today = new Date().toISOString().split("T")[0];
+
+  const totalLeads = leads.length;
+  const overdueLeads = leads.filter(
+    (l) => l.next_action_date && l.next_action_date < today
+  );
+  const todayLeads = leads.filter((l) => l.next_action_date === today);
+  const pipelineLeads = leads.filter(
+    (l) => !["closed_won", "closed_lost"].includes(l.pipeline_stage)
+  );
 
   return (
     <div className="p-4 md:p-8 space-y-6">
       {/* Header */}
       <div>
         <h1 className="font-heading text-2xl md:text-3xl font-bold text-surface-900">
-          {getGreeting()}, {userName || "there"}
+          {getGreeting()}, {userName}
         </h1>
         <p className="text-surface-500 text-sm mt-1">{getFormattedDate()}</p>
       </div>
@@ -114,27 +72,27 @@ export default function DashboardPage() {
         <StatCard
           icon={<Users className="h-5 w-5" />}
           label="Total Leads"
-          value={stats.total}
+          value={totalLeads}
           color="primary"
         />
         <StatCard
           icon={<AlertTriangle className="h-5 w-5" />}
           label="Overdue"
-          value={stats.overdue}
+          value={overdueLeads.length}
           color="destructive"
           href="/follow-ups"
         />
         <StatCard
           icon={<Clock className="h-5 w-5" />}
           label="Today"
-          value={stats.today}
+          value={todayLeads.length}
           color="warning"
           href="/follow-ups"
         />
         <StatCard
           icon={<TrendingUp className="h-5 w-5" />}
           label="In Pipeline"
-          value={stats.pipeline}
+          value={pipelineLeads.length}
           color="accent"
           href="/pipeline"
         />
@@ -163,17 +121,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Today's Focus */}
-      {stats.todayLeads.length > 0 && (
+      {todayLeads.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
             <CalendarCheck className="h-4 w-4 text-primary" />
             <h2 className="font-heading text-sm font-semibold text-surface-900">
               Today&apos;s Focus
             </h2>
-            <Badge variant="primary">{stats.todayLeads.length}</Badge>
+            <Badge variant="primary">{todayLeads.length}</Badge>
           </div>
           <div className="space-y-2">
-            {stats.todayLeads.map((lead) => (
+            {todayLeads.slice(0, 5).map((lead) => (
               <FollowUpRow key={lead.id} lead={lead} />
             ))}
           </div>
@@ -181,33 +139,34 @@ export default function DashboardPage() {
       )}
 
       {/* Overdue Alert */}
-      {stats.overdueLeads.length > 0 && (
+      {overdueLeads.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="h-4 w-4 text-destructive" />
             <h2 className="font-heading text-sm font-semibold text-surface-900">
               Overdue
             </h2>
-            <Badge variant="destructive">{stats.overdue}</Badge>
+            <Badge variant="destructive">{overdueLeads.length}</Badge>
           </div>
           <div className="space-y-2">
-            {stats.overdueLeads.map((lead) => (
+            {overdueLeads.slice(0, 5).map((lead) => (
               <FollowUpRow key={lead.id} lead={lead} overdue />
             ))}
           </div>
-          {stats.overdue > 5 && (
+          {overdueLeads.length > 5 && (
             <Link
               href="/follow-ups"
               className="text-xs text-primary hover:text-primary-700 font-medium flex items-center gap-1 mt-3"
             >
-              View all {stats.overdue} overdue <ArrowRight className="h-3 w-3" />
+              View all {overdueLeads.length} overdue{" "}
+              <ArrowRight className="h-3 w-3" />
             </Link>
           )}
         </div>
       )}
 
       {/* Empty State */}
-      {stats.total === 0 && (
+      {totalLeads === 0 && (
         <EmptyState
           icon={<UserPlus className="h-6 w-6 text-surface-500" />}
           title="Welcome to AgentFlow"

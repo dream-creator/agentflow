@@ -79,21 +79,26 @@ AgentFlow is designed with a security-first approach. User data is strictly isol
 
 Comprehensive developer documentation lives in [`docs/`](./docs/README.md):
 
-- [**Architecture**](./docs/ARCHITECTURE.md) — high-level overview, stack, request lifecycle
-- [**Authentication**](./docs/AUTHENTICATION.md) — Supabase + middleware + Turnstile flow
-- [**Database**](./docs/DATABASE.md) — schema, RLS, plan enforcement, migrations
-- [**API Reference**](./docs/API-REFERENCE.md) — every route handler, error envelope, rate limiting
-- [**Components & Hooks**](./docs/COMPONENTS-AND-HOOKS.md) — UI primitive and hook catalog
-- [**Environment Variables**](./docs/ENVIRONMENT-VARIABLES.md) — full env matrix and per-runtime topology
-- [**Security**](./docs/SECURITY.md) — defense-in-depth, CSP, headers, captcha, secret rotation
-- [**Deployment**](./docs/DEPLOYMENT.md) — CI/CD, Vercel, Supabase, PayMongo, Resend, Sentry
-- [**PWA**](./docs/PWA.md) — manifest, service worker, install prompt
-- [**Testing**](./docs/TESTING.md) — Vitest + Playwright patterns, auth fixture
-- [**Onboarding**](./docs/ONBOARDING.md) — first-time dev setup, common tasks, troubleshooting
+**Getting started**
+- [**Onboarding**](./docs/getting-started/onboarding.md) — first-time dev setup, common tasks, troubleshooting
+- [**Environment Variables**](./docs/getting-started/environment-variables.md) — full env matrix and per-runtime topology
 
-For new developers, start with [**Onboarding**](./docs/ONBOARDING.md). For the big picture, read [**Architecture**](./docs/ARCHITECTURE.md).
+**Guides**
+- [**Architecture**](./docs/guides/architecture.md) — high-level overview, stack, request lifecycle
+- [**Authentication**](./docs/guides/authentication.md) — Supabase + middleware + Turnstile flow
+- [**Database**](./docs/guides/database.md) — schema, RLS, plan enforcement, migrations
+- [**API Reference**](./docs/guides/api-reference.md) — every route handler, error envelope, rate limiting
+- [**Components & Hooks**](./docs/guides/components-and-hooks.md) — UI primitive and hook catalog
+- [**Security**](./docs/guides/security.md) — defense-in-depth, CSP, headers, captcha, secret rotation
+- [**Deployment**](./docs/guides/deployment.md) — CI/CD, Vercel, Supabase, PayMongo, Resend, Sentry
+- [**Testing**](./docs/guides/testing.md) — Vitest + Playwright patterns, auth fixture
+- [**PWA**](./docs/guides/pwa.md) — manifest, service worker, install prompt
 
-A Mermaid-based runtime flow diagram is in [`docs/ARCHITECTURE-FLOW.md`](./docs/ARCHITECTURE-FLOW.md).
+**Architecture**
+- [**Architecture Decision Records**](./docs/architecture/adr/README.md) — why the code looks the way it does
+- [**Architecture Diagrams**](./docs/architecture/diagrams/) — Mermaid runtime flow diagrams
+
+For new developers, start with [**Onboarding**](./docs/getting-started/onboarding.md). For the big picture, read [**Architecture**](./docs/guides/architecture.md).
 
 ---
 

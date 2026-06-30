@@ -1,96 +1,22 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { getLead } from "@/hooks/useLead";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { showToast } from "@/components/ui/toast";
-import { ArrowLeft, Phone, Mail, MessageSquare, Trash2, Edit, Clock, CheckCircle } from "lucide-react";
-import Link from "next/link";
+import { ArrowLeft, Phone, Mail, MessageSquare, Edit, Clock, CheckCircle } from "lucide-react";
 import { formatStage, getStageVariant } from "@/lib/utils";
-import type { Database } from "@/types";
+import { DeleteLeadButton } from "./lead-detail-client";
 
-type Lead = Database["public"]["Tables"]["leads"]["Row"];
-type Action = Database["public"]["Tables"]["actions"]["Row"];
+export default async function LeadDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { lead, actions, error } = await getLead(params.id);
 
-export default function LeadDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [lead, setLead] = useState<Lead | null>(null);
-  const [actions, setActions] = useState<Action[]>([]);
-  const [loading, setLoading] = useState(true);
-  const supabase = createClient();
-
-  useEffect(() => {
-    async function fetchLeadAndActions() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: leadData } = await supabase
-        .from("leads")
-        .select("*")
-        .eq("id", params.id)
-        .eq("user_id", user.id)
-        .single();
-
-      if (leadData) {
-        setLead(leadData);
-        const { data: actionsData } = await supabase
-          .from("actions")
-          .select("*")
-          .eq("lead_id", params.id as string)
-          .order("created_at", { ascending: false });
-        if (actionsData) setActions(actionsData);
-      }
-      setLoading(false);
-    }
-
-    fetchLeadAndActions();
-  }, [supabase, params.id]);
-
-  async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this lead?")) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { error } = await supabase
-      .from("leads")
-      .update({ is_active: false, updated_at: new Date().toISOString() })
-      .eq("id", params.id as string)
-      .eq("user_id", user.id);
-
-    if (error) {
-      showToast("Failed to delete lead. Please try again.", "error");
-      return;
-    }
-
-    showToast("Lead deleted successfully!", "success");
-    router.push("/leads");
-    router.refresh();
-  }
-
-  if (loading) {
-    return (
-      <div className="p-4 md:p-8 max-w-2xl mx-auto">
-        <Skeleton className="h-8 w-48 mb-6" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
-  }
-
-  if (!lead) {
-    return (
-      <div className="p-4 md:p-8 max-w-2xl mx-auto">
-        <p className="text-surface-500">Lead not found.</p>
-        <Link href="/leads" className="text-primary hover:underline mt-2 inline-block">
-          Back to leads
-        </Link>
-      </div>
-    );
+  if (error || !lead) {
+    notFound();
   }
 
   return (
@@ -118,9 +44,7 @@ export default function LeadDetailPage() {
                 <Edit className="h-4 w-4" />
               </Button>
             </Link>
-            <Button variant="ghost" size="sm" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4 text-destructive" />
-            </Button>
+            <DeleteLeadButton leadId={lead.id} />
           </div>
         </div>
       </div>
