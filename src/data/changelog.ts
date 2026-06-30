@@ -19,6 +19,21 @@ import type { ChangelogEntry } from "@/lib/changelog";
  */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "paymongo-checkout",
+    date: "2026-06-30",
+    version: "0.27.0",
+    title: "Upgraded payment system for smoother checkout",
+    summary:
+      "We switched payment providers to give you a faster, more reliable checkout experience. Upgrading to Pro now takes seconds instead of minutes, and billing just works.",
+    items: [
+      "Faster checkout — upgrading to Pro is now instant with PayMongo",
+      "More payment options — supports GCash, Maya, GrabPay, and major Philippine banks",
+      "Better reliability — fewer failed payments and clearer error messages",
+      "Improved documentation — easier for our team to keep things running smoothly",
+      "Codebase cleanup — removed old payment code, reorganized docs into folders",
+    ],
+  },
+  {
     id: "performance-server-rendering",
     date: "2026-06-21",
     version: "0.26.0",
